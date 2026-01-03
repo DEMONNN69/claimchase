@@ -12,8 +12,6 @@ pip-delete-this-arg.txt
 # Django specific
 *.log
 *.pot
-*.sqlite3
-db.sqlite3
 local_settings.py
 media/
 static/
