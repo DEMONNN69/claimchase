@@ -15,12 +15,16 @@ export function AppLayout() {
 
       {/* Main Content */}
       <div className={showNav ? "flex-1 md:max-w-none" : "w-full"}>
-        <div className={`${showNav ? "max-w-md md:max-w-4xl" : "max-w-md"} mx-auto min-h-screen bg-background relative`}>
-          <div className={showNav ? "pb-20 md:pb-0" : ""}>
-            <Outlet />
+        {showNav ? (
+          <div className="max-w-md md:max-w-4xl mx-auto min-h-screen bg-background relative">
+            <div className="pb-20 md:pb-0">
+              <Outlet />
+            </div>
+            <BottomNavigation />
           </div>
-          {showNav && <BottomNavigation />}
-        </div>
+        ) : (
+          <Outlet />
+        )}
       </div>
     </div>
   );

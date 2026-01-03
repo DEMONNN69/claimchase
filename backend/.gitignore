@@ -1,0 +1,26 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+.venv/
+env/
+.env/
+*/migrations/__pycache__
+pip-log.txt
+pip-delete-this-arg.txt
+
+# Django specific
+*.log
+*.pot
+*.sqlite3
+db.sqlite3
+local_settings.py
+media/
+static/
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store

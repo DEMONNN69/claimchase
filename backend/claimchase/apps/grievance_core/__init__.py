@@ -1,0 +1,3 @@
+"""
+Grievance Core app initialization.
+"""

@@ -7,26 +7,48 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export default function Login() {
+export default function Signup() {
   const navigate = useNavigate();
-  const { login, isLoading, error } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { signup, isLoading, error } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast.error("Please enter email and password");
+    if (!formData.email || !formData.username || !formData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return;
     }
 
     try {
-      await login(email, password);
-      toast.success("Login successful!");
-      navigate("/dashboard");
+      await signup({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+      });
+      toast.success("Account created! Complete your profile.");
+      navigate("/onboarding");
     } catch (err: any) {
-      toast.error(error || "Login failed");
+      toast.error(error || "Signup failed");
     }
   };
 
@@ -39,9 +61,9 @@ export default function Login() {
         </div>
         <div className="text-white my-8 lg:my-0">
           <h2 className="text-2xl lg:text-4xl font-bold mb-2 lg:mb-4">
-            Your Claim,<br className="hidden lg:block"/> We Chase.
+            Start Your<br className="hidden lg:block"/> Claim Journey
           </h2>
-          <p className="text-white/80 text-sm lg:text-lg">Fight insurance grievances the smart way.</p>
+          <p className="text-white/80 text-sm lg:text-lg">Join thousands fighting for their insurance claims.</p>
         </div>
         <p className="text-white/60 text-xs hidden lg:block">© 2025 ClaimChase 360 Solutions</p>
       </div>
@@ -50,10 +72,23 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex-1 flex items-center justify-center p-6 lg:p-12">
         <Card className="w-full max-w-md border-0 shadow-none lg:border lg:shadow-sm">
           <CardContent className="p-0 lg:p-8">
-            <h2 className="text-2xl font-semibold mb-1">Welcome back</h2>
-            <p className="text-muted-foreground text-sm mb-8">Sign in to continue</p>
+            <h2 className="text-2xl font-semibold mb-1">Create account</h2>
+            <p className="text-muted-foreground text-sm mb-8">Get started with ClaimChase</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input 
+                  id="username" 
+                  type="text" 
+                  placeholder="saurabhshukla"
+                  className="mt-2 h-11"
+                  value={formData.username}
+                  onChange={(e) => handleChange("username", e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input 
@@ -61,26 +96,34 @@ export default function Login() {
                   type="email" 
                   placeholder="you@gmail.com"
                   className="mt-2 h-11"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
                   disabled={isLoading}
                 />
               </div>
 
               <div>
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input 
                   id="password" 
                   type="password" 
                   placeholder="••••••••"
                   className="mt-2 h-11"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input 
+                  id="confirmPassword" 
+                  type="password" 
+                  placeholder="••••••••"
+                  className="mt-2 h-11"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleChange("confirmPassword", e.target.value)}
                   disabled={isLoading}
                 />
               </div>
@@ -90,7 +133,7 @@ export default function Login() {
               )}
 
               <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
 
@@ -106,7 +149,7 @@ export default function Login() {
             <Button 
               variant="outline" 
               className="w-full h-11"
-              onClick={() => toast.info("Google login coming soon")}
+              onClick={() => toast.info("Google signup coming soon")}
               disabled={isLoading}
             >
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -119,9 +162,9 @@ export default function Login() {
             </Button>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
-              New here?{" "}
-              <Link to="/signup" className="text-primary font-medium hover:underline">
-                Create account
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary font-medium hover:underline">
+                Sign in
               </Link>
             </p>
           </CardContent>

@@ -1,0 +1,3 @@
+"""
+Grievance core app migrations.
+"""
