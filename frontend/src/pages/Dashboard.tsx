@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FileEdit, Mail, Scale, Users, Check, Lock, ChevronRight, Plus, Clock, AlertCircle, Edit2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { useInsuranceCompanies, useInsuranceTypes } from "@/hooks/useApi";
+import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +70,7 @@ export default function Dashboard() {
   const { user, updateProfile } = useAuth();
   const { data: allCompanies = [] } = useInsuranceCompanies();
   const { data: insuranceTypes = [] } = useInsuranceTypes();
+  const { data: cases = [], isLoading: casesLoading } = useCases();
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editType, setEditType] = useState<"company" | "problem" | null>(null);
@@ -88,6 +89,9 @@ export default function Dashboard() {
     : allCompanies.find(c => c.id === selectedCompanyId);
   const popularCompanies = allCompanies.slice(0, 6);
   const otherCompanies = allCompanies.slice(6);
+
+  // Get the most recent case
+  const activeCase = cases.length > 0 ? cases[0] : null;
 
   const handleEditClick = (type: "company" | "problem") => {
     setEditType(type);
@@ -122,22 +126,66 @@ export default function Dashboard() {
     }
   };
 
-  // Mock case data
-  const caseData = {
-    id: "9821",
-    type: "Mediclaim",
-    company: "HDFC ERGO",
-    amount: "₹2,50,000",
-    status: "draft",
-    createdAt: "Dec 28, 2025",
+  // Determine case status steps based on actual case
+  const getStepsFromCase = () => {
+    if (!activeCase) {
+      return [
+        { icon: FileEdit, title: "Draft Grievance", status: "pending" as const },
+        { icon: Mail, title: "Email Sent", status: "locked" as const },
+        { icon: Scale, title: "Ombudsman", status: "locked" as const },
+        { icon: Users, title: "Expert Handoff", status: "locked" as const },
+      ];
+    }
+
+    const steps = [
+      { 
+        icon: FileEdit, 
+        title: "Draft Grievance", 
+        status: activeCase.status === 'draft' ? "active" as const : "complete" as const 
+      },
+      { 
+        icon: Mail, 
+        title: "Email Sent", 
+        status: activeCase.status === 'submitted' || activeCase.status === 'under_review' ? "complete" as const : 
+                activeCase.status === 'draft' ? "pending" as const : "locked" as const
+      },
+      { 
+        icon: Scale, 
+        title: "Ombudsman", 
+        status: activeCase.status === 'escalated_to_ombudsman' ? "active" as const :
+                activeCase.is_escalated_to_ombudsman ? "complete" as const : "locked" as const
+      },
+      { 
+        icon: Users, 
+        title: "Expert Handoff", 
+        status: "locked" as const
+      },
+    ];
+
+    return steps;
   };
 
-  const steps = [
-    { icon: FileEdit, title: "Draft Grievance", status: "active" as const },
-    { icon: Mail, title: "Email Sent", status: "pending" as const },
-    { icon: Scale, title: "Ombudsman", status: "locked" as const },
-    { icon: Users, title: "Expert Handoff", status: "locked" as const },
-  ];
+  const steps = getStepsFromCase();
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Get status badge variant
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, { label: string; className: string }> = {
+      'draft': { label: 'Draft', className: 'bg-orange-500/10 text-orange-500' },
+      'submitted': { label: 'Submitted', className: 'bg-blue-500/10 text-blue-500' },
+      'under_review': { label: 'Under Review', className: 'bg-purple-500/10 text-purple-500' },
+      'rejected': { label: 'Rejected', className: 'bg-red-500/10 text-red-500' },
+      'escalated_to_ombudsman': { label: 'Escalated', className: 'bg-orange-600/10 text-orange-600' },
+      'resolved': { label: 'Resolved', className: 'bg-green-500/10 text-green-500' },
+      'closed': { label: 'Closed', className: 'bg-gray-500/10 text-gray-500' },
+    };
+    return badges[status] || badges['draft'];
+  };
 
   return (
     <div className="p-5 lg:p-8 animate-fade-in space-y-6">
@@ -215,46 +263,77 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Your current case</p>
-          <h2 className="text-2xl font-bold">Cases</h2>
+          <p className="text-sm text-muted-foreground">Your cases</p>
+          <h2 className="text-2xl font-bold">Cases {cases.length > 0 && `(${cases.length})`}</h2>
         </div>
       </div>
 
-      {/* Active Case Card */}
-      <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Case #{caseData.id}</p>
-              <CardTitle className="text-xl">{caseData.type}</CardTitle>
+      {/* Active Case Card or Empty State */}
+      {casesLoading ? (
+        <Card className="mb-6">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Loading your cases...</p>
+          </CardContent>
+        </Card>
+      ) : activeCase ? (
+        <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Case #{activeCase.case_number}</p>
+                <CardTitle className="text-xl">{activeCase.subject}</CardTitle>
+              </div>
+              <Badge className={cn("hover:bg-opacity-100", getStatusBadge(activeCase.status).className)}>
+                <Clock className="h-3 w-3 mr-1" />
+                {getStatusBadge(activeCase.status).label}
+              </Badge>
             </div>
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-              <Clock className="h-3 w-3 mr-1" />
-              In Progress
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex flex-wrap gap-4 text-sm mb-4">
-            <div>
-              <p className="text-muted-foreground text-xs">Company</p>
-              <p className="font-medium">{caseData.company}</p>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-4 text-sm mb-4">
+              <div>
+                <p className="text-muted-foreground text-xs">Company</p>
+                <p className="font-medium">
+                  {activeCase.insurance_company_data?.name || activeCase.insurance_company_name || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Status</p>
+                <p className="font-medium capitalize">{activeCase.status.replace(/_/g, ' ')}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Priority</p>
+                <p className="font-medium capitalize">{activeCase.priority}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Created</p>
+                <p className="font-medium">{formatDate(activeCase.created_at)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Claim Amount</p>
-              <p className="font-medium">{caseData.amount}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Created</p>
-              <p className="font-medium">{caseData.createdAt}</p>
-            </div>
-          </div>
-          <Button className="w-full sm:w-auto" onClick={() => navigate("/drafter")}>
-            Continue Case
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        </CardContent>
-      </Card>
+            <Button 
+              className="w-full sm:w-auto" 
+              onClick={() => navigate(activeCase.status === 'draft' ? "/drafter" : `/cases/${activeCase.id}`)}
+            >
+              {activeCase.status === 'draft' ? 'Continue Draft' : 'View Case'}
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-6 border-dashed">
+          <CardContent className="p-8 text-center">
+            <FileEdit className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">No cases yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Start your first grievance to begin tracking your insurance claim.
+            </p>
+            <Button onClick={() => navigate("/start-grievance")} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create First Case
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-6">
@@ -286,21 +365,47 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                <FileEdit className="h-6 w-6 text-primary" />
+            {activeCase ? (
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
+                  <FileEdit className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">
+                    {activeCase.status === 'draft' ? 'Complete Your Draft' : 'Review Your Case'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {activeCase.status === 'draft'
+                      ? 'Your grievance email is ready to review. Make any final edits before sending.'
+                      : `Your case is currently ${getStatusBadge(activeCase.status).label.toLowerCase()}. Check for updates.`}
+                  </p>
+                  <Button 
+                    onClick={() => navigate(activeCase.status === 'draft' ? "/drafter" : `/cases/${activeCase.id}`)} 
+                    variant="outline" 
+                    className="gap-2"
+                  >
+                    {activeCase.status === 'draft' ? 'Open Drafter' : 'View Case'}
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold mb-1">Complete Your Draft</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Your grievance email is ready to review. Make any final edits before sending.
-                </p>
-                <Button onClick={() => navigate("/drafter")} variant="outline" className="gap-2">
-                  Open Drafter
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+            ) : (
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
+                  <Plus className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Start Your First Case</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    You haven't created any cases yet. Start your first grievance to get help with your insurance claim.
+                  </p>
+                  <Button onClick={() => navigate("/start-grievance")} variant="outline" className="gap-2">
+                    Create Case
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

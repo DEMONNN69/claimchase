@@ -243,9 +243,9 @@ class DocumentAdmin(admin.ModelAdmin):
     """Admin for Document model."""
     
     list_display = (
-        'file_name',
-        'case',
-        'document_type',
+        'file_name_display',
+        'case_number_display',
+        'document_type_display',
         'uploaded_by_email',
         'is_verified_badge',
         'file_size_display',
@@ -270,25 +270,53 @@ class DocumentAdmin(admin.ModelAdmin):
         }),
     )
     
+    def file_name_display(self, obj):
+        """Display file name safely."""
+        return obj.file_name if obj.file_name else 'N/A'
+    file_name_display.short_description = 'File Name'
+    
+    def case_number_display(self, obj):
+        """Display case number safely."""
+        if obj.case and hasattr(obj.case, 'case_number'):
+            return obj.case.case_number
+        return 'N/A'
+    case_number_display.short_description = 'Case'
+    
+    def document_type_display(self, obj):
+        """Display document type safely."""
+        if obj.document_type:
+            return obj.get_document_type_display()
+        return 'N/A'
+    document_type_display.short_description = 'Type'
+    
     def uploaded_by_email(self, obj):
-        return obj.uploaded_by.email if obj.uploaded_by else 'N/A'
+        if obj.uploaded_by and hasattr(obj.uploaded_by, 'email'):
+            return obj.uploaded_by.email
+        return 'N/A'
     uploaded_by_email.short_description = 'Uploaded By'
     
     def is_verified_badge(self, obj):
         if obj.is_verified:
-            return format_html('<span style="color: green;">✓ Verified</span>')
-        return format_html('<span style="color: gray;">—</span>')
+            return mark_safe('<span style="color: green;">✓ Verified</span>')
+        return mark_safe('<span style="color: gray;">—</span>')
     is_verified_badge.short_description = 'Verified'
     
     def file_size_display(self, obj):
         """Display file size in human-readable format."""
-        size_mb = obj.file_size / (1024 * 1024)
-        return f"{size_mb:.2f} MB"
+        if obj.file_size and obj.file_size > 0:
+            size_mb = obj.file_size / (1024 * 1024)
+            return f"{size_mb:.2f} MB"
+        return '0 MB'
     file_size_display.short_description = 'Size'
     
     def file_url(self, obj):
         """Display file URL as a link."""
-        if obj.file:
-            return format_html('<a href="{}" target="_blank">{}</a>', obj.file.url, obj.file.url)
+        try:
+            if obj.file and hasattr(obj.file, 'url'):
+                url = obj.file.url
+                if url:
+                    return format_html('<a href="{}" target="_blank">{}</a>', url, url)
+        except Exception:
+            pass
         return 'N/A'
     file_url.short_description = 'File URL'

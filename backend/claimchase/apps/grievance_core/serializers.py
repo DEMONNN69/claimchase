@@ -87,19 +87,28 @@ class DocumentBriefSerializer(serializers.ModelSerializer):
     
     uploaded_by_email = serializers.CharField(source='uploaded_by.email', read_only=True)
     file_size_mb = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Document
         fields = (
             'id',
             'file_name',
+            'file_url',
             'document_type',
             'file_size_mb',
+            'file_type',
             'is_verified',
             'uploaded_by_email',
             'created_at',
         )
         read_only_fields = fields
+    
+    def get_file_url(self, obj):
+        """Get the Cloudinary URL for the file."""
+        if obj.file:
+            return obj.file.url
+        return None
     
     def get_file_size_mb(self, obj):
         """Convert file size to MB."""
