@@ -4,10 +4,11 @@ Handles API endpoints for case management and status tracking.
 """
 
 from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 import logging
 
 from .models import InsuranceCompany, Case, CaseTimeline, EmailTracking, Document
@@ -22,6 +23,7 @@ from .serializers import (
     CaseStatusResponseSerializer,
 )
 from .services import CaseService, EmailTrackingService, DocumentService
+from .gmail_service import GmailSendService, GmailEncryption
 
 logger = logging.getLogger(__name__)
 
@@ -208,15 +210,70 @@ class CaseViewSet(viewsets.ModelViewSet):
             'emails': serializer.data,
         })
     
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get', 'post'])
     def documents(self, request, pk=None):
         """
-        Get documents attached to a case.
+        Get or upload documents for a case.
         
-        Returns all uploaded documents with verification status.
-        Endpoint: GET /api/cases/{id}/documents/
+        GET /api/cases/{id}/documents/ - List all documents
+        POST /api/cases/{id}/documents/ - Upload a new document
+        
+        POST body (multipart/form-data):
+        {
+            "file": <file>,
+            "document_type": "policy_document",
+            "description": "Optional description"
+        }
         """
         case = self.get_object()
+        
+        if request.method == 'POST':
+            # Handle file upload
+            file = request.FILES.get('file')
+            document_type = request.data.get('document_type', 'other')
+            description = request.data.get('description', '')
+            
+            if not file:
+                return Response({
+                    'success': False,
+                    'message': 'No file provided',
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            try:
+                # Create document record
+                document = Document.objects.create(
+                    case=case,
+                    uploaded_by=request.user,
+                    document_type=document_type,
+                    file=file,
+                    file_name=file.name,
+                    file_size=file.size,
+                    file_type=file.content_type,
+                    description=description,
+                )
+                
+                # Add timeline event
+                CaseTimeline.objects.create(
+                    case=case,
+                    event_type='document_uploaded',
+                    description=f'Document uploaded: {file.name}',
+                    created_by=request.user
+                )
+                
+                return Response({
+                    'success': True,
+                    'message': 'Document uploaded successfully',
+                    'document': DocumentBriefSerializer(document).data,
+                }, status=status.HTTP_201_CREATED)
+                
+            except Exception as e:
+                logger.error(f"Error uploading document: {e}")
+                return Response({
+                    'success': False,
+                    'message': f'Failed to upload document: {str(e)}',
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # GET request - list documents
         documents = case.documents.all().order_by('-created_at')
         
         serializer = DocumentBriefSerializer(documents, many=True)
@@ -335,6 +392,137 @@ class CaseViewSet(viewsets.ModelViewSet):
                 'message': message,
             }, status=status.HTTP_400_BAD_REQUEST)
     
+    @action(detail=True, methods=['post'])
+    def send_email(self, request, pk=None):
+        """
+        Send grievance email via Gmail.
+        
+        Endpoint: POST /api/cases/{id}/send_email/
+        
+        Request body:
+        {
+            "email_body": "The grievance letter content",
+            "cc_emails": ["optional@email.com"]  # Optional
+        }
+        
+        Returns:
+        {
+            "success": true,
+            "message": "Email sent successfully",
+            "message_id": "gmail_message_id",
+            "thread_id": "gmail_thread_id"
+        }
+        """
+        case = self.get_object()
+        user = request.user
+        email_body = request.data.get('email_body')
+        cc_emails = request.data.get('cc_emails', [])
+        
+        # Validate input
+        if not email_body:
+            return Response({
+                'success': False,
+                'message': 'email_body is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user has Gmail connected
+        if not user.gmail_connected or not user.gmail_refresh_token:
+            return Response({
+                'success': False,
+                'message': 'Gmail account not connected. Please connect your Gmail first.',
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            # Decrypt refresh token
+            refresh_token = GmailEncryption.decrypt(user.gmail_refresh_token)
+            
+            if not refresh_token:
+                return Response({
+                    'success': False,
+                    'message': 'Failed to decrypt Gmail refresh token',
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get fresh access token
+            access_token = GmailSendService.refresh_access_token(refresh_token)
+            
+            if not access_token:
+                return Response({
+                    'success': False,
+                    'message': 'Failed to refresh Gmail access token. Please reconnect your Gmail account.',
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Get insurance company email
+            insurance_company_email = case.insurance_company.grievance_email if case.insurance_company else None
+            
+            if not insurance_company_email:
+                return Response({
+                    'success': False,
+                    'message': 'Insurance company grievance email not available',
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Send email via Gmail API
+            result = GmailSendService.send_email(
+                access_token=access_token,
+                from_email=user.gmail_email,
+                to_email=insurance_company_email,
+                subject=f"Insurance Grievance - Policy {case.policy_number}",
+                body=email_body,
+                cc_emails=cc_emails
+            )
+            
+            if not result['success']:
+                return Response({
+                    'success': False,
+                    'message': result['error'],
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Create EmailTracking record
+            email_tracking = EmailTracking.objects.create(
+                case=case,
+                email_type='outbound',
+                from_email=user.gmail_email,
+                to_email=insurance_company_email,
+                cc_emails=', '.join(cc_emails) if cc_emails else '',
+                subject=f"Insurance Grievance - Policy {case.policy_number}",
+                body=email_body,
+                status='sent',
+                sent_at=timezone.now(),
+                gmail_message_id=result['message_id'],
+                gmail_thread_id=result['thread_id'],
+                is_automated=True,
+                created_by=user
+            )
+            
+            # Update case status
+            case.status = 'submitted'
+            case.save()
+            
+            # Add timeline event
+            CaseTimeline.objects.create(
+                case=case,
+                event_type='email_sent',
+                description=f'Grievance email sent to {insurance_company_email}',
+                created_by=user
+            )
+            
+            logger.info(f"Grievance email sent for case {case.case_number} by user {user.email}")
+            
+            return Response({
+                'success': True,
+                'message': 'Email sent successfully',
+                'message_id': result['message_id'],
+                'thread_id': result['thread_id'],
+                'case': CaseDetailSerializer(case).data,
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            logger.error(f"Error sending email for case {case.case_number}: {e}")
+            return Response({
+                'success': False,
+                'message': 'Failed to send email',
+                'error': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     @staticmethod
     def _get_valid_transitions(case: Case) -> list:
         """Get list of valid next statuses for a case."""
@@ -411,3 +599,29 @@ class CaseStatusView:
             'timeline_count': case.timeline_events.count(),
             'document_count': case.documents.count(),
         }
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_insurance_types(request):
+    """
+    Get available insurance type choices.
+    
+    GET /api/insurance-types/
+    
+    Returns:
+    {
+        "insurance_types": [
+            {"value": "motor", "label": "Motor Insurance"},
+            ...
+        ]
+    }
+    """
+    insurance_types = [
+        {"value": choice[0], "label": choice[1]}
+        for choice in Case.INSURANCE_TYPE_CHOICES
+    ]
+    
+    return Response({
+        'insurance_types': insurance_types
+    })

@@ -9,6 +9,7 @@ from .views import (
     CaseViewSet,
     CaseTimelineViewSet,
     EmailTrackingViewSet,
+    get_insurance_types,
 )
 
 # Create router and register viewsets
@@ -21,5 +22,6 @@ router.register(r'emails', EmailTrackingViewSet, basename='email')
 app_name = 'grievance_core'
 
 urlpatterns = [
+    path('insurance-types/', get_insurance_types, name='insurance-types'),
     path('', include(router.urls)),
 ]

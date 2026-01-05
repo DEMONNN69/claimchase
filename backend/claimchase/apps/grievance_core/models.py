@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from claimchase.apps.users.models import CustomUser
+from cloudinary.models import CloudinaryField
 
 
 class InsuranceCompany(models.Model):
@@ -489,6 +490,20 @@ class EmailTracking(models.Model):
         help_text="When email was delivered"
     )
     
+    # Gmail Integration
+    gmail_message_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Gmail message ID for tracking"
+    )
+    gmail_thread_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Gmail thread ID for conversation tracking"
+    )
+    
     # Metadata
     is_automated = models.BooleanField(
         default=False,
@@ -515,6 +530,8 @@ class EmailTracking(models.Model):
             models.Index(fields=['email_type', 'status']),
             models.Index(fields=['from_email']),
             models.Index(fields=['to_email']),
+            models.Index(fields=['gmail_message_id']),
+            models.Index(fields=['gmail_thread_id']),
         ]
         ordering = ['-created_at']
     
@@ -647,9 +664,11 @@ class Document(models.Model):
         help_text="Type of document"
     )
     
-    file = models.FileField(
-        upload_to='case_documents/%Y/%m/%d/',
-        help_text="File upload (local or S3)"
+    file = CloudinaryField(
+        'document',
+        resource_type='auto',
+        folder='claimchase/documents',
+        help_text="File upload to Cloudinary"
     )
     
     file_name = models.CharField(

@@ -63,9 +63,41 @@ export default function StartGreivance() {
           date_of_incident: incidentData.incident_date,
         };
 
+        // Step 1: Create the case
         const response = await caseAPI.create(caseData);
+        console.log('Case creation response:', response);
+        console.log('Response data:', response.data);
         
-        toast.success("Grievance created successfully!");
+        // Extract case ID - check multiple possible locations
+        const caseId = response.data?.id || response.data?.data?.id;
+        
+        if (!caseId) {
+          console.error('No case ID found in response:', response.data);
+          toast.error('Case created but ID not found. Please refresh the page.');
+          return;
+        }
+        
+        console.log('Extracted case ID:', caseId);
+        
+        // Step 2: Upload documents to the created case
+        if (documents.length > 0) {
+          toast.info(`Uploading ${documents.length} document(s)...`);
+          
+          const uploadPromises = documents.map(file => 
+            caseAPI.uploadDocument(caseId, file, 'support_document', file.name)
+          );
+          
+          try {
+            await Promise.all(uploadPromises);
+            toast.success(`Case created with ${documents.length} document(s)!`);
+          } catch (uploadError) {
+            console.error('Document upload error:', uploadError);
+            toast.warning('Case created, but some documents failed to upload');
+          }
+        } else {
+          toast.success("Grievance created successfully!");
+        }
+        
         setTimeout(() => {
           navigate("/dashboard");
         }, 1000);

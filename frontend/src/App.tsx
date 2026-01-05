@@ -17,6 +17,7 @@ import Guide from "./pages/Guide";
 import Handoff from "./pages/Handoff";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import GmailCallback from "./pages/GmailCallback";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public Gmail OAuth callback endpoint used by popup redirect */}
+            <Route path="/gmail/callback" element={<GmailCallback />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />

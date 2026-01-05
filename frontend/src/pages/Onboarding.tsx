@@ -7,20 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, Search, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { useInsuranceCompanies } from "@/hooks/useApi";
+import { useInsuranceCompanies, useInsuranceTypes } from "@/hooks/useApi";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import type { InsuranceCompany } from "@/services/types";
-
-const PROBLEM_TYPES = [
-  { id: "mediclaim", label: "Mediclaim" },
-  { id: "life_insurance", label: "Life Insurance" },
-  { id: "critical_illness", label: "Critical Illness" },
-  { id: "motor_insurance", label: "Motor Insurance" },
-  { id: "marine_claim", label: "Marine Claim" },
-  { id: "fire_claim", label: "Fire Claim" },
-  { id: "other", label: "Other" },
-];
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -28,6 +18,9 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Fetch insurance types from backend
+  const { data: insuranceTypes = [] } = useInsuranceTypes();
   
   // Form data
   const [profileData, setProfileData] = useState({
@@ -321,20 +314,20 @@ export default function Onboarding() {
                 <p className="text-muted-foreground mb-6">Select the type of insurance issue you're facing.</p>
 
                 <div className="space-y-3">
-                  {PROBLEM_TYPES.map((problem) => (
+                  {insuranceTypes.map((problem) => (
                     <div
-                      key={problem.id}
+                      key={problem.value}
                       className={cn(
                         "p-4 rounded-lg border cursor-pointer transition-all hover:border-primary/50",
-                        selectedProblem === problem.id
+                        selectedProblem === problem.value
                           ? "border-primary bg-primary/5"
                           : "border-border"
                       )}
-                      onClick={() => setSelectedProblem(problem.id)}
+                      onClick={() => setSelectedProblem(problem.value)}
                     >
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{problem.label}</p>
-                        {selectedProblem === problem.id && (
+                        {selectedProblem === problem.value && (
                           <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                             <Check className="h-3 w-3 text-white" />
                           </div>

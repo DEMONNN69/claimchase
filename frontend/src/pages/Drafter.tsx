@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, Check, Building2, FileText, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateCase, useInsuranceCompanies } from "@/hooks/useApi";
+import { gmailAPI } from "@/services/gmail";
 import {
   Command,
   CommandEmpty,
@@ -104,9 +105,30 @@ export default function Drafter() {
 
     try {
       createCaseMutation.mutate(formData, {
-        onSuccess: () => {
-          toast.success("Case created successfully!");
-          navigate("/dashboard");
+        onSuccess: async (response: any) => {
+          const caseId = response.data.id;
+          
+          // Show initial success
+          toast.success("Case created! Sending email...");
+          
+          try {
+            // Send email automatically via Gmail
+            await gmailAPI.sendEmail(caseId, formData.description, []);
+            
+            toast.success("Grievance email sent successfully!");
+            navigate("/dashboard");
+          } catch (emailError: any) {
+            // Case created but email failed
+            const errorMsg = emailError.response?.data?.message || "Failed to send email";
+            
+            if (errorMsg.includes("Gmail account not connected")) {
+              toast.error("Please connect your Gmail account in Settings to send emails");
+              navigate("/settings");
+            } else {
+              toast.error(`Case created, but ${errorMsg}. You can resend from Dashboard.`);
+              navigate("/dashboard");
+            }
+          }
         },
         onError: (error: any) => {
           toast.error(error.message || "Failed to create case");
@@ -296,8 +318,11 @@ export default function Drafter() {
               disabled={createCaseMutation.isPending}
             >
               <Send className="h-4 w-4" />
-              {createCaseMutation.isPending ? "Creating..." : "Create & Send Case"}
+              {createCaseMutation.isPending ? "Sending..." : "Send Grievance Email"}
             </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              This will create a case and automatically send the email via your connected Gmail
+            </p>
           </div>
         </div>
       </div>

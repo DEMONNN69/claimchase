@@ -12,6 +12,8 @@ export interface User {
   role?: string;
   insurance_company?: InsuranceCompany;
   problem_type?: string;
+  gmail_email?: string;
+  gmail_connected?: boolean;
 }
 
 export interface InsuranceCompany {

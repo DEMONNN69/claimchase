@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'drf_spectacular',
+    'cloudinary_storage',
+    'cloudinary',
     
     # Local apps
     'claimchase.apps.users.apps.UsersConfig',
@@ -193,3 +195,37 @@ LOGGING = {
         },
     },
 }
+
+# Google OAuth & Gmail Integration
+GOOGLE_OAUTH_CLIENT_ID = config('GOOGLE_OAUTH_CLIENT_ID', default='')
+GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET', default='')
+GOOGLE_OAUTH_REDIRECT_URI = config('GOOGLE_OAUTH_REDIRECT_URI', default='http://localhost:8000/api/auth/gmail/callback/')
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
+
+GMAIL_SCOPES = [
+    'https://www.googleapis.com/auth/gmail.send',
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.modify',
+]
+
+# Encryption key for storing sensitive tokens (use SECRET_KEY)
+ENCRYPTION_KEY = SECRET_KEY[:32]  # First 32 chars of SECRET_KEY
+
+# Cloudinary Configuration for Document Storage
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+
+# Configure Cloudinary directly (needed for cloudinary.uploader and CloudinaryField)
+import cloudinary
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=config('CLOUDINARY_API_KEY', default=''),
+    api_secret=config('CLOUDINARY_API_SECRET', default=''),
+    secure=True
+)
+
+# Set Cloudinary as default file storage
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

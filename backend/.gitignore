@@ -22,3 +22,4 @@ static/
 
 # OS-specific files
 .DS_Store
+.env

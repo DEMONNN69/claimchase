@@ -46,6 +46,18 @@ export const useInsuranceCompany = (id: number | null) => {
   });
 };
 
+/**
+ * Fetch insurance type choices from backend
+ */
+export const useInsuranceTypes = () => {
+  return useQuery({
+    queryKey: ['insurance-types'],
+    queryFn: () => insuranceAPI.getInsuranceTypes(),
+    select: (response) => response.data.insurance_types as Array<{ value: string; label: string }>,
+    staleTime: 60 * 60 * 1000, // 1 hour (rarely changes)
+  });
+};
+
 // ==================== Case Queries ====================
 
 /**

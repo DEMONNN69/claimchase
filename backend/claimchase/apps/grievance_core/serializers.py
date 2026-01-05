@@ -221,6 +221,8 @@ class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = (
+            'id',
+            'case_number',
             'insurance_company',
             'insurance_company_name',
             'policy_number',
@@ -229,6 +231,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             'description',
             'date_of_incident',
         )
+        read_only_fields = ('id', 'case_number')
     
     def create(self, validated_data):
         """

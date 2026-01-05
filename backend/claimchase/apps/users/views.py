@@ -10,10 +10,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 import logging
 
 from .models import CustomUser
 from .serializers import UserSerializer
+from claimchase.apps.grievance_core.gmail_service import GmailOAuthService, GmailSendService, GmailEncryption
 
 logger = logging.getLogger(__name__)
 
@@ -233,3 +235,151 @@ class AuthViewSet(viewsets.ViewSet):
                 'message': 'Profile updated successfully',
                 'user': UserSerializer(user).data,
             }, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def gmail_connect(self, request):
+        """
+        Get Gmail OAuth authorization URL.
+        
+        GET /api/auth/gmail/connect/
+        Headers: Authorization: Token <token>
+        
+        Returns:
+        {
+            "authorization_url": "https://accounts.google.com/o/oauth2/auth?...",
+            "message": "Visit this URL to authorize Gmail access"
+        }
+        """
+        try:
+            # Get user's auth token to include in state
+            token = request.auth.key if hasattr(request.auth, 'key') else None
+            
+            auth_url = GmailOAuthService.get_authorization_url(user_token=token)
+            
+            return Response({
+                'success': True,
+                'authorization_url': auth_url,
+                'message': 'Visit this URL to authorize Gmail access',
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error getting Gmail auth URL: {e}")
+            return Response({
+                'success': False,
+                'message': 'Failed to get authorization URL',
+                'error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get', 'post'], permission_classes=[AllowAny])
+    def gmail_callback(self, request):
+        """
+        Handle Gmail OAuth callback.
+        Exchange authorization code for tokens.
+        
+        GET /api/auth/gmail/callback/?code=...&state=<user_token>
+        (Google redirects here after user authorizes)
+        
+        POST /api/auth/gmail/callback/
+        Headers: Authorization: Token <token>
+        {"code": "authorization_code_from_google"}
+        
+        Returns: Redirect to frontend with success/error status
+        """
+        from django.shortcuts import redirect
+        from django.conf import settings
+        
+        # Get code and state from either GET params or POST body
+        if request.method == 'GET':
+            auth_code = request.GET.get('code')
+            user_token = request.GET.get('state')  # Token passed in state
+        else:
+            auth_code = request.data.get('code')
+            user_token = request.auth.key if hasattr(request.auth, 'key') else None
+        
+        if not auth_code:
+            # Redirect to frontend with error
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return redirect(f"{frontend_url}/settings?gmail_error=no_code")
+        
+        if not user_token:
+            # Redirect to frontend with error
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return redirect(f"{frontend_url}/settings?gmail_error=no_token")
+        
+        try:
+            # Find user by token
+            token_obj = Token.objects.get(key=user_token)
+            user = token_obj.user
+            
+            # Exchange code for tokens
+            tokens = GmailOAuthService.exchange_code_for_tokens(auth_code)
+            
+            if not tokens:
+                frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+                return redirect(f"{frontend_url}/settings?gmail_error=exchange_failed")
+            
+            # Get user's Gmail email address
+            gmail_email = GmailOAuthService.get_user_email(tokens['access_token'])
+            
+            if not gmail_email:
+                frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+                return redirect(f"{frontend_url}/settings?gmail_error=no_email")
+            
+            # Save refresh token and Gmail email to user
+            user.gmail_refresh_token = GmailEncryption.encrypt(tokens['refresh_token'])
+            user.gmail_email = gmail_email
+            user.gmail_connected = True
+            user.gmail_token_expires_at = tokens['expires_at']
+            user.save()
+            
+            logger.info(f"User {user.email} connected Gmail account: {gmail_email}")
+            
+            # Redirect to frontend with success
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return redirect(f"{frontend_url}/settings?gmail_connected=true&gmail_email={gmail_email}")
+        
+        except Token.DoesNotExist:
+            logger.error(f"Invalid token in Gmail callback")
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return redirect(f"{frontend_url}/settings?gmail_error=invalid_token")
+        
+        except Exception as e:
+            logger.error(f"Gmail callback error: {e}")
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return redirect(f"{frontend_url}/settings?gmail_error=unknown")
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def gmail_disconnect(self, request):
+        """
+        Disconnect Gmail account from ClaimChase.
+        
+        POST /api/auth/gmail/disconnect/
+        Headers: Authorization: Token <token>
+        
+        Returns:
+        {
+            "success": true,
+            "message": "Gmail account disconnected"
+        }
+        """
+        try:
+            user = request.user
+            user.gmail_refresh_token = None
+            user.gmail_email = None
+            user.gmail_connected = False
+            user.gmail_token_expires_at = None
+            user.save()
+            
+            logger.info(f"User {user.email} disconnected Gmail account")
+            
+            return Response({
+                'success': True,
+                'message': 'Gmail account disconnected',
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            logger.error(f"Error disconnecting Gmail: {e}")
+            return Response({
+                'success': False,
+                'message': 'Failed to disconnect Gmail account',
+                'error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)

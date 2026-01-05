@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FileEdit, Mail, Scale, Users, Check, Lock, ChevronRight, Plus, Clock, AlertCircle, Edit2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { useInsuranceCompanies } from "@/hooks/useApi";
+import { useInsuranceCompanies, useInsuranceTypes } from "@/hooks/useApi";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +69,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, updateProfile } = useAuth();
   const { data: allCompanies = [] } = useInsuranceCompanies();
+  const { data: insuranceTypes = [] } = useInsuranceTypes();
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editType, setEditType] = useState<"company" | "problem" | null>(null);
@@ -392,27 +393,20 @@ export default function Dashboard() {
                 <p className="text-sm font-medium mb-3">Currently Selected: <span className="text-primary capitalize">{user?.problem_type?.replace(/_/g, " ") || "None"}</span></p>
               </div>
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {[
-                  "mediclaim",
-                  "life_insurance",
-                  "critical_illness",
-                  "motor_insurance",
-                  "marine_claim",
-                  "fire_claim",
-                ].map((problem) => (
+                {insuranceTypes.map((problem) => (
                   <button
-                    key={problem}
-                    onClick={() => setSelectedProblem(problem)}
+                    key={problem.value}
+                    onClick={() => setSelectedProblem(problem.value)}
                     className={cn(
                       "w-full p-3 rounded-lg border text-sm text-left transition-all",
-                      selectedProblem === problem
+                      selectedProblem === problem.value
                         ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                         : "border-border hover:border-primary/50"
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{problem.replace(/_/g, " ")}</span>
-                      {selectedProblem === problem && (
+                      <span>{problem.label}</span>
+                      {selectedProblem === problem.value && (
                         <CheckCircle className="h-4 w-4 text-primary" />
                       )}
                     </div>

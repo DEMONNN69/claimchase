@@ -70,6 +70,22 @@ export const caseAPI = {
     apiClient.get<{ documents: Document[] }>(`/cases/${caseId}/documents/`),
 
   /**
+   * Upload document to case
+   */
+  uploadDocument: (caseId: number, file: File, documentType: string = 'other', description: string = '') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('document_type', documentType);
+    formData.append('description', description);
+    
+    return apiClient.post(`/cases/${caseId}/documents/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  /**
    * Get ombudsman eligibility status
    */
   getOmbudsmanStatus: (caseId: number) =>

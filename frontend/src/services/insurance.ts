@@ -26,4 +26,10 @@ export const insuranceAPI = {
     apiClient.get<InsuranceCompany[]>('/insurance-companies/', {
       params: { category },
     }),
+
+  /**
+   * Get available insurance types
+   */
+  getInsuranceTypes: () =>
+    apiClient.get('/insurance-types/'),
 };

@@ -3,18 +3,62 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Trash2, Bell, Mail, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ConnectGmail } from "@/components/ConnectGmail";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 export default function Settings() {
   const [emailTracking, setEmailTracking] = useState(true);
   const [notifications, setNotifications] = useState(true);
-  const { user, logout } = useAuth();
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [gmailEmail, setGmailEmail] = useState<string>();
+  const { user, logout, refreshUser } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle OAuth redirect from backend
+  useEffect(() => {
+    const gmailConnectedParam = searchParams.get('gmail_connected');
+    const gmailEmailParam = searchParams.get('gmail_email');
+    const gmailError = searchParams.get('gmail_error');
+
+    if (gmailConnectedParam === 'true' && gmailEmailParam) {
+      setGmailConnected(true);
+      setGmailEmail(gmailEmailParam);
+      toast.success(`Gmail connected: ${gmailEmailParam}`);
+      // Refresh user data
+      refreshUser?.();
+      // Clear query params
+      setSearchParams({});
+    } else if (gmailError) {
+      const errorMessages: Record<string, string> = {
+        no_code: 'No authorization code received',
+        no_token: 'Authentication required',
+        exchange_failed: 'Failed to exchange authorization code',
+        no_email: 'Failed to fetch Gmail address',
+        invalid_token: 'Invalid authentication token',
+        unknown: 'An error occurred connecting Gmail'
+      };
+      toast.error(errorMessages[gmailError] || 'Gmail connection failed');
+      // Clear query params
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, refreshUser]);
 
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully");
+  };
+
+  const handleGmailConnectSuccess = (email: string) => {
+    setGmailConnected(true);
+    setGmailEmail(email);
+  };
+
+  const handleGmailDisconnectSuccess = () => {
+    setGmailConnected(false);
+    setGmailEmail(undefined);
   };
 
   return (
@@ -41,6 +85,21 @@ export default function Settings() {
               </div>
               <Button variant="outline" size="sm">Edit</Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Gmail Integration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Email Integration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ConnectGmail
+              gmailEmail={gmailEmail || user?.gmail_email}
+              gmailConnected={gmailConnected || user?.gmail_connected}
+              onConnectSuccess={handleGmailConnectSuccess}
+              onDisconnectSuccess={handleGmailDisconnectSuccess}
+            />
           </CardContent>
         </Card>
 

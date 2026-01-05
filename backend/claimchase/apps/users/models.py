@@ -85,6 +85,27 @@ class CustomUser(AbstractUser):
         help_text="Type of insurance problem: mediclaim, life_insurance, critical_illness, motor_insurance, marine_claim, fire_claim, or custom"
     )
     
+    # Gmail Integration
+    gmail_refresh_token = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Encrypted Gmail refresh token for OAuth"
+    )
+    gmail_email = models.EmailField(
+        null=True,
+        blank=True,
+        help_text="Connected Gmail address"
+    )
+    gmail_connected = models.BooleanField(
+        default=False,
+        help_text="Whether Gmail account is connected"
+    )
+    gmail_token_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the Gmail access token expires"
+    )
+    
     class Meta:
         db_table = 'users_customuser'
         verbose_name = 'User'
