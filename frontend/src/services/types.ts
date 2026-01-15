@@ -112,3 +112,107 @@ export interface CaseCreateData {
   description: string;
   date_of_incident: string;
 }
+
+// Consumer Dispute Types
+export interface DisputeCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  parent: number | null;
+  display_order: number;
+  is_active: boolean;
+  is_subcategory: boolean;
+  level: number;
+  subcategories: DisputeCategoryBrief[];
+  entity_count: number;
+}
+
+export interface DisputeCategoryBrief {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+}
+
+export interface Entity {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  logo_url: string | null;
+  website: string;
+  is_active: boolean;
+  is_verified: boolean;
+}
+
+export interface ConsumerDispute {
+  id: number;
+  dispute_id: string;
+  user: number;
+  user_data: {
+    id: number;
+    email: string;
+    name: string;
+  };
+  category: number;
+  category_data: DisputeCategoryBrief;
+  subcategory: number | null;
+  subcategory_data: DisputeCategoryBrief | null;
+  entity: number | null;
+  entity_data: Entity | null;
+  title: string;
+  description: string;
+  transaction_id: string;
+  transaction_date: string | null;
+  amount_involved: string | null;
+  preferred_contact_method: 'phone' | 'email' | 'whatsapp';
+  preferred_contact_time: string;
+  status: 'new' | 'contacted' | 'in_progress' | 'resolved' | 'closed' | 'rejected';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  created_at: string;
+  updated_at: string;
+  contacted_at: string | null;
+  resolved_at: string | null;
+}
+
+export interface ConsumerDisputeList {
+  id: number;
+  dispute_id: string;
+  title: string;
+  category: number;
+  category_name: string;
+  subcategory_name: string | null;
+  entity_name: string | null;
+  status: string;
+  priority: string;
+  amount_involved: string | null;
+  preferred_contact_method: string;
+  created_at: string;
+  updated_at: string;
+  document_count: number;
+}
+
+export interface ConsumerDisputeCreateData {
+  category: number;
+  subcategory?: number;
+  entity?: number;
+  title: string;
+  description: string;
+  transaction_id?: string;
+  transaction_date?: string;
+  amount_involved?: number;
+  preferred_contact_method: 'phone' | 'email' | 'whatsapp';
+  preferred_contact_time?: string;
+}
+
+export interface DisputeStats {
+  total: number;
+  new: number;
+  in_progress: number;
+  contacted: number;
+  resolved: number;
+  closed: number;
+}

@@ -18,6 +18,8 @@ import Handoff from "./pages/Handoff";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import GmailCallback from "./pages/GmailCallback";
+import ConsumerDispute from "./pages/ConsumerDispute";
+import DisputesList from "./pages/DisputesList";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +70,16 @@ const App = () => (
               <Route path="/settings" element={
                 <ProtectedRoute requireOnboarding>
                   <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/disputes" element={
+                <ProtectedRoute requireOnboarding>
+                  <DisputesList />
+                </ProtectedRoute>
+              } />
+              <Route path="/disputes/new" element={
+                <ProtectedRoute requireOnboarding>
+                  <ConsumerDispute />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />

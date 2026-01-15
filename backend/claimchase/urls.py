@@ -19,6 +19,7 @@ urlpatterns = [
     # App URLs
     path('api/', include('claimchase.apps.users.urls')),
     path('api/', include('claimchase.apps.grievance_core.urls')),
+    path('api/', include('claimchase.apps.consumer_disputes.urls')),
 ]
 
 # Serve media files in development

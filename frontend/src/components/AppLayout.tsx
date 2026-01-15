@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
 import { DesktopSidebar } from "./DesktopSidebar";
 
-const pagesWithNav = ["/dashboard", "/guide", "/settings"];
+const pagesWithNav = ["/dashboard", "/guide", "/settings", "/disputes"];
 
 export function AppLayout() {
   const location = useLocation();

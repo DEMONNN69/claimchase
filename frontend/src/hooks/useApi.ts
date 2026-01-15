@@ -5,6 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { insuranceAPI, caseAPI } from '@/services';
+import { disputeAPI } from '@/services/disputes';
 import type { 
   InsuranceCompany, 
   Case, 
@@ -12,7 +13,14 @@ import type {
   CaseCreateData,
   TimelineEvent, 
   EmailTracking, 
-  Document 
+  Document,
+  DisputeCategory,
+  DisputeCategoryBrief,
+  Entity,
+  ConsumerDispute,
+  ConsumerDisputeList,
+  ConsumerDisputeCreateData,
+  DisputeStats,
 } from '@/services/types';
 
 // ==================== Insurance Company Queries ====================
@@ -239,6 +247,130 @@ export const useEscalateToOmbudsman = () => {
       queryClient.invalidateQueries({ queryKey: ['case-status', caseId] });
       queryClient.invalidateQueries({ queryKey: ['ombudsman-status', caseId] });
       queryClient.invalidateQueries({ queryKey: ['cases'] });
+    },
+  });
+};
+
+// ==================== Consumer Dispute Queries ====================
+
+/**
+ * Fetch all dispute categories (with subcategories)
+ */
+export const useDisputeCategories = () => {
+  return useQuery({
+    queryKey: ['dispute-categories'],
+    queryFn: () => disputeAPI.getCategories(),
+    select: (response) => response.data as DisputeCategory[],
+    staleTime: 60 * 60 * 1000, // 1 hour (admin managed, rarely changes)
+  });
+};
+
+/**
+ * Fetch subcategories for a category
+ */
+export const useSubcategories = (categoryId: number | null) => {
+  return useQuery({
+    queryKey: ['subcategories', categoryId],
+    queryFn: () => disputeAPI.getSubcategories(categoryId!),
+    select: (response) => response.data as DisputeCategoryBrief[],
+    enabled: !!categoryId,
+    staleTime: 60 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch entities for a category
+ */
+export const useEntitiesByCategory = (categoryId: number | null) => {
+  return useQuery({
+    queryKey: ['entities-by-category', categoryId],
+    queryFn: () => disputeAPI.getEntitiesByCategory(categoryId!),
+    select: (response) => response.data as Entity[],
+    enabled: !!categoryId,
+    staleTime: 30 * 60 * 1000, // 30 minutes
+  });
+};
+
+/**
+ * Fetch all entities with optional filters
+ */
+export const useEntities = (params?: { category?: number; search?: string }) => {
+  return useQuery({
+    queryKey: ['entities', params],
+    queryFn: () => disputeAPI.getEntities(params),
+    select: (response) => response.data as Entity[],
+    staleTime: 30 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch user's consumer disputes
+ */
+export const useConsumerDisputes = (params?: { status?: string; category?: number }) => {
+  return useQuery({
+    queryKey: ['consumer-disputes', params],
+    queryFn: () => disputeAPI.list(params),
+    select: (response) => {
+      const data = response.data as any;
+      return (data.results || data) as ConsumerDisputeList[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
+ * Fetch single dispute with full details
+ */
+export const useConsumerDispute = (disputeId: number | null) => {
+  return useQuery({
+    queryKey: ['consumer-dispute', disputeId],
+    queryFn: () => disputeAPI.get(disputeId!),
+    select: (response) => response.data as ConsumerDispute,
+    enabled: !!disputeId,
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch dispute statistics
+ */
+export const useDisputeStats = () => {
+  return useQuery({
+    queryKey: ['dispute-stats'],
+    queryFn: () => disputeAPI.getStats(),
+    select: (response) => response.data as DisputeStats,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+// ==================== Consumer Dispute Mutations ====================
+
+/**
+ * Create a new consumer dispute
+ */
+export const useCreateDispute = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ConsumerDisputeCreateData) => disputeAPI.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consumer-disputes'] });
+      queryClient.invalidateQueries({ queryKey: ['dispute-stats'] });
+    },
+  });
+};
+
+/**
+ * Upload document to dispute
+ */
+export const useUploadDisputeDocument = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { disputeId: number; file: File; documentType?: string; description?: string }) =>
+      disputeAPI.uploadDocument(data.disputeId, data.file, data.documentType, data.description),
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['consumer-dispute', variables.disputeId] });
     },
   });
 };
