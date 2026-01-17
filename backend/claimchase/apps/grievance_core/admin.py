@@ -150,10 +150,6 @@ class CaseTimelineAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         """Timeline events should only be created programmatically."""
         return False
-    
-    def has_delete_permission(self, request, obj=None):
-        """Timeline events should not be deleted."""
-        return False
 
 
 @admin.register(EmailTracking)

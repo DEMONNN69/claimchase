@@ -71,14 +71,18 @@ class DocumentBriefSerializer(serializers.ModelSerializer):
         ]
     
     def get_file_url(self, obj):
-        """Return proxy URL for secure document access"""
+        """Return proxy URL for secure document access with auth token"""
         request = self.context.get('request')
-        if obj.id:
-            # Use the proxy endpoint for secure access
-            proxy_path = f"/api/documents/{obj.id}/file/"
-            if request:
+        if obj.id and request:
+            # Get user's auth token
+            from rest_framework.authtoken.models import Token
+            try:
+                token = Token.objects.get(user=request.user)
+                # Use the proxy endpoint with token parameter
+                proxy_path = f"/api/documents/{obj.id}/file/?token={token.key}"
                 return request.build_absolute_uri(proxy_path)
-            return proxy_path
+            except Token.DoesNotExist:
+                pass
         return None
 
 
