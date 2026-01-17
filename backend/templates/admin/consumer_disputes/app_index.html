@@ -1,0 +1,331 @@
+{% extends 'admin/base.html' %}
+{% load i18n unfold %}
+{% load consumer_disputes_tags %}
+
+{% block title %}
+    Consumer Disputes | {{ site_title|default:_('ClaimChase Admin') }}
+{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+{% get_consumer_disputes_stats as stats %}
+
+{% if stats.show_dashboard %}
+    
+    <!-- Dashboard Navigation -->
+    <div class="mb-6">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+            <a href="/admin/" class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                📊 Main Dashboard
+            </a>
+            <a href="/admin/medical_review/" class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                🏥 Medical Review
+            </a>
+            <a href="/admin/consumer_disputes/" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition-colors">
+                ⚖️ Consumer Disputes
+            </a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <span class="text-4xl">⚖️</span> Consumer Disputes Dashboard
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Track consumer complaints, categories, and resolution progress</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Disputes -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Disputes</h3>
+                <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.total_disputes|default:0 }}</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.disputes_this_week|default:0 }} this week</p>
+        </div>
+
+        <!-- Active Disputes -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Active</h3>
+                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ active_disputes|default:0 }}</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.disputes_this_month|default:0 }} this month</p>
+        </div>
+
+        <!-- Resolution Rate -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Resolution Rate</h3>
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ resolution_rate|default:0 }}%</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.dispute_status_counts.resolved|default:0 }} resolved</p>
+        </div>
+
+        <!-- Documents -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Documents</h3>
+                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_documents|default:0 }}</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ pending_documents|default:0 }} pending</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% component "unfold/components/card.html" with title="📊 Priority Distribution" %}
+            {% component "unfold/components/chart/bar.html" with component_class="DisputePriorityChartComponent" %}{% endcomponent %}
+        {% endcomponent %}
+        
+        {% component "unfold/components/card.html" with title="📈 Dispute Trends (Last 30 Days)" %}
+            {% component "unfold/components/chart/line.html" with component_class="DisputeTrendChartComponent" %}{% endcomponent %}
+        {% endcomponent %}
+    </div>
+
+    <!-- Status Pipeline -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span class="text-blue-500">📊</span> Dispute Pipeline
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                <div class="flex-1 min-w-[110px]">
+                    <div class="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600">
+                        <div class="text-2xl mb-1">🆕</div>
+                        <p class="text-xl font-bold text-gray-700 dark:text-gray-300">{{ stats.dispute_status_counts.new|default:0 }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">New</p>
+                    </div>
+                </div>
+                <div class="text-gray-400 dark:text-gray-600 text-xl">→</div>
+                <div class="flex-1 min-w-[110px]">
+                    <div class="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700">
+                        <div class="text-2xl mb-1">📞</div>
+                        <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ stats.dispute_status_counts.contacted|default:0 }}</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">Contacted</p>
+                    </div>
+                </div>
+                <div class="text-gray-400 dark:text-gray-600 text-xl">→</div>
+                <div class="flex-1 min-w-[110px]">
+                    <div class="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700">
+                        <div class="text-2xl mb-1">⚙️</div>
+                        <p class="text-xl font-bold text-purple-600 dark:text-purple-400">{{ stats.dispute_status_counts.in_progress|default:0 }}</p>
+                        <p class="text-xs text-purple-600 dark:text-purple-400 font-medium">In Progress</p>
+                    </div>
+                </div>
+                <div class="text-gray-400 dark:text-gray-600 text-xl">→</div>
+                <div class="flex-1 min-w-[110px]">
+                    <div class="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700">
+                        <div class="text-2xl mb-1">✅</div>
+                        <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.dispute_status_counts.resolved|default:0 }}</p>
+                        <p class="text-xs text-green-600 dark:text-green-400 font-medium">Resolved</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Statuses -->
+            <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <span class="text-2xl">🔒</span>
+                    <div>
+                        <p class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ stats.dispute_status_counts.closed|default:0 }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Closed</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
+                    <span class="text-2xl">❌</span>
+                    <div>
+                        <p class="text-lg font-bold text-red-600 dark:text-red-400">{{ stats.dispute_status_counts.rejected|default:0 }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Rejected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority & Categories -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Priority Breakdown -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-red-500">🚨</span> Priority Distribution
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-red-600 dark:text-red-400">Urgent</span>
+                            <span class="text-sm font-bold text-red-600 dark:text-red-400">{{ dispute_priority_counts.urgent|default:0 }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            {% if total_disputes > 0 %}<div class="bg-gradient-to-r from-red-500 to-red-600 h-2.5 rounded-full" style="width: {% widthratio dispute_priority_counts.urgent|default:0 total_disputes 100 %}%"></div>{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-orange-600 dark:text-orange-400">High</span>
+                            <span class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ dispute_priority_counts.high|default:0 }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            {% if total_disputes > 0 %}<div class="bg-gradient-to-r from-orange-500 to-orange-600 h-2.5 rounded-full" style="width: {% widthratio dispute_priority_counts.high|default:0 total_disputes 100 %}%"></div>{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-blue-600 dark:text-blue-400">Medium</span>
+                            <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ dispute_priority_counts.medium|default:0 }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            {% if total_disputes > 0 %}<div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full" style="width: {% widthratio dispute_priority_counts.medium|default:0 total_disputes 100 %}%"></div>{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Low</span>
+                            <span class="text-sm font-bold text-gray-600 dark:text-gray-400">{{ dispute_priority_counts.low|default:0 }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            {% if total_disputes > 0 %}<div class="bg-gradient-to-r from-gray-500 to-gray-600 h-2.5 rounded-full" style="width: {% widthratio dispute_priority_counts.low|default:0 total_disputes 100 %}%"></div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-purple-500">📂</span> Top Categories
+                </h2>
+            </div>
+            <div class="p-6 space-y-3">
+                {% for category in top_categories %}
+                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center text-white font-bold">
+                            {{ forloop.counter }}
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ category.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ category.dispute_count }} dispute{{ category.dispute_count|pluralize }}</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {{ category.dispute_count }}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 py-4">
+                    No categories yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Disputes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-blue-500">📝</span> Recent Disputes
+                </h2>
+                <a href="/admin/consumer_disputes/consumerdispute/" class="text-blue-500 hover:text-blue-600 text-sm font-medium">
+                    View all →
+                </a>
+            </div>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for dispute in recent_disputes %}
+                <a href="/admin/consumer_disputes/consumerdispute/{{ dispute.id }}/change/" class="block px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ dispute.title|truncatechars:50 }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ dispute.category.name }} • {{ dispute.entity.name|default:"No entity" }}</p>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ml-2
+                            {% if dispute.status == 'new' %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                            {% elif dispute.status == 'contacted' %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300
+                            {% elif dispute.status == 'in_progress' %}bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300
+                            {% elif dispute.status == 'resolved' %}bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300
+                            {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                            {{ dispute.get_status_display }}
+                        </span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    No disputes yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Entities -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-amber-500">🏢</span> Most Disputed Entities
+                </h2>
+            </div>
+            <div class="p-6 space-y-3">
+                {% for entity in top_entities %}
+                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+                            {{ forloop.counter }}
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ entity.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ entity.entity_type|default:"Unknown type" }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xl font-bold text-amber-600 dark:text-amber-400">
+                            {{ entity.dispute_count }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">dispute{{ entity.dispute_count|pluralize }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 py-4">
+                    No entity data yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="text-6xl mb-4">⚖️</div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Consumer Disputes Dashboard</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+            {% if dashboard_error %}Error loading dashboard: {{ dashboard_error }}{% else %}Start managing consumer disputes.{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
