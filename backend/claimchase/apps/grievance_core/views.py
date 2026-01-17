@@ -625,3 +625,73 @@ def get_insurance_types(request):
     return Response({
         'insurance_types': insurance_types
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def document_proxy(request, document_id):
+    """
+    Proxy endpoint to serve document files.
+    This allows secure access to Cloudinary private resources.
+    
+    GET /api/documents/<id>/file/
+    """
+    from django.http import HttpResponse, HttpResponseRedirect
+    import requests
+    
+    document = get_object_or_404(Document, id=document_id)
+    
+    # Check if user has permission to access this document
+    # (Either owner of the case or a medical reviewer with assignment)
+    user = request.user
+    has_access = False
+    
+    # Case owner
+    if document.case.user == user:
+        has_access = True
+    
+    # Admin/Staff
+    if user.is_staff or user.is_superuser:
+        has_access = True
+    
+    # Medical reviewer with assignment containing this document
+    if hasattr(user, 'is_medical_reviewer') and user.is_medical_reviewer:
+        from claimchase.apps.medical_review.models import AssignmentDocument
+        has_access = AssignmentDocument.objects.filter(
+            document=document,
+            assignment__reviewer=user
+        ).exists()
+    
+    if not has_access:
+        return Response(
+            {'error': 'You do not have permission to access this document'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Get the file URL
+    if document.file:
+        try:
+            # For Cloudinary, get the actual file content and serve it
+            import cloudinary.utils
+            
+            public_id = str(document.file)
+            
+            # Generate a signed URL
+            signed_url, _ = cloudinary.utils.cloudinary_url(
+                public_id,
+                sign_url=True,
+                secure=True,
+            )
+            
+            # Redirect to the signed URL
+            return HttpResponseRedirect(signed_url)
+        except Exception as e:
+            logger.error(f"Error generating signed URL: {e}")
+            # Fallback to direct URL
+            return HttpResponseRedirect(document.file.url)
+    
+    return Response(
+        {'error': 'Document file not found'},
+        status=status.HTTP_404_NOT_FOUND
+    )
+

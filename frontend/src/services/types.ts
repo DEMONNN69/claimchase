@@ -6,6 +6,7 @@ export interface User {
   id: number;
   email: string;
   username?: string;
+  full_name?: string;
   first_name?: string;
   last_name?: string;
   phone?: string;
@@ -215,4 +216,124 @@ export interface DisputeStats {
   contacted: number;
   resolved: number;
   closed: number;
+}
+
+// ==================== Medical Review Types ====================
+
+export interface MedicalReviewerProfile {
+  id: number;
+  user: number;
+  user_email: string;
+  full_name: string;
+  specialization: string;
+  other_specialization?: string;
+  display_specialization: string;
+  years_of_experience: number;
+  is_onboarded: boolean;
+  is_available: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OnboardingData {
+  full_name: string;
+  specialization: string;
+  other_specialization?: string;
+  years_of_experience: number;
+}
+
+export interface ReviewAssignment {
+  id: number;
+  case: number;
+  case_number: string;
+  case_subject?: string;
+  insurance_company: string;
+  reviewer: number;
+  reviewer_name: string;
+  assigned_by: number | null;
+  assigned_by_name: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'needs_more_info';
+  admin_notes?: string;
+  document_count: number;
+  reviewed_count: number;
+  documents?: AssignmentDocument[];
+  assigned_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface AssignmentDocument {
+  id: number;
+  document: number;
+  document_details: DocumentDetails;
+  review: DocumentReview | null;
+  is_reviewed: boolean;
+  added_at: string;
+}
+
+export interface DocumentDetails {
+  id: number;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  document_type: string;
+  description: string;
+  file_url: string;
+  created_at: string;
+}
+
+export interface DocumentReview {
+  id: number;
+  assignment: number;
+  assignment_document: number;
+  reviewer: number;
+  reviewer_name: string;
+  document_name?: string;
+  outcome: 'approved' | 'rejected' | 'needs_more_info';
+  comments: string;
+  additional_info_requested?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDocumentReviewData {
+  assignment_document: number;
+  outcome: 'approved' | 'rejected' | 'needs_more_info';
+  comments: string;
+  additional_info_requested?: string;
+}
+
+export interface ReviewerDashboardSummary {
+  pending_count: number;
+  in_progress_count: number;
+  completed_count: number;
+  needs_info_count: number;
+  cases: CaseGroup[];
+}
+
+export interface CaseGroup {
+  case_id: number;
+  case_number: string;
+  insurance_company: string;
+  assignments: ReviewAssignment[];
+}
+
+export interface ReviewerStats {
+  reviewer: number;
+  reviewer_name: string;
+  total_assignments: number;
+  pending_assignments: number;
+  completed_assignments: number;
+  total_documents_reviewed: number;
+  approved_count: number;
+  rejected_count: number;
+  needs_info_count: number;
+  avg_review_time_hours: number;
+  last_updated: string;
+}
+
+export interface OnboardingCheckResponse {
+  needs_onboarding: boolean;
+  is_reviewer: boolean;
+  profile: MedicalReviewerProfile | null;
 }

@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/', include('claimchase.apps.users.urls')),
     path('api/', include('claimchase.apps.grievance_core.urls')),
     path('api/', include('claimchase.apps.consumer_disputes.urls')),
+    path('api/medical-review/', include('claimchase.apps.medical_review.urls')),
 ]
 
 # Serve media files in development

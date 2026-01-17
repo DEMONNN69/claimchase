@@ -374,3 +374,139 @@ export const useUploadDisputeDocument = () => {
     },
   });
 };
+
+// ==================== Medical Review Queries ====================
+
+import { medicalReviewAPI } from '@/services/medicalReview';
+import type {
+  MedicalReviewerProfile,
+  OnboardingData,
+  OnboardingCheckResponse,
+  ReviewAssignment,
+  DocumentReview,
+  CreateDocumentReviewData,
+  ReviewerDashboardSummary,
+  ReviewerStats,
+} from '@/services/types';
+
+/**
+ * Check if user needs onboarding
+ */
+export const useCheckOnboarding = () => {
+  return useQuery({
+    queryKey: ['reviewer-onboarding-check'],
+    queryFn: () => medicalReviewAPI.checkOnboarding(),
+    select: (response) => response.data as OnboardingCheckResponse,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
+ * Get current user's medical reviewer profile
+ */
+export const useReviewerProfile = () => {
+  return useQuery({
+    queryKey: ['reviewer-profile'],
+    queryFn: () => medicalReviewAPI.getMyProfile(),
+    select: (response) => response.data as MedicalReviewerProfile,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+/**
+ * Complete onboarding
+ */
+export const useOnboard = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: OnboardingData) => medicalReviewAPI.onboard(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviewer-onboarding-check'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-profile'] });
+    },
+  });
+};
+
+/**
+ * Get dashboard summary
+ */
+export const useReviewerDashboard = () => {
+  return useQuery({
+    queryKey: ['reviewer-dashboard'],
+    queryFn: () => medicalReviewAPI.getDashboardSummary(),
+    select: (response) => response.data as ReviewerDashboardSummary,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
+  });
+};
+
+/**
+ * Get reviewer's assignments
+ */
+export const useMyAssignments = (status?: string) => {
+  return useQuery({
+    queryKey: ['my-assignments', status],
+    queryFn: () => medicalReviewAPI.getMyAssignments(status),
+    select: (response) => response.data as ReviewAssignment[],
+    staleTime: 1 * 60 * 1000,
+  });
+};
+
+/**
+ * Get assignment details
+ */
+export const useAssignment = (id: number | null) => {
+  return useQuery({
+    queryKey: ['assignment', id],
+    queryFn: () => medicalReviewAPI.getAssignment(id!),
+    select: (response) => response.data as ReviewAssignment,
+    enabled: !!id,
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+/**
+ * Start reviewing an assignment
+ */
+export const useStartReview = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => medicalReviewAPI.startReview(id),
+    onSuccess: (response, id) => {
+      queryClient.invalidateQueries({ queryKey: ['assignment', id] });
+      queryClient.invalidateQueries({ queryKey: ['my-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-dashboard'] });
+    },
+  });
+};
+
+/**
+ * Submit a document review
+ */
+export const useSubmitReview = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateDocumentReviewData) => medicalReviewAPI.submitReview(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assignment'] });
+      queryClient.invalidateQueries({ queryKey: ['my-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-stats'] });
+    },
+  });
+};
+
+/**
+ * Get reviewer stats
+ */
+export const useReviewerStats = () => {
+  return useQuery({
+    queryKey: ['reviewer-stats'],
+    queryFn: () => medicalReviewAPI.getStats(),
+    select: (response) => response.data as ReviewerStats,
+    staleTime: 5 * 60 * 1000,
+  });
+};

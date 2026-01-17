@@ -21,6 +21,7 @@ class CustomUser(AbstractUser):
         ('ombudsman_admin', 'Ombudsman Admin'),
         ('insurance_agent', 'Insurance Company Agent'),
         ('support_staff', 'Support Staff'),
+        ('medical_reviewer', 'Medical Reviewer'),
     ]
     
     # Custom fields
@@ -136,6 +137,11 @@ class CustomUser(AbstractUser):
     def is_insurance_agent(self) -> bool:
         """Check if user is an insurance company agent."""
         return self.role == 'insurance_agent'
+    
+    @property
+    def is_medical_reviewer(self) -> bool:
+        """Check if user is a medical reviewer."""
+        return self.role == 'medical_reviewer'
     
     def get_full_name(self) -> str:
         """Return full name or username."""

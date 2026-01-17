@@ -728,8 +728,32 @@ class Document(models.Model):
     
     @property
     def file_url(self) -> str:
-        """Return the URL for accessing the file."""
+        """Return a signed URL for accessing the file (works with private resources)."""
         if self.file:
+            try:
+                import cloudinary.utils
+                import time
+                
+                # Get the public_id from the file
+                public_id = str(self.file)
+                
+                # Generate a signed URL with expiration (1 hour from now)
+                expires_at = int(time.time()) + 3600
+                
+                signed_url, _ = cloudinary.utils.cloudinary_url(
+                    public_id,
+                    sign_url=True,
+                    secure=True,
+                    resource_type="raw",  # For PDFs and other non-image files
+                )
+                
+                if signed_url:
+                    return signed_url
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to generate signed URL: {e}")
+            
+            # Fallback to regular URL
             return self.file.url
         return ""
     

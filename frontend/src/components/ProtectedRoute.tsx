@@ -24,8 +24,8 @@ export function ProtectedRoute({ children, requireOnboarding = false }: Protecte
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check if user needs onboarding (no first_name or last_name)
-  const needsOnboarding = !user?.first_name || !user?.last_name;
+  // Check if user needs onboarding (no full_name set)
+  const needsOnboarding = !user?.full_name || user.full_name.trim() === "";
 
   // If user has completed profile and tries to access onboarding, redirect to dashboard
   if (!needsOnboarding && location.pathname === "/onboarding") {

@@ -69,7 +69,8 @@ export default function StartGreivance() {
         console.log('Response data:', response.data);
         
         // Extract case ID - check multiple possible locations
-        const caseId = response.data?.id || response.data?.data?.id;
+        const responseData = response.data as any;
+        const caseId = responseData?.id || responseData?.data?.id;
         
         if (!caseId) {
           console.error('No case ID found in response:', response.data);

@@ -10,6 +10,7 @@ from .views import (
     CaseTimelineViewSet,
     EmailTrackingViewSet,
     get_insurance_types,
+    document_proxy,
 )
 
 # Create router and register viewsets
@@ -23,5 +24,6 @@ app_name = 'grievance_core'
 
 urlpatterns = [
     path('insurance-types/', get_insurance_types, name='insurance-types'),
+    path('documents/<int:document_id>/file/', document_proxy, name='document-proxy'),
     path('', include(router.urls)),
 ]

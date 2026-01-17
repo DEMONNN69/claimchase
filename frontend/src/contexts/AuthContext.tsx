@@ -97,7 +97,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const getProfile = async () => {
     try {
       const response = await authAPI.getProfile();
-      const userData = response.data.user || response.data;
+      // Handle both response.data.user and response.data structures
+      const responseData = response.data as any;
+      const userData = responseData.user || responseData;
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
     } catch (err: any) {
@@ -112,7 +114,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setError(null);
       const response = await authAPI.updateProfile(data);
       // Handle both response.data.user and response.data structures
-      const userData = response.data.user || response.data;
+      const responseData = response.data as any;
+      const userData = responseData.user || responseData;
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
     } catch (err: any) {

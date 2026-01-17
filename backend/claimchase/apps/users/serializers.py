@@ -18,7 +18,7 @@ class InsuranceCompanySimpleSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for CustomUser model."""
     
-    full_name = serializers.SerializerMethodField()
+    full_name = serializers.CharField(required=False, allow_blank=True)
     is_ombudsman_eligible = serializers.BooleanField(read_only=True)
     insurance_company = InsuranceCompanySimpleSerializer(read_only=True)
     insurance_company_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
@@ -58,9 +58,20 @@ class UserSerializer(serializers.ModelSerializer):
             'is_ombudsman_eligible',
         )
     
-    def get_full_name(self, obj):
-        """Get user's full name."""
-        return obj.get_full_name()
+    def to_representation(self, instance):
+        """Add computed full_name to response."""
+        ret = super().to_representation(instance)
+        ret['full_name'] = instance.get_full_name()
+        return ret
+    
+    def update(self, instance, validated_data):
+        """Handle full_name by splitting into first_name and last_name."""
+        full_name = validated_data.pop('full_name', None)
+        if full_name:
+            parts = full_name.strip().split(' ', 1)
+            validated_data['first_name'] = parts[0]
+            validated_data['last_name'] = parts[1] if len(parts) > 1 else ''
+        return super().update(instance, validated_data)
 
 
 class UserDetailSerializer(serializers.ModelSerializer):

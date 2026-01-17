@@ -24,7 +24,17 @@ export default function Login() {
     try {
       await login(email, password);
       toast.success("Login successful!");
-      navigate("/dashboard");
+      
+      // Get the updated user from localStorage (just set by login)
+      const storedUser = localStorage.getItem('user');
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      
+      // Redirect based on role
+      if (userData?.role === 'medical_reviewer') {
+        navigate("/reviewer");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       toast.error(error || "Login failed");
     }

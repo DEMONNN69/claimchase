@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AppLayout } from "./components/AppLayout";
+import { ReviewerLayout } from "./components/ReviewerLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -20,6 +21,10 @@ import NotFound from "./pages/NotFound";
 import GmailCallback from "./pages/GmailCallback";
 import ConsumerDispute from "./pages/ConsumerDispute";
 import DisputesList from "./pages/DisputesList";
+import ReviewerOnboarding from "./pages/ReviewerOnboarding";
+import ReviewerDashboard from "./pages/ReviewerDashboard";
+import ReviewerSettings from "./pages/ReviewerSettings";
+import AssignmentReview from "./pages/AssignmentReview";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +38,8 @@ const App = () => (
           <Routes>
             {/* Public Gmail OAuth callback endpoint used by popup redirect */}
             <Route path="/gmail/callback" element={<GmailCallback />} />
+            
+            {/* Consumer/User Routes */}
             <Route element={<AppLayout />}>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -84,6 +91,24 @@ const App = () => (
               } />
               <Route path="*" element={<NotFound />} />
             </Route>
+            
+            {/* Medical Reviewer Routes - Separate Layout */}
+            <Route element={
+              <ProtectedRoute>
+                <ReviewerLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="/reviewer" element={<ReviewerDashboard />} />
+              <Route path="/reviewer/settings" element={<ReviewerSettings />} />
+              <Route path="/reviewer/assignment/:id" element={<AssignmentReview />} />
+            </Route>
+            
+            {/* Reviewer Onboarding - No layout (full page) */}
+            <Route path="/reviewer/onboarding" element={
+              <ProtectedRoute>
+                <ReviewerOnboarding />
+              </ProtectedRoute>
+            } />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

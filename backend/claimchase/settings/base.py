@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'claimchase.apps.users.apps.UsersConfig',
     'claimchase.apps.grievance_core.apps.GrievanceCoreConfig',
     'claimchase.apps.consumer_disputes.apps.ConsumerDisputesConfig',
+    'claimchase.apps.medical_review.apps.MedicalReviewConfig',
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
