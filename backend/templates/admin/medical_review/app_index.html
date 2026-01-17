@@ -15,17 +15,39 @@
 
 {% if stats.show_dashboard %}
     {% component "unfold/components/container.html" %}
-        {% component "unfold/components/flex.html" with class="gap-4 mb-6" %}
-            {% component "unfold/components/button.html" with href="/admin/" %}
-                📊 Main Dashboard
+        <div class="mb-6">
+            {% component "unfold/components/flex.html" with class="flex-col sm:flex-row gap-3" %}
+                {% if request.path == '/admin/' %}
+                    {% component "unfold/components/button.html" with href="/admin/" variant="primary" %}
+                        📊 Main Dashboard
+                    {% endcomponent %}
+                {% else %}
+                    {% component "unfold/components/button.html" with href="/admin/" variant="outline" %}
+                        📊 Main Dashboard
+                    {% endcomponent %}
+                {% endif %}
+                
+                {% if '/medical_review' in request.path %}
+                    {% component "unfold/components/button.html" with href="/admin/medical_review/" variant="primary" %}
+                        🏥 Medical Review
+                    {% endcomponent %}
+                {% else %}
+                    {% component "unfold/components/button.html" with href="/admin/medical_review/" variant="outline" %}
+                        🏥 Medical Review
+                    {% endcomponent %}
+                {% endif %}
+                
+                {% if '/consumer_disputes' in request.path %}
+                    {% component "unfold/components/button.html" with href="/admin/consumer_disputes/" variant="primary" %}
+                        ⚖️ Consumer Disputes
+                    {% endcomponent %}
+                {% else %}
+                    {% component "unfold/components/button.html" with href="/admin/consumer_disputes/" variant="outline" %}
+                        ⚖️ Consumer Disputes
+                    {% endcomponent %}
+                {% endif %}
             {% endcomponent %}
-            {% component "unfold/components/button.html" with href="/admin/medical_review/" class="bg-primary-600 text-white hover:bg-primary-700" %}
-                🏥 Medical Review
-            {% endcomponent %}
-            {% component "unfold/components/button.html" with href="/admin/consumer_disputes/" %}
-                ⚖️ Consumer Disputes
-            {% endcomponent %}
-        {% endcomponent %}
+        </div>
 
         {% component "unfold/components/separator.html" %}{% endcomponent %}
 
@@ -71,46 +93,31 @@
     {% component "unfold/components/separator.html" %}{% endcomponent %}
 
     <!-- Review Workflow Pipeline -->
-    {% component "unfold/components/card.html" with title="📊 Review Pipeline" %}
-        {% component "unfold/components/flex.html" with class="flex items-center gap-2 overflow-x-auto pb-2" %}
-            <div class="flex-1 min-w-[140px]">
-                <div class="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600">
-                    <div class="text-3xl mb-1">📋</div>
-                    <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">{{ stats.assignment_status_counts.pending|default:0 }}</p>
-                    {% component "unfold/components/text.html" with class="text-xs font-medium" %}
-                        Pending
-                    {% endcomponent %}
-                </div>
+    {% component "unfold/components/card.html" with title="Review Status Pipeline" %}
+        {% component "unfold/components/flex.html" with class="grid grid-cols-2 md:grid-cols-4 gap-4" %}
+            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow">
+                {% component "unfold/components/text.html" with class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2" %}
+                    Pending
+                {% endcomponent %}
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.assignment_status_counts.pending|default:0 }}</div>
             </div>
-            <div class="text-gray-400 dark:text-gray-600 text-2xl">→</div>
-            <div class="flex-1 min-w-[140px]">
-                <div class="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700">
-                    <div class="text-3xl mb-1">🔍</div>
-                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ stats.assignment_status_counts.in_progress|default:0 }}</p>
-                    {% component "unfold/components/text.html" with class="text-xs text-blue-600 dark:text-blue-400 font-medium" %}
-                        In Progress
-                    {% endcomponent %}
-                </div>
+            <div class="p-4 border border-blue-200 dark:border-blue-700 rounded-lg hover:shadow-md transition-shadow bg-blue-50/50 dark:bg-blue-900/10">
+                {% component "unfold/components/text.html" with class="text-xs uppercase tracking-wide text-blue-600 dark:text-blue-400 mb-2" %}
+                    In Progress
+                {% endcomponent %}
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ stats.assignment_status_counts.in_progress|default:0 }}</div>
             </div>
-            <div class="text-gray-400 dark:text-gray-600 text-2xl">→</div>
-            <div class="flex-1 min-w-[140px]">
-                <div class="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700">
-                    <div class="text-3xl mb-1">✅</div>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ stats.assignment_status_counts.completed|default:0 }}</p>
-                    {% component "unfold/components/text.html" with class="text-xs text-green-600 dark:text-green-400 font-medium" %}
-                        Completed
-                    {% endcomponent %}
-                </div>
+            <div class="p-4 border border-green-200 dark:border-green-700 rounded-lg hover:shadow-md transition-shadow bg-green-50/50 dark:bg-green-900/10">
+                {% component "unfold/components/text.html" with class="text-xs uppercase tracking-wide text-green-600 dark:text-green-400 mb-2" %}
+                    Completed
+                {% endcomponent %}
+                <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ stats.assignment_status_counts.completed|default:0 }}</div>
             </div>
-            <div class="text-gray-400 dark:text-gray-600 text-2xl">→</div>
-            <div class="flex-1 min-w-[140px]">
-                <div class="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700">
-                    <div class="text-3xl mb-1">❓</div>
-                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.assignment_status_counts.needs_more_info|default:0 }}</p>
-                    {% component "unfold/components/text.html" with class="text-xs text-amber-600 dark:text-amber-400 font-medium" %}
-                        Needs Info
-                    {% endcomponent %}
-                </div>
+            <div class="p-4 border border-amber-200 dark:border-amber-700 rounded-lg hover:shadow-md transition-shadow bg-amber-50/50 dark:bg-amber-900/10">
+                {% component "unfold/components/text.html" with class="text-xs uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-2" %}
+                    Needs Info
+                {% endcomponent %}
+                <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">{{ stats.assignment_status_counts.needs_more_info|default:0 }}</div>
             </div>
         {% endcomponent %}
     {% endcomponent %}
