@@ -11,108 +11,87 @@
 
 {% block content %}
 {% if show_dashboard %}
-    
-    <!-- Dashboard Navigation -->
-    <div class="mb-6">
-        <div class="flex flex-wrap items-center gap-3 mb-4">
-            <a href="/admin/" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition-colors">
+    {% component "unfold/components/container.html" %}
+        {% component "unfold/components/flex.html" with class="gap-4 mb-6" %}
+            {% component "unfold/components/button.html" with href="/admin/" class="bg-primary-600 text-white hover:bg-primary-700" %}
                 📊 Main Dashboard
-            </a>
-            <a href="/admin/medical_review/" class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            {% endcomponent %}
+            {% component "unfold/components/button.html" with href="/admin/medical_review/" %}
                 🏥 Medical Review
-            </a>
-            <a href="/admin/consumer_disputes/" class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            {% endcomponent %}
+            {% component "unfold/components/button.html" with href="/admin/consumer_disputes/" %}
                 ⚖️ Consumer Disputes
-            </a>
+            {% endcomponent %}
+        {% endcomponent %}
+
+        {% component "unfold/components/separator.html" %}{% endcomponent %}
+
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard Overview</h1>
+            <p class="text-gray-600 dark:text-gray-400">Real-time insights into your insurance grievance management</p>
         </div>
-    </div>
 
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard Overview</h1>
-        <p class="text-gray-600 dark:text-gray-400">Real-time insights into your insurance grievance management</p>
-    </div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            {% component "unfold/components/card.html" with title="Active Cases" %}
+                <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ active_cases|default:0 }}</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">+{{ cases_this_week|default:0 }} this week</p>
+            {% endcomponent %}
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {% component "unfold/components/card.html" with title="Active Cases" icon="description" %}
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ active_cases|default:0 }}</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">+{{ cases_this_week|default:0 }} this week</p>
-        {% endcomponent %}
+            {% component "unfold/components/card.html" with title="Pending Reviews" %}
+                <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ pending_reviews|default:0 }}</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ in_progress_reviews|default:0 }} in progress</p>
+            {% endcomponent %}
 
-        {% component "unfold/components/card.html" with title="Pending Reviews" icon="schedule" %}
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ pending_reviews|default:0 }}</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ in_progress_reviews|default:0 }} in progress</p>
-        {% endcomponent %}
+            {% component "unfold/components/card.html" with title="Documents" %}
+                <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_documents|default:0 }}</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ pending_documents|default:0 }} pending</p>
+            {% endcomponent %}
 
-        {% component "unfold/components/card.html" with title="Documents" icon="folder" %}
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_documents|default:0 }}</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ pending_documents|default:0 }} pending</p>
-        {% endcomponent %}
+            {% component "unfold/components/card.html" with title="Users" %}
+                <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_users|default:0 }}</div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ medical_reviewers|default:0 }} reviewers</p>
+            {% endcomponent %}
+        </div>
 
-        {% component "unfold/components/card.html" with title="Users" icon="people" %}
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_users|default:0 }}</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ medical_reviewers|default:0 }} reviewers</p>
-        {% endcomponent %}
-    </div>
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {% component "unfold/components/card.html" with title="Case Status Distribution" icon="bar_chart" %}
+                {% component "unfold/components/chart/bar.html" with component_class="CaseStatusChartComponent" %}{% endcomponent %}
+            {% endcomponent %}
+            
+            {% component "unfold/components/card.html" with title="Case Trends (Last 7 Days)" icon="show_chart" %}
+                {% component "unfold/components/chart/line.html" with component_class="CaseTrendChartComponent" %}{% endcomponent %}
+            {% endcomponent %}
+        </div>
 
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {% component "unfold/components/card.html" with title="📊 Case Status Distribution" %}
-            {% component "unfold/components/chart/bar.html" with component_class="CaseStatusChartComponent" %}{% endcomponent %}
-        {% endcomponent %}
-        {% endcomponent %}
-        
-        {% component "unfold/components/card.html" with title="📈 Case Trends (Last 7 Days)" %}
-            {% component "unfold/components/chart/line.html" with component_class="CaseTrendChartComponent" %}{% endcomponent %}
-        {% endcomponent %}
-    </div>
+    {% component "unfold/components/separator.html" %}{% endcomponent %}
 
     <!-- Advanced Metrics Row -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {% component "unfold/components/flex.html" with class="grid grid-cols-1 md:grid-cols-3 gap-6" %}
         <!-- Review Progress -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Review Progress</h3>
-                <span class="text-2xl">📈</span>
-            </div>
-            <div class="space-y-3">
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Completed</span>
-                        <span class="text-sm font-semibold text-green-600 dark:text-green-400">{{ completed_reviews|default:0 }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if total_documents > 0 %}<div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: {% widthratio completed_reviews|default:0 total_documents 100 %}%"></div>{% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">In Progress</span>
-                        <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ in_progress_reviews|default:0 }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if total_documents > 0 %}<div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: {% widthratio in_progress_reviews|default:0 total_documents 100 %}%"></div>{% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Pending</span>
-                        <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">{{ pending_reviews|default:0 }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if total_documents > 0 %}<div class="bg-gradient-to-r from-amber-400 to-amber-600 h-2 rounded-full" style="width: {% widthratio pending_reviews|default:0 total_documents 100 %}%"></div>{% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% component "unfold/components/card.html" with title="Review Progress" icon="trending_up" %}
+            {% if total_documents > 0 %}
+                {% component "unfold/components/progress.html" with title="Completed" description=completed_reviews|stringformat:"s" value=completed_reviews|default:0 %}
+                    {% widthratio completed_reviews|default:0 total_documents 100 %}
+                {% endcomponent %}
+                
+                {% component "unfold/components/progress.html" with title="In Progress" description=in_progress_reviews|stringformat:"s" value=in_progress_reviews|default:0 %}
+                    {% widthratio in_progress_reviews|default:0 total_documents 100 %}
+                {% endcomponent %}
+                
+                {% component "unfold/components/progress.html" with title="Pending" description=pending_reviews|stringformat:"s" value=pending_reviews|default:0 %}
+                    {% widthratio pending_reviews|default:0 total_documents 100 %}
+                {% endcomponent %}
+            {% else %}
+                {% component "unfold/components/text.html" %}
+                    No documents yet
+                {% endcomponent %}
+            {% endif %}
+        {% endcomponent %}
 
         <!-- Resolution Rate -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Resolution Rate</h3>
-                <span class="text-2xl">🎯</span>
-            </div>
+        {% component "unfold/components/card.html" with title="Resolution Rate" icon="verified" %}
             <div class="flex items-center justify-center py-4">
                 <div class="relative">
                     <svg class="transform -rotate-90 w-32 h-32">
@@ -127,89 +106,104 @@
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900 dark:text-white">
+                            {% component "unfold/components/title.html" with class="text-3xl" %}
                                 {% if total_cases > 0 %}{% widthratio case_status_counts.resolved|default:0 total_cases 100 %}%{% else %}0%{% endif %}
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Resolved</div>
+                            {% endcomponent %}
+                            {% component "unfold/components/text.html" with class="text-xs" %}
+                                Resolved
+                            {% endcomponent %}
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3 mt-4">
+            {% component "unfold/components/flex.html" with class="grid grid-cols-2 gap-3 mt-4" %}
                 <div class="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ case_status_counts.resolved|default:0 }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Resolved</p>
+                    {% component "unfold/components/text.html" with class="text-xs" %}
+                        Resolved
+                    {% endcomponent %}
                 </div>
                 <div class="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <p class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ case_status_counts.closed|default:0 }}</p>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Closed</p>
+                    {% component "unfold/components/text.html" with class="text-xs" %}
+                        Closed
+                    {% endcomponent %}
                 </div>
-            </div>
-        </div>
+            {% endcomponent %}
+        {% endcomponent %}
 
         <!-- Activity Timeline -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Activity</h3>
-                <span class="text-2xl">⚡</span>
-            </div>
+        {% component "unfold/components/card.html" with title="Activity" icon="bolt" %}
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                         <span class="text-lg">📊</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">Cases This Week</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">New submissions</p>
+                        {% component "unfold/components/text.html" with class="text-sm font-medium" %}
+                            Cases This Week
+                        {% endcomponent %}
+                        {% component "unfold/components/text.html" with class="text-xs" %}
+                            New submissions
+                        {% endcomponent %}
                     </div>
                     <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ cases_this_week|default:0 }}</span>
                 </div>
+                {% component "unfold/components/separator.html" %}{% endcomponent %}
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
                         <span class="text-lg">👥</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">New Users</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Last 7 days</p>
+                        {% component "unfold/components/text.html" with class="text-sm font-medium" %}
+                            New Users
+                        {% endcomponent %}
+                        {% component "unfold/components/text.html" with class="text-xs" %}
+                            Last 7 days
+                        {% endcomponent %}
                     </div>
                     <span class="text-lg font-bold text-purple-600 dark:text-purple-400">+{{ new_users_week|default:0 }}</span>
                 </div>
+                {% component "unfold/components/separator.html" %}{% endcomponent %}
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
                         <span class="text-lg">⚠️</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">Escalated</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Requires attention</p>
+                        {% component "unfold/components/text.html" with class="text-sm font-medium" %}
+                            Escalated
+                        {% endcomponent %}
+                        {% component "unfold/components/text.html" with class="text-xs" %}
+                            Requires attention
+                        {% endcomponent %}
                     </div>
                     <span class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ escalated_cases|default:0 }}</span>
                 </div>
+                {% component "unfold/components/separator.html" %}{% endcomponent %}
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
                         <span class="text-lg">🩺</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">Reviewers</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Medical experts</p>
+                        {% component "unfold/components/text.html" with class="text-sm font-medium" %}
+                            Reviewers
+                        {% endcomponent %}
+                        {% component "unfold/components/text.html" with class="text-xs" %}
+                            Medical experts
+                        {% endcomponent %}
                     </div>
                     <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ medical_reviewers|default:0 }}</span>
                 </div>
             </div>
-        </div>
-    </div>
+        {% endcomponent %}
+    {% endcomponent %}
+
+    {% component "unfold/components/separator.html" %}{% endcomponent %}
 
     <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% component "unfold/components/flex.html" with class="grid grid-cols-1 lg:grid-cols-2 gap-6" %}
         <!-- Recent Cases -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span class="text-blue-500">📋</span> Recent Cases
-                </h2>
-                <a href="/admin/grievance_core/case/" class="text-blue-500 hover:text-blue-600 text-sm font-medium">
-                    View all →
-                </a>
-            </div>
+        {% component "unfold/components/card.html" with title="Recent Cases" icon="article" footer="<a href='/admin/grievance_core/case/' class='text-blue-500 hover:text-blue-600 text-sm font-medium'>View all →</a>" %}
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 {% for case in recent_cases %}
                 <a href="/admin/grievance_core/case/{{ case.id }}/change/" class="block px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
@@ -232,19 +226,17 @@
                     </div>
                 </a>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No cases yet. Start by creating your first case.
+                <div class="px-6 py-8 text-center">
+                    {% component "unfold/components/text.html" %}
+                        No cases yet. Start by creating your first case.
+                    {% endcomponent %}
                 </div>
                 {% endfor %}
             </div>
-        </div>
+        {% endcomponent %}
 
         <!-- Recent Reviews -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span class="text-purple-500">🔍</span> Recent Reviews
-                </h2>
+        {% component "unfold/components/card.html" with title="Recent Reviews" icon="search" footer="<a href='/admin/medical_review/reviewassignment/' class='text-blue-500 hover:text-blue-600 text-sm font-medium'>View all →</a>" %}
                 <a href="/admin/medical_review/documentreview/" class="text-blue-500 hover:text-blue-600 text-sm font-medium">
                     View all →
                 </a>
@@ -274,74 +266,49 @@
                     </div>
                 </div>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No reviews yet.
+                <div class="px-6 py-8 text-center">
+                    {% component "unfold/components/text.html" %}
+                        No reviews yet.
+                    {% endcomponent %}
                 </div>
                 {% endfor %}
             </div>
-        </div>
-    </div>
+        {% endcomponent %}
+    {% endcomponent %}
+
+    {% component "unfold/components/separator.html" %}{% endcomponent %}
 
     <!-- Quick Actions Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <a href="/admin/grievance_core/case/add/" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow group">
-            <div class="flex flex-col items-center text-center">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">New Case</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Create grievance case</p>
-            </div>
-        </a>
+    {% component "unfold/components/flex.html" with class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" %}
+        {% component "unfold/components/card.html" with title="New Case" icon="add_circle" href="/admin/grievance_core/case/add/" %}
+            {% component "unfold/components/text.html" with class="text-center" %}
+                Create grievance case
+            {% endcomponent %}
+        {% endcomponent %}
 
-        <a href="/admin/users/customuser/add/" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow group">
-            <div class="flex flex-col items-center text-center">
-                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Add User</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Register new user</p>
-            </div>
-        </a>
+        {% component "unfold/components/card.html" with title="Register User" icon="person_add" href="/admin/users/customuser/add/" %}
+            {% component "unfold/components/text.html" with class="text-center" %}
+                Add new user
+            {% endcomponent %}
+        {% endcomponent %}
 
-        <a href="/admin/medical_review/reviewassignment/" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow group">
-            <div class="flex flex-col items-center text-center">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Reviews</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Manage assignments</p>
-            </div>
-        </a>
+        {% component "unfold/components/card.html" with title="Manage Assignments" icon="assignment" href="/admin/medical_review/reviewassignment/" %}
+            {% component "unfold/components/text.html" with class="text-center" %}
+                Review assignments
+            {% endcomponent %}
+        {% endcomponent %}
 
-        <a href="/admin/grievance_core/document/" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow group">
-            <div class="flex flex-col items-center text-center">
-                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Documents</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Browse all files</p>
-            </div>
-        </a>
-    </div>
+        {% component "unfold/components/card.html" with title="Browse Files" icon="folder_open" href="/admin/grievance_core/document/" %}
+            {% component "unfold/components/text.html" with class="text-center" %}
+                View all documents
+            {% endcomponent %}
+        {% endcomponent %}
+    {% endcomponent %}
+
+    {% component "unfold/components/separator.html" %}{% endcomponent %}
 
     <!-- Case Status Overview -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <span class="text-emerald-500">📊</span> Case Pipeline
-            </h2>
-            <a href="/admin/grievance_core/case/" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View All →</a>
-        </div>
-        <div class="p-6">
+    {% component "unfold/components/card.html" with title="Case Pipeline" icon="trending_up" footer="<a href='/admin/grievance_core/case/' class='text-sm text-blue-500 hover:text-blue-600 font-medium'>View All →</a>" %}
             <!-- Visual Pipeline -->
             <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
                 <div class="flex-1 min-w-[120px]">
@@ -396,6 +363,7 @@
             </div>
         </div>
     </div>
+    {% endcomponent %}
 
     <!-- Escalation Alert -->
     {% if escalated_cases > 0 %}
@@ -417,7 +385,8 @@
     </div>
     {% endif %}
 
-    {% else %}
+    {% endcomponent %}
+{% else %}
     <!-- Fallback if dashboard data isn't available -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
         <div class="text-6xl mb-4">🏥</div>
