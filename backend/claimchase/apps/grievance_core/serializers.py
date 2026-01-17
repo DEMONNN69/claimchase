@@ -105,7 +105,19 @@ class DocumentBriefSerializer(serializers.ModelSerializer):
         read_only_fields = fields
     
     def get_file_url(self, obj):
-        """Get the Cloudinary URL for the file."""
+        """Get the proxy URL for secure document access with auth token."""
+        request = self.context.get('request')
+        if obj.id and request:
+            # Get user's auth token
+            from rest_framework.authtoken.models import Token
+            try:
+                token = Token.objects.get(user=request.user)
+                # Use the proxy endpoint with token parameter
+                proxy_path = f"/api/documents/{obj.id}/file/?token={token.key}"
+                return request.build_absolute_uri(proxy_path)
+            except Token.DoesNotExist:
+                pass
+        # Fallback to direct Cloudinary URL if no token available
         if obj.file:
             return obj.file.url
         return None
@@ -145,6 +157,8 @@ class CaseDetailSerializer(serializers.ModelSerializer):
     emails = EmailTrackingSerializer(read_only=True, many=True)
     documents = DocumentBriefSerializer(read_only=True, many=True)
     ombudsman_status = serializers.SerializerMethodField()
+    days_since_submission = serializers.SerializerMethodField()
+    days_since_incident = serializers.SerializerMethodField()
     
     class Meta:
         model = Case
@@ -189,6 +203,14 @@ class CaseDetailSerializer(serializers.ModelSerializer):
     def get_ombudsman_status(self, obj):
         """Get ombudsman eligibility status."""
         return obj.get_ombudsman_status()
+    
+    def get_days_since_submission(self, obj):
+        """Get days since case submission."""
+        return obj.get_days_since_submission()
+    
+    def get_days_since_incident(self, obj):
+        """Get days since incident date."""
+        return obj.get_days_since_incident()
 
 
 class CaseListSerializer(serializers.ModelSerializer):

@@ -18,6 +18,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lamb
 
 # Django apps
 INSTALLED_APPS = [
+    'unfold',  # Modern admin UI
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+    'unfold.contrib.inlines',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -230,3 +234,208 @@ cloudinary.config(
 
 # Set Cloudinary as default file storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Unfold Admin configuration
+UNFOLD = {
+    # Branding
+    "SITE_TITLE": "ClaimChase",
+    "SITE_HEADER": "ClaimChase",
+    "SITE_SUBHEADER": "Insurance Grievance Management",
+    "SITE_URL": "/",
+    "SITE_SYMBOL": "gavel",
+    
+    # Features
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": True,
+    
+    # Environment indicator
+    "ENVIRONMENT": "claimchase.admin_callbacks.environment_callback",
+    
+    # Dashboard callback
+    "DASHBOARD_CALLBACK": "claimchase.admin_callbacks.dashboard_callback",
+    
+    # Modern OKLCH Color Scheme - Professional Blue Theme
+    "COLORS": {
+        "base": {
+            "50": "oklch(98% .01 250)",
+            "100": "oklch(96% .015 250)",
+            "200": "oklch(92% .02 250)",
+            "300": "oklch(86% .025 250)",
+            "400": "oklch(70% .03 250)",
+            "500": "oklch(55% .04 250)",
+            "600": "oklch(45% .04 250)",
+            "700": "oklch(37% .04 250)",
+            "800": "oklch(27% .03 250)",
+            "900": "oklch(20% .025 250)",
+            "950": "oklch(14% .02 250)",
+        },
+        "primary": {
+            "50": "oklch(97% .02 250)",
+            "100": "oklch(94% .05 250)",
+            "200": "oklch(88% .09 250)",
+            "300": "oklch(80% .14 250)",
+            "400": "oklch(70% .18 250)",
+            "500": "oklch(60% .22 250)",
+            "600": "oklch(52% .22 250)",
+            "700": "oklch(45% .2 250)",
+            "800": "oklch(38% .16 250)",
+            "900": "oklch(32% .12 250)",
+            "950": "oklch(24% .09 250)",
+        },
+    },
+    
+    # Rounded borders for modern look
+    "BORDER_RADIUS": "8px",
+    
+    # Sidebar configuration - Using custom AppListView
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,  # Will be filtered by custom AppListView
+        "navigation": [
+            # ══════════════════════════════════════════════════════════════
+            # DASHBOARD
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "🏠 Dashboard",
+                "separator": False,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Overview",
+                        "icon": "space_dashboard",
+                        "link": "/admin/",
+                    },
+                ],
+            },
+            # ══════════════════════════════════════════════════════════════
+            # INSURANCE GRIEVANCES
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "🛡️ Insurance Grievances",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Cases",
+                        "icon": "folder_open",
+                        "link": "/admin/grievance_core/case/",
+                        "badge": "claimchase.admin_callbacks.badge_callback_cases",
+                        "badge_class": "bg-primary-600 text-white",
+                    },
+                    {
+                        "title": "Documents",
+                        "icon": "description",
+                        "link": "/admin/grievance_core/document/",
+                        "badge": "claimchase.admin_callbacks.badge_callback_documents",
+                        "badge_class": "bg-amber-600 text-white",
+                    },
+                    {
+                        "title": "Timeline",
+                        "icon": "timeline",
+                        "link": "/admin/grievance_core/casetimeline/",
+                    },
+                    {
+                        "title": "Email Tracking",
+                        "icon": "mark_email_read",
+                        "link": "/admin/grievance_core/emailtracking/",
+                    },
+                    {
+                        "title": "Consents",
+                        "icon": "verified_user",
+                        "link": "/admin/grievance_core/consent/",
+                    },
+                    {
+                        "title": "Insurance Companies",
+                        "icon": "domain",
+                        "link": "/admin/grievance_core/insurancecompany/",
+                    },
+                ],
+            },
+            # ══════════════════════════════════════════════════════════════
+            # CONSUMER DISPUTES
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "⚖️ Consumer Disputes",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Disputes",
+                        "icon": "report_problem",
+                        "link": "/admin/consumer_disputes/consumerdispute/",
+                    },
+                    {
+                        "title": "Categories",
+                        "icon": "category",
+                        "link": "/admin/consumer_disputes/disputecategory/",
+                    },
+                    {
+                        "title": "Entities",
+                        "icon": "store",
+                        "link": "/admin/consumer_disputes/entity/",
+                    },
+                    {
+                        "title": "Dispute Documents",
+                        "icon": "attach_file",
+                        "link": "/admin/consumer_disputes/disputedocument/",
+                    },
+                    {
+                        "title": "Dispute Timeline",
+                        "icon": "history",
+                        "link": "/admin/consumer_disputes/disputetimeline/",
+                    },
+                ],
+            },
+            # ══════════════════════════════════════════════════════════════
+            # MEDICAL REVIEW
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "🏥 Medical Review",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Assignments",
+                        "icon": "assignment_ind",
+                        "link": "/admin/medical_review/reviewassignment/",
+                        "badge": "claimchase.admin_callbacks.badge_callback_pending_reviews",
+                        "badge_class": "bg-red-600 text-white",
+                    },
+                    {
+                        "title": "Document Reviews",
+                        "icon": "rate_review",
+                        "link": "/admin/medical_review/documentreview/",
+                    },
+                    {
+                        "title": "Reviewer Profiles",
+                        "icon": "badge",
+                        "link": "/admin/medical_review/medicalreviewerprofile/",
+                    },
+                    {
+                        "title": "Statistics",
+                        "icon": "insights",
+                        "link": "/admin/medical_review/reviewerstats/",
+                    },
+                ],
+            },
+            # ══════════════════════════════════════════════════════════════
+            # USER MANAGEMENT
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "👥 User Management",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "group",
+                        "link": "/admin/users/customuser/",
+                        "badge": "claimchase.admin_callbacks.badge_callback_users",
+                        "badge_class": "bg-emerald-600 text-white",
+                    },
+                ],
+            },
+        ],
+    },
+}

@@ -1,147 +1,203 @@
 """
 Admin interface for grievance_core app.
+Enhanced with Django Unfold for professional appearance.
 """
 
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.contrib import messages
+from unfold.admin import ModelAdmin
+from unfold.decorators import action, display
 from .models import InsuranceCompany, Case, CaseTimeline, EmailTracking, Consent, Document
 
 
 @admin.register(InsuranceCompany)
-class InsuranceCompanyAdmin(admin.ModelAdmin):
+class InsuranceCompanyAdmin(ModelAdmin):
     """Admin for Insurance Company model."""
     
     list_display = (
         'name',
-        'category_badge',
+        'display_category',
         'grievance_email',
         'grievance_helpline',
-        'is_active',
+        'display_status',
         'created_at',
     )
     list_filter = ('category', 'is_active', 'created_at')
     search_fields = ('name', 'grievance_email', 'gro_email')
     readonly_fields = ('created_at', 'updated_at')
+    list_filter_submit = True  # Add apply button for filters
+    
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
     
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'category', 'is_active')
+        ('🏢 Basic Information', {
+            'fields': ('name', 'category', 'is_active'),
+            'classes': ['tab'],
         }),
-        ('Contact Details', {
-            'fields': ('grievance_email', 'additional_emails', 'grievance_helpline', 'gro_email')
+        ('📞 Contact Details', {
+            'fields': ('grievance_email', 'additional_emails', 'grievance_helpline', 'gro_email'),
+            'classes': ['tab'],
         }),
-        ('Additional Information', {
-            'fields': ('website', 'correspondence_address')
+        ('🌐 Additional Info', {
+            'fields': ('website', 'correspondence_address'),
+            'classes': ['tab'],
         }),
-        ('Metadata', {
+        ('⏰ Timestamps', {
             'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+            'classes': ['tab'],
         }),
     )
-    
-    def category_badge(self, obj):
-        """Display category with badge."""
-        colors = {
-            'life': '#4CAF50',
-            'health': '#2196F3',
-            'general': '#FF9800',
-        }
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
-            colors.get(obj.category, '#999'),
-            obj.get_category_display()
-        )
-    category_badge.short_description = 'Category'
+
+    @display(description='Category', label={
+        'life': 'success',
+        'health': 'info', 
+        'general': 'warning',
+    })
+    def display_category(self, obj):
+        return obj.category
+
+    @display(description='Status', label={
+        True: 'success',
+        False: 'danger',
+    })
+    def display_status(self, obj):
+        return obj.is_active
 
 
 @admin.register(Case)
-class CaseAdmin(admin.ModelAdmin):
-    """Admin for Case model."""
+class CaseAdmin(ModelAdmin):
+    """Admin for Case model with enhanced actions and display."""
     
     list_display = (
         'case_number',
         'user_email',
-        'status_badge',
-        'priority',
+        'display_status',
+        'display_priority',
         'insurance_type',
-        'ombudsman_status',
+        'display_ombudsman',
         'created_at',
     )
     list_filter = ('status', 'priority', 'insurance_type', 'is_escalated_to_ombudsman', 'created_at')
+    list_filter_submit = True
     search_fields = ('case_number', 'user__email', 'policy_number', 'subject')
     readonly_fields = ('case_number', 'created_at', 'updated_at', 'submission_date', 'escalation_date')
+    date_hierarchy = 'created_at'
+    actions = ['mark_under_review', 'escalate_to_ombudsman', 'mark_resolved']
+    
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
     
     fieldsets = (
-        ('Case Metadata', {
-            'fields': ('case_number', 'user', 'status', 'priority')
+        ('📋 Case Info', {
+            'fields': ('case_number', 'user', 'status', 'priority'),
+            'classes': ['tab'],
         }),
-        ('Insurance Details', {
-            'fields': ('insurance_company', 'insurance_type', 'policy_number', 'insurance_company_name')
+        ('🏢 Insurance', {
+            'fields': ('insurance_company', 'insurance_type', 'policy_number', 'insurance_company_name'),
+            'classes': ['tab'],
         }),
-        ('Grievance Details', {
-            'fields': ('subject', 'description', 'date_of_incident', 'date_of_rejection')
+        ('📝 Grievance', {
+            'fields': ('subject', 'description', 'date_of_incident', 'date_of_rejection'),
+            'classes': ['tab'],
         }),
-        ('Escalation', {
-            'fields': ('is_escalated_to_ombudsman', 'escalation_date')
+        ('⚠️ Escalation', {
+            'fields': ('is_escalated_to_ombudsman', 'escalation_date'),
+            'classes': ['tab'],
         }),
-        ('Draft & Submission', {
-            'fields': ('draft_content', 'submission_date')
+        ('📧 Draft', {
+            'fields': ('draft_content', 'submission_date'),
+            'classes': ['tab'],
         }),
-        ('Resolution', {
-            'fields': ('resolution_date', 'resolution_notes')
+        ('✅ Resolution', {
+            'fields': ('resolution_date', 'resolution_notes'),
+            'classes': ['tab'],
         }),
-        ('Metadata', {
+        ('⏰ Timestamps', {
             'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+            'classes': ['tab'],
         }),
     )
     
     def user_email(self, obj):
-        """Display user email safely."""
         if obj.user:
             return obj.user.email
         return '-'
-    user_email.short_description = 'User Email'
+    user_email.short_description = 'User'
+
+    @display(description='Status', label={
+        'draft': 'secondary',
+        'submitted': 'info',
+        'under_review': 'primary',
+        'rejected': 'danger',
+        'escalated_to_ombudsman': 'warning',
+        'resolved': 'success',
+        'closed': 'secondary',
+    })
+    def display_status(self, obj):
+        return obj.status
+
+    @display(description='Priority', label={
+        'low': 'secondary',
+        'medium': 'info',
+        'high': 'warning',
+        'urgent': 'danger',
+    })
+    def display_priority(self, obj):
+        return obj.priority
+
+    @display(description='Ombudsman', boolean=True)
+    def display_ombudsman(self, obj):
+        return obj.is_escalated_to_ombudsman
+
+    @action(description='📋 Mark as Under Review')
+    def mark_under_review(self, request, queryset):
+        updated = queryset.update(status='under_review')
+        self.message_user(request, f'{updated} case(s) marked as under review.', messages.SUCCESS)
     
-    def status_badge(self, obj):
-        """Display status with colored badge."""
-        if not obj.status:
-            return '-'
-        colors = {
-            'draft': '#FFA500',
-            'submitted': '#0099FF',
-            'under_review': '#9900FF',
-            'rejected': '#FF0000',
-            'escalated_to_ombudsman': '#FF6600',
-            'resolved': '#00AA00',
-            'closed': '#666666',
-        }
-        color = colors.get(obj.status, '#000000')
-        display = obj.get_status_display() or obj.status
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
-            color,
-            display
+    @action(description='⚠️ Escalate to Ombudsman')
+    def escalate_to_ombudsman(self, request, queryset):
+        from django.utils import timezone
+        updated = queryset.update(
+            is_escalated_to_ombudsman=True,
+            status='escalated_to_ombudsman',
+            escalation_date=timezone.now().date()
         )
-    status_badge.short_description = 'Status'
+        self.message_user(request, f'{updated} case(s) escalated to Ombudsman.', messages.WARNING)
     
-    def ombudsman_status(self, obj):
-        """Display ombudsman escalation status."""
-        if obj.is_escalated_to_ombudsman:
-            return mark_safe('<span style="color: green;">✓ Escalated</span>')
-        return mark_safe('<span style="color: gray;">—</span>')
-    ombudsman_status.short_description = 'Ombudsman'
+    @action(description='✅ Mark as Resolved')
+    def mark_resolved(self, request, queryset):
+        from django.utils import timezone
+        updated = queryset.update(
+            status='resolved',
+            resolution_date=timezone.now().date()
+        )
+        self.message_user(request, f'{updated} case(s) marked as resolved.', messages.SUCCESS)
 
 
 @admin.register(CaseTimeline)
-class CaseTimelineAdmin(admin.ModelAdmin):
+class CaseTimelineAdmin(ModelAdmin):
     """Admin for CaseTimeline model."""
     
-    list_display = ('case', 'event_type', 'description_short', 'created_by', 'created_at')
+    list_display = ('case', 'display_event_type', 'description_short', 'created_by', 'created_at')
     list_filter = ('event_type', 'created_at')
+    list_filter_submit = True
     search_fields = ('case__case_number', 'description')
     readonly_fields = ('case', 'created_at', 'created_by', 'event_type', 'description', 'old_value', 'new_value')
+    
+    @display(description='Event Type', label={
+        'status_change': 'info',
+        'document_added': 'success',
+        'comment_added': 'primary',
+        'escalation': 'warning',
+        'resolution': 'success',
+    })
+    def display_event_type(self, obj):
+        return obj.event_type
     
     def description_short(self, obj):
         return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
@@ -153,73 +209,82 @@ class CaseTimelineAdmin(admin.ModelAdmin):
 
 
 @admin.register(EmailTracking)
-class EmailTrackingAdmin(admin.ModelAdmin):
+class EmailTrackingAdmin(ModelAdmin):
     """Admin for EmailTracking model."""
     
-    list_display = ('subject', 'case', 'email_type_badge', 'status_badge', 'from_email', 'to_email', 'created_at')
+    list_display = ('subject', 'case', 'display_email_type', 'display_status', 'from_email', 'to_email', 'created_at')
     list_filter = ('email_type', 'status', 'created_at')
+    list_filter_submit = True
     search_fields = ('case__case_number', 'subject', 'from_email', 'to_email')
     readonly_fields = ('case', 'created_at', 'updated_at', 'sent_at', 'delivered_at')
     
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
+    
     fieldsets = (
-        ('Case Association', {
-            'fields': ('case',)
+        ('📋 Case', {
+            'fields': ('case',),
+            'classes': ['tab'],
         }),
-        ('Email Details', {
-            'fields': ('from_email', 'to_email', 'cc_emails', 'subject', 'body')
+        ('✉️ Email Details', {
+            'fields': ('from_email', 'to_email', 'cc_emails', 'subject', 'body'),
+            'classes': ['tab'],
         }),
-        ('Status', {
-            'fields': ('email_type', 'status', 'sent_at', 'delivered_at')
+        ('📤 Status', {
+            'fields': ('email_type', 'status', 'sent_at', 'delivered_at'),
+            'classes': ['tab'],
         }),
-        ('Metadata', {
-            'fields': ('is_automated', 'created_by', 'created_at', 'updated_at')
+        ('⏰ Metadata', {
+            'fields': ('is_automated', 'created_by', 'created_at', 'updated_at'),
+            'classes': ['tab'],
         }),
     )
-    
-    def email_type_badge(self, obj):
-        color = '#0099FF' if obj.email_type == 'inbound' else '#00AA00'
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
-            color,
-            obj.get_email_type_display()
-        )
-    email_type_badge.short_description = 'Type'
-    
-    def status_badge(self, obj):
-        colors = {
-            'pending': '#FFA500',
-            'sent': '#0099FF',
-            'delivered': '#00AA00',
-            'bounced': '#FF6600',
-            'failed': '#FF0000',
-        }
-        color = colors.get(obj.status, '#000000')
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
-            color,
-            obj.get_status_display()
-        )
-    status_badge.short_description = 'Delivery Status'
+
+    @display(description='Type', label={
+        'inbound': 'info',
+        'outbound': 'success',
+    })
+    def display_email_type(self, obj):
+        return obj.email_type
+
+    @display(description='Delivery Status', label={
+        'pending': 'warning',
+        'sent': 'info',
+        'delivered': 'success',
+        'bounced': 'warning',
+        'failed': 'danger',
+    })
+    def display_status(self, obj):
+        return obj.status
 
 
 @admin.register(Consent)
-class ConsentAdmin(admin.ModelAdmin):
+class ConsentAdmin(ModelAdmin):
     """Admin for Consent model."""
     
-    list_display = ('user_email', 'consent_type', 'case', 'is_active_badge', 'given_at', 'revoked_at')
+    list_display = ('user_email', 'consent_type', 'case', 'display_active', 'given_at', 'revoked_at')
     list_filter = ('consent_type', 'is_given', 'given_at')
+    list_filter_submit = True
     search_fields = ('user__email', 'case__case_number')
     readonly_fields = ('created_at', 'updated_at')
     
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
+    
     fieldsets = (
-        ('Consent Details', {
-            'fields': ('case', 'user', 'consent_type', 'is_given')
+        ('✅ Consent Details', {
+            'fields': ('case', 'user', 'consent_type', 'is_given'),
+            'classes': ['tab'],
         }),
-        ('Timestamps', {
-            'fields': ('given_at', 'revoked_at')
+        ('⏰ Timestamps', {
+            'fields': ('given_at', 'revoked_at'),
+            'classes': ['tab'],
         }),
-        ('Metadata', {
-            'fields': ('ip_address', 'notes', 'created_at', 'updated_at')
+        ('📝 Metadata', {
+            'fields': ('ip_address', 'notes', 'created_at', 'updated_at'),
+            'classes': ['tab'],
         }),
     )
     
@@ -227,59 +292,67 @@ class ConsentAdmin(admin.ModelAdmin):
         return obj.user.email
     user_email.short_description = 'User'
     
-    def is_active_badge(self, obj):
-        if obj.is_active:
-            return format_html('<span style="color: green;">✓ Active</span>')
-        return format_html('<span style="color: red;">✗ Revoked</span>')
-    is_active_badge.short_description = 'Status'
+    @display(description='Status', label={
+        True: 'success',
+        False: 'danger',
+    })
+    def display_active(self, obj):
+        return obj.is_active
 
 
 @admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
-    """Admin for Document model."""
+class DocumentAdmin(ModelAdmin):
+    """Admin for Document model with actions."""
     
     list_display = (
         'file_name_display',
         'case_number_display',
         'document_type_display',
         'uploaded_by_email',
-        'is_verified_badge',
+        'display_verified',
         'file_size_display',
         'created_at',
     )
     list_filter = ('document_type', 'is_verified', 'created_at')
+    list_filter_submit = True
     search_fields = ('file_name', 'case__case_number', 'uploaded_by__email')
     readonly_fields = ('created_at', 'updated_at', 'verified_at', 'file_url')
+    actions = ['verify_documents', 'unverify_documents']
+    
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
     
     fieldsets = (
-        ('Document Details', {
-            'fields': ('case', 'file', 'file_name', 'document_type', 'description')
+        ('📄 Document', {
+            'fields': ('case', 'file', 'file_name', 'document_type', 'description'),
+            'classes': ['tab'],
         }),
-        ('File Metadata', {
-            'fields': ('file_size', 'file_type', 'file_url')
+        ('📊 File Info', {
+            'fields': ('file_size', 'file_type', 'file_url'),
+            'classes': ['tab'],
         }),
-        ('Verification', {
-            'fields': ('is_verified', 'verified_by', 'verified_at')
+        ('✅ Verification', {
+            'fields': ('is_verified', 'verified_by', 'verified_at'),
+            'classes': ['tab'],
         }),
-        ('Metadata', {
-            'fields': ('uploaded_by', 'created_at', 'updated_at')
+        ('⏰ Metadata', {
+            'fields': ('uploaded_by', 'created_at', 'updated_at'),
+            'classes': ['tab'],
         }),
     )
     
     def file_name_display(self, obj):
-        """Display file name safely."""
         return obj.file_name if obj.file_name else 'N/A'
     file_name_display.short_description = 'File Name'
     
     def case_number_display(self, obj):
-        """Display case number safely."""
         if obj.case and hasattr(obj.case, 'case_number'):
             return obj.case.case_number
         return 'N/A'
     case_number_display.short_description = 'Case'
     
     def document_type_display(self, obj):
-        """Display document type safely."""
         if obj.document_type:
             return obj.get_document_type_display()
         return 'N/A'
@@ -291,14 +364,11 @@ class DocumentAdmin(admin.ModelAdmin):
         return 'N/A'
     uploaded_by_email.short_description = 'Uploaded By'
     
-    def is_verified_badge(self, obj):
-        if obj.is_verified:
-            return mark_safe('<span style="color: green;">✓ Verified</span>')
-        return mark_safe('<span style="color: gray;">—</span>')
-    is_verified_badge.short_description = 'Verified'
+    @display(description='Verified', boolean=True)
+    def display_verified(self, obj):
+        return obj.is_verified
     
     def file_size_display(self, obj):
-        """Display file size in human-readable format."""
         if obj.file_size and obj.file_size > 0:
             size_mb = obj.file_size / (1024 * 1024)
             return f"{size_mb:.2f} MB"
@@ -306,13 +376,23 @@ class DocumentAdmin(admin.ModelAdmin):
     file_size_display.short_description = 'Size'
     
     def file_url(self, obj):
-        """Display file URL as a link."""
         try:
             if obj.file and hasattr(obj.file, 'url'):
                 url = obj.file.url
                 if url:
-                    return format_html('<a href="{}" target="_blank">{}</a>', url, url)
+                    return format_html('<a href="{}" target="_blank" class="text-primary-600 hover:underline">{}</a>', url, url[:50] + '...')
         except Exception:
             pass
         return 'N/A'
     file_url.short_description = 'File URL'
+
+    @action(description='✅ Verify selected documents')
+    def verify_documents(self, request, queryset):
+        from django.utils import timezone
+        updated = queryset.update(is_verified=True, verified_by=request.user, verified_at=timezone.now())
+        self.message_user(request, f'{updated} document(s) verified.', messages.SUCCESS)
+    
+    @action(description='❌ Unverify selected documents')
+    def unverify_documents(self, request, queryset):
+        updated = queryset.update(is_verified=False, verified_by=None, verified_at=None)
+        self.message_user(request, f'{updated} document(s) unverified.', messages.WARNING)

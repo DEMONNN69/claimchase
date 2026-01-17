@@ -1,10 +1,14 @@
 """
 Admin configuration for Consumer Disputes.
+Enhanced with Django Unfold for professional appearance.
 """
 
 from django.contrib import admin
+from django.contrib import messages
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
+from unfold.decorators import action, display
 from .models import (
     DisputeCategory,
     Entity,
@@ -15,26 +19,34 @@ from .models import (
 
 
 @admin.register(DisputeCategory)
-class DisputeCategoryAdmin(admin.ModelAdmin):
+class DisputeCategoryAdmin(ModelAdmin):
     """Admin for dispute categories"""
     
     list_display = [
-        'name', 'parent', 'display_order', 'entity_count', 'is_active', 'created_at'
+        'name', 'parent', 'display_order', 'entity_count', 'display_active', 'created_at'
     ]
     list_filter = ['is_active', 'parent']
+    list_filter_submit = True
     search_fields = ['name', 'slug', 'description']
     prepopulated_fields = {'slug': ('name',)}
     ordering = ['parent__name', 'display_order', 'name']
     
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
+    
     fieldsets = (
-        (None, {
-            'fields': ('name', 'slug', 'description', 'icon')
+        ('🏷️ Details', {
+            'fields': ('name', 'slug', 'description', 'icon'),
+            'classes': ['tab'],
         }),
-        ('Hierarchy', {
-            'fields': ('parent', 'display_order')
+        ('📂 Hierarchy', {
+            'fields': ('parent', 'display_order'),
+            'classes': ['tab'],
         }),
-        ('Status', {
-            'fields': ('is_active',)
+        ('⚙️ Status', {
+            'fields': ('is_active',),
+            'classes': ['tab'],
         }),
     )
     
@@ -42,32 +54,44 @@ class DisputeCategoryAdmin(admin.ModelAdmin):
         return obj.entities.count()
     entity_count.short_description = 'Entities'
 
+    @display(description='Active', boolean=True)
+    def display_active(self, obj):
+        return obj.is_active
+
 
 @admin.register(Entity)
-class EntityAdmin(admin.ModelAdmin):
+class EntityAdmin(ModelAdmin):
     """Admin for entities"""
     
     list_display = [
-        'name', 'logo_preview', 'category_list', 'is_active', 'is_verified', 'created_at'
+        'name', 'logo_preview', 'category_list', 'display_active', 'display_verified', 'created_at'
     ]
     list_filter = ['is_active', 'is_verified', 'categories']
+    list_filter_submit = True
     search_fields = ['name', 'slug', 'description']
     prepopulated_fields = {'slug': ('name',)}
     filter_horizontal = ['categories']
     
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
+    
     fieldsets = (
-        (None, {
-            'fields': ('name', 'slug', 'description', 'logo', 'website')
+        ('🏢 Basic Info', {
+            'fields': ('name', 'slug', 'description', 'logo', 'website'),
+            'classes': ['tab'],
         }),
-        ('Categories', {
-            'fields': ('categories',)
+        ('📂 Categories', {
+            'fields': ('categories',),
+            'classes': ['tab'],
         }),
-        ('Contact Information', {
+        ('📞 Contact', {
             'fields': ('contact_email', 'contact_phone', 'address'),
-            'classes': ('collapse',)
+            'classes': ['tab'],
         }),
-        ('Status', {
-            'fields': ('is_active', 'is_verified')
+        ('⚙️ Status', {
+            'fields': ('is_active', 'is_verified'),
+            'classes': ['tab'],
         }),
     )
     
@@ -85,6 +109,14 @@ class EntityAdmin(admin.ModelAdmin):
         return names or '-'
     category_list.short_description = 'Categories'
 
+    @display(description='Active', boolean=True)
+    def display_active(self, obj):
+        return obj.is_active
+
+    @display(description='Verified', boolean=True)
+    def display_verified(self, obj):
+        return obj.is_verified
+
 
 class DisputeDocumentInline(admin.TabularInline):
     """Inline for dispute documents"""
@@ -95,7 +127,7 @@ class DisputeDocumentInline(admin.TabularInline):
     
     def file_preview(self, obj):
         if obj.file:
-            return mark_safe(f'<a href="{obj.file.url}" target="_blank">View File</a>')
+            return mark_safe(f'<a href="{obj.file.url}" target="_blank" class="text-primary-600 hover:underline">View File</a>')
         return '-'
     file_preview.short_description = 'File'
 
@@ -113,39 +145,50 @@ class DisputeTimelineInline(admin.TabularInline):
 
 
 @admin.register(ConsumerDispute)
-class ConsumerDisputeAdmin(admin.ModelAdmin):
+class ConsumerDisputeAdmin(ModelAdmin):
     """Admin for consumer disputes"""
     
     list_display = [
         'dispute_id', 'title_truncated', 'user_email', 'category',
-        'status_badge', 'priority_badge', 'amount_display', 'created_at'
+        'display_status', 'display_priority', 'amount_display', 'created_at'
     ]
     list_filter = ['status', 'priority', 'category', 'preferred_contact_method', 'created_at']
+    list_filter_submit = True
     search_fields = ['dispute_id', 'title', 'description', 'user__email', 'transaction_id']
     readonly_fields = ['dispute_id', 'created_at', 'updated_at', 'contacted_at', 'resolved_at']
     raw_id_fields = ['user', 'assigned_to']
     date_hierarchy = 'created_at'
     inlines = [DisputeDocumentInline, DisputeTimelineInline]
+    actions = ['mark_contacted', 'mark_in_progress', 'mark_resolved']
+    
+    # Enable horizontal tabs
+    warn_unsaved_form = True
+    compressed_fields = True
     
     fieldsets = (
-        ('Dispute Information', {
-            'fields': ('dispute_id', 'user', 'title', 'description')
+        ('📋 Dispute Info', {
+            'fields': ('dispute_id', 'user', 'title', 'description'),
+            'classes': ['tab'],
         }),
-        ('Category & Entity', {
-            'fields': ('category', 'subcategory', 'entity')
+        ('🏷️ Category', {
+            'fields': ('category', 'subcategory', 'entity'),
+            'classes': ['tab'],
         }),
-        ('Transaction Details', {
-            'fields': ('transaction_id', 'transaction_date', 'amount_involved')
+        ('💰 Transaction', {
+            'fields': ('transaction_id', 'transaction_date', 'amount_involved'),
+            'classes': ['tab'],
         }),
-        ('Contact Preferences', {
-            'fields': ('preferred_contact_method', 'preferred_contact_time')
+        ('📞 Contact', {
+            'fields': ('preferred_contact_method', 'preferred_contact_time'),
+            'classes': ['tab'],
         }),
-        ('Status & Assignment', {
-            'fields': ('status', 'priority', 'assigned_to', 'internal_notes')
+        ('⚙️ Status', {
+            'fields': ('status', 'priority', 'assigned_to', 'internal_notes'),
+            'classes': ['tab'],
         }),
-        ('Timestamps', {
+        ('⏰ Timestamps', {
             'fields': ('created_at', 'updated_at', 'contacted_at', 'resolved_at'),
-            'classes': ('collapse',)
+            'classes': ['tab'],
         }),
     )
     
@@ -156,77 +199,64 @@ class ConsumerDisputeAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         return obj.user.email
     user_email.short_description = 'User'
-    
-    def status_badge(self, obj):
-        colors = {
-            'new': '#3b82f6',
-            'contacted': '#f59e0b',
-            'in_progress': '#8b5cf6',
-            'resolved': '#22c55e',
-            'closed': '#6b7280',
-            'rejected': '#ef4444',
-        }
-        color = colors.get(obj.status, '#6b7280')
-        return mark_safe(
-            f'<span style="background-color: {color}; color: white; padding: 3px 8px; '
-            f'border-radius: 4px; font-size: 11px; font-weight: 500;">'
-            f'{obj.get_status_display()}</span>'
-        )
-    status_badge.short_description = 'Status'
-    
-    def priority_badge(self, obj):
-        colors = {
-            'low': '#6b7280',
-            'medium': '#3b82f6',
-            'high': '#f59e0b',
-            'urgent': '#ef4444',
-        }
-        color = colors.get(obj.priority, '#6b7280')
-        return mark_safe(
-            f'<span style="background-color: {color}; color: white; padding: 3px 8px; '
-            f'border-radius: 4px; font-size: 11px; font-weight: 500;">'
-            f'{obj.get_priority_display()}</span>'
-        )
-    priority_badge.short_description = 'Priority'
+
+    @display(description='Status', label={
+        'new': 'info',
+        'contacted': 'warning',
+        'in_progress': 'primary',
+        'resolved': 'success',
+        'closed': 'secondary',
+        'rejected': 'danger',
+    })
+    def display_status(self, obj):
+        return obj.status
+
+    @display(description='Priority', label={
+        'low': 'secondary',
+        'medium': 'info',
+        'high': 'warning',
+        'urgent': 'danger',
+    })
+    def display_priority(self, obj):
+        return obj.priority
     
     def amount_display(self, obj):
         if obj.amount_involved:
             return f'₹{obj.amount_involved:,.2f}'
         return '-'
     amount_display.short_description = 'Amount'
-    
-    actions = ['mark_contacted', 'mark_in_progress', 'mark_resolved']
-    
-    @admin.action(description='Mark selected as Contacted')
+
+    @action(description='📞 Mark as Contacted')
     def mark_contacted(self, request, queryset):
         from django.utils import timezone
         updated = queryset.update(status='contacted', contacted_at=timezone.now())
-        self.message_user(request, f'{updated} disputes marked as contacted.')
-    
-    @admin.action(description='Mark selected as In Progress')
+        self.message_user(request, f'{updated} disputes marked as contacted.', messages.SUCCESS)
+
+    @action(description='🔄 Mark as In Progress')
     def mark_in_progress(self, request, queryset):
         updated = queryset.update(status='in_progress')
-        self.message_user(request, f'{updated} disputes marked as in progress.')
-    
-    @admin.action(description='Mark selected as Resolved')
+        self.message_user(request, f'{updated} disputes marked as in progress.', messages.INFO)
+
+    @action(description='✅ Mark as Resolved')
     def mark_resolved(self, request, queryset):
         from django.utils import timezone
         updated = queryset.update(status='resolved', resolved_at=timezone.now())
-        self.message_user(request, f'{updated} disputes marked as resolved.')
+        self.message_user(request, f'{updated} disputes marked as resolved.', messages.SUCCESS)
 
 
 @admin.register(DisputeDocument)
-class DisputeDocumentAdmin(admin.ModelAdmin):
+class DisputeDocumentAdmin(ModelAdmin):
     """Admin for dispute documents"""
     
     list_display = ['file_name', 'dispute_link', 'document_type', 'file_size_display', 'uploaded_by', 'uploaded_at']
     list_filter = ['document_type', 'uploaded_at']
+    list_filter_submit = True
     search_fields = ['file_name', 'dispute__dispute_id', 'dispute__title']
     raw_id_fields = ['dispute', 'uploaded_by']
     
     def dispute_link(self, obj):
         if obj.dispute:
-            return mark_safe(f'<a href="/admin/consumer_disputes/consumerdispute/{obj.dispute.id}/change/">{obj.dispute.dispute_id}</a>')
+            return mark_safe(f'<a href="/admin/consumer_disputes/consumerdispute/{obj.dispute.id}/change/" class="text-primary-600 hover:underline">{obj.dispute.dispute_id}</a>')
         return '-'
     dispute_link.short_description = 'Dispute'
     
@@ -243,11 +273,12 @@ class DisputeDocumentAdmin(admin.ModelAdmin):
 
 
 @admin.register(DisputeTimeline)
-class DisputeTimelineAdmin(admin.ModelAdmin):
+class DisputeTimelineAdmin(ModelAdmin):
     """Admin for dispute timeline"""
     
     list_display = ['dispute_id_display', 'event_type', 'description_truncated', 'performed_by', 'created_at']
     list_filter = ['event_type', 'created_at']
+    list_filter_submit = True
     search_fields = ['dispute__dispute_id', 'description']
     raw_id_fields = ['dispute', 'performed_by']
     
