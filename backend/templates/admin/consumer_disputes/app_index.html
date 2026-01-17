@@ -40,54 +40,27 @@
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Disputes -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Disputes</h3>
-                <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-            </div>
+        {% component "unfold/components/card.html" with title="Total Disputes" icon="report_problem" %}
             <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.total_disputes|default:0 }}</div>
             <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.disputes_this_week|default:0 }} this week</p>
-        </div>
+        {% endcomponent %}
 
-        <!-- Active Disputes -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Active</h3>
-                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ active_disputes|default:0 }}</div>
+        {% component "unfold/components/card.html" with title="Open Disputes" icon="error_outline" %}
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.open_disputes|default:0 }}</div>
             <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.disputes_this_month|default:0 }} this month</p>
-        </div>
+        {% endcomponent %}
 
-        <!-- Resolution Rate -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Resolution Rate</h3>
-                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ resolution_rate|default:0 }}%</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ stats.dispute_status_counts.resolved|default:0 }} resolved</p>
-        </div>
+        {% component "unfold/components/card.html" with title="In Review" icon="rate_review" %}
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.in_review_disputes|default:0 }}</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Being processed</p>
+        {% endcomponent %}
 
-        <!-- Documents -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Documents</h3>
-                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ total_documents|default:0 }}</div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ pending_documents|default:0 }} pending</p>
-        </div>
+        {% component "unfold/components/card.html" with title="Resolved" icon="check_circle" %}
+            <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ stats.resolved_disputes|default:0 }}</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Successfully closed</p>
+        {% endcomponent %}
     </div>
+
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

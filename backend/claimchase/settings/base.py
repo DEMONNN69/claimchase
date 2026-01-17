@@ -258,6 +258,16 @@ UNFOLD = {
     # Dashboard callback
     "DASHBOARD_CALLBACK": "claimchase.admin_callbacks.dashboard_callback",
     
+    # App-specific dashboard callbacks
+    "APPS": {
+        "medical_review": {
+            "DASHBOARD_CALLBACK": "claimchase.admin_callbacks.medical_review_dashboard_callback",
+        },
+        "consumer_disputes": {
+            "DASHBOARD_CALLBACK": "claimchase.admin_callbacks.consumer_disputes_dashboard_callback",
+        },
+    },
+    
     # Modern OKLCH Color Scheme - Professional Blue Theme
     "COLORS": {
         "base": {
