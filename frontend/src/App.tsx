@@ -25,6 +25,7 @@ import ReviewerOnboarding from "./pages/ReviewerOnboarding";
 import ReviewerDashboard from "./pages/ReviewerDashboard";
 import ReviewerSettings from "./pages/ReviewerSettings";
 import AssignmentReview from "./pages/AssignmentReview";
+import CaseDetail from "./pages/CaseDetail";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,11 @@ const App = () => (
               <Route path="/dashboard" element={
                 <ProtectedRoute requireOnboarding>
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/cases/:id" element={
+                <ProtectedRoute requireOnboarding>
+                  <CaseDetail />
                 </ProtectedRoute>
               } />
               <Route path="/start-grievance" element={

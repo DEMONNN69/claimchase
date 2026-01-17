@@ -8,12 +8,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-# Import custom admin site and replace the default
-from claimchase.admin_site import ClaimChaseAdminSite
-
-# Replace default admin site with our custom one
-admin.site.__class__ = ClaimChaseAdminSite
-
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),

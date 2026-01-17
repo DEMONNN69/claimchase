@@ -312,9 +312,9 @@ export default function Dashboard() {
             </div>
             <Button 
               className="w-full sm:w-auto" 
-              onClick={() => navigate(activeCase.status === 'draft' ? "/drafter" : `/cases/${activeCase.id}`)}
+              onClick={() => navigate(`/cases/${activeCase.id}`)}
             >
-              {activeCase.status === 'draft' ? 'Continue Draft' : 'View Case'}
+              View Case
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           </CardContent>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Base settings for ClaimChase Django project.
 Configuration common to all environments (dev, prod, test).
@@ -18,16 +19,18 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lamb
 
 # Django apps
 INSTALLED_APPS = [
-    'unfold',  # Modern admin UI
-    'unfold.contrib.filters',
-    'unfold.contrib.forms',
-    'unfold.contrib.inlines',
-    'django.contrib.admin',
+    'unfold',  # Modern admin UI - must be first
+    'adminpanel.apps.UnfoldAdminConfig',  # Custom admin using Unfold
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Unfold contrib apps
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+    'unfold.contrib.inlines',
     
     # Third-party apps
     'rest_framework',
@@ -288,10 +291,10 @@ UNFOLD = {
     # Rounded borders for modern look
     "BORDER_RADIUS": "8px",
     
-    # Sidebar configuration - Using custom AppListView
+    # Sidebar configuration - Custom navigation only
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,  # Will be filtered by custom AppListView
+        "show_all_applications": False,  # Hide default app list, use custom navigation only
         "navigation": [
             # ══════════════════════════════════════════════════════════════
             # DASHBOARD
@@ -303,7 +306,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": "Overview",
-                        "icon": "space_dashboard",
+                        "icon": "dashboard",
                         "link": "/admin/",
                     },
                 ],
@@ -318,7 +321,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": "Cases",
-                        "icon": "folder_open",
+                        "icon": "folder",
                         "link": "/admin/grievance_core/case/",
                         "badge": "claimchase.admin_callbacks.badge_callback_cases",
                         "badge_class": "bg-primary-600 text-white",
@@ -337,17 +340,17 @@ UNFOLD = {
                     },
                     {
                         "title": "Email Tracking",
-                        "icon": "mark_email_read",
+                        "icon": "email",
                         "link": "/admin/grievance_core/emailtracking/",
                     },
                     {
                         "title": "Consents",
-                        "icon": "verified_user",
+                        "icon": "verified",
                         "link": "/admin/grievance_core/consent/",
                     },
                     {
                         "title": "Insurance Companies",
-                        "icon": "domain",
+                        "icon": "business",
                         "link": "/admin/grievance_core/insurancecompany/",
                     },
                 ],
@@ -362,7 +365,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": "Disputes",
-                        "icon": "report_problem",
+                        "icon": "warning",
                         "link": "/admin/consumer_disputes/consumerdispute/",
                     },
                     {
@@ -377,7 +380,7 @@ UNFOLD = {
                     },
                     {
                         "title": "Dispute Documents",
-                        "icon": "attach_file",
+                        "icon": "attachment",
                         "link": "/admin/consumer_disputes/disputedocument/",
                     },
                     {
@@ -397,7 +400,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": "Assignments",
-                        "icon": "assignment_ind",
+                        "icon": "assignment",
                         "link": "/admin/medical_review/reviewassignment/",
                         "badge": "claimchase.admin_callbacks.badge_callback_pending_reviews",
                         "badge_class": "bg-red-600 text-white",
@@ -414,7 +417,7 @@ UNFOLD = {
                     },
                     {
                         "title": "Statistics",
-                        "icon": "insights",
+                        "icon": "analytics",
                         "link": "/admin/medical_review/reviewerstats/",
                     },
                 ],
@@ -429,7 +432,7 @@ UNFOLD = {
                 "items": [
                     {
                         "title": "Users",
-                        "icon": "group",
+                        "icon": "people",
                         "link": "/admin/users/customuser/",
                         "badge": "claimchase.admin_callbacks.badge_callback_users",
                         "badge_class": "bg-emerald-600 text-white",

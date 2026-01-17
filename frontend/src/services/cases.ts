@@ -72,12 +72,7 @@ export const caseAPI = {
   /**
    * Upload document to case
    */
-  uploadDocument: (caseId: number, file: File, documentType: string = 'other', description: string = '') => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('document_type', documentType);
-    formData.append('description', description);
-    
+  uploadDocument: (caseId: number, formData: FormData) => {
     return apiClient.post(`/cases/${caseId}/documents/`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

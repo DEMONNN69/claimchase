@@ -5,6 +5,7 @@ Extends base.py with debug, logging, and development-friendly configurations.
 
 from pathlib import Path
 from .base import *
+from .base import UNFOLD  # Explicitly import UNFOLD
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
