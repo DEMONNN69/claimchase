@@ -1,9 +1,10 @@
-import { Home, BookOpen, Settings, Shield, AlertTriangle } from "lucide-react";
+import { Home, BookOpen, Settings, Shield, AlertTriangle, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Home" },
+  { to: "/cases", icon: FileText, label: "My Cases" },
   { to: "/disputes", icon: AlertTriangle, label: "Consumer Disputes" },
   { to: "/guide", icon: BookOpen, label: "Guide" },
   { to: "/settings", icon: Settings, label: "Settings" },

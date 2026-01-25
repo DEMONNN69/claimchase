@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { FileEdit, Mail, Scale, Users, Check, Lock, ChevronRight, Plus, Clock, AlertCircle, Edit2, CheckCircle } from "lucide-react";
+import { Scale, Users, CheckCircle, Plus, FileText, Edit2 , FileEdit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
 import {
-  Dialog,
+  Dialog,                                                             
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -16,54 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { InsuranceCompany } from "@/services/types";
-
-interface StepProps {
-  icon: React.ElementType;
-  title: string;
-  status: "complete" | "active" | "pending" | "locked";
-  index: number;
-  isLast?: boolean;
-}
-
-function Step({ icon: Icon, title, status, index, isLast }: StepProps) {
-  const statusConfig = {
-    complete: { bg: "bg-green-500", icon: Check, text: "Completed" },
-    active: { bg: "bg-primary", icon: Icon, text: "In Progress" },
-    pending: { bg: "bg-muted", icon: Icon, text: "Pending" },
-    locked: { bg: "bg-muted", icon: Lock, text: "Locked" },
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center text-white transition-all",
-          config.bg,
-          status === "pending" || status === "locked" ? "text-muted-foreground" : ""
-        )}>
-          <config.icon className="h-5 w-5" />
-        </div>
-        {!isLast && (
-          <div className={cn(
-            "w-0.5 h-10 mt-2",
-            status === "complete" ? "bg-green-500" : "bg-muted"
-          )} />
-        )}
-      </div>
-      <div className="flex-1 pb-4">
-        <p className={cn(
-          "font-medium",
-          status === "locked" ? "text-muted-foreground" : "text-foreground"
-        )}>
-          {title}
-        </p>
-        <p className="text-sm text-muted-foreground">{config.text}</p>
-      </div>
-    </div>
-  );
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -92,6 +43,14 @@ export default function Dashboard() {
 
   // Get the most recent case
   const activeCase = cases.length > 0 ? cases[0] : null;
+  
+  // Calculate case statistics
+  const caseStats = {
+    total: cases.length,
+    draft: cases.filter(c => c.status === 'draft').length,
+    active: cases.filter(c => ['submitted', 'in_review'].includes(c.status)).length,
+    resolved: cases.filter(c => c.status === 'resolved').length,
+  };
 
   const handleEditClick = (type: "company" | "problem") => {
     setEditType(type);
@@ -126,65 +85,10 @@ export default function Dashboard() {
     }
   };
 
-  // Determine case status steps based on actual case
-  const getStepsFromCase = () => {
-    if (!activeCase) {
-      return [
-        { icon: FileEdit, title: "Draft Grievance", status: "pending" as const },
-        { icon: Mail, title: "Email Sent", status: "locked" as const },
-        { icon: Scale, title: "Ombudsman", status: "locked" as const },
-        { icon: Users, title: "Expert Handoff", status: "locked" as const },
-      ];
-    }
-
-    const steps = [
-      { 
-        icon: FileEdit, 
-        title: "Draft Grievance", 
-        status: activeCase.status === 'draft' ? "active" as const : "complete" as const 
-      },
-      { 
-        icon: Mail, 
-        title: "Email Sent", 
-        status: activeCase.status === 'submitted' || activeCase.status === 'under_review' ? "complete" as const : 
-                activeCase.status === 'draft' ? "pending" as const : "locked" as const
-      },
-      { 
-        icon: Scale, 
-        title: "Ombudsman", 
-        status: activeCase.status === 'escalated_to_ombudsman' ? "active" as const :
-                activeCase.is_escalated_to_ombudsman ? "complete" as const : "locked" as const
-      },
-      { 
-        icon: Users, 
-        title: "Expert Handoff", 
-        status: "locked" as const
-      },
-    ];
-
-    return steps;
-  };
-
-  const steps = getStepsFromCase();
-
   // Format date helper
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  // Get status badge variant
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; className: string }> = {
-      'draft': { label: 'Draft', className: 'bg-orange-500/10 text-orange-500' },
-      'submitted': { label: 'Submitted', className: 'bg-blue-500/10 text-blue-500' },
-      'under_review': { label: 'Under Review', className: 'bg-purple-500/10 text-purple-500' },
-      'rejected': { label: 'Rejected', className: 'bg-red-500/10 text-red-500' },
-      'escalated_to_ombudsman': { label: 'Escalated', className: 'bg-orange-600/10 text-orange-600' },
-      'resolved': { label: 'Resolved', className: 'bg-green-500/10 text-green-500' },
-      'closed': { label: 'Closed', className: 'bg-gray-500/10 text-gray-500' },
-    };
-    return badges[status] || badges['draft'];
   };
 
   return (
@@ -268,7 +172,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Active Case Card or Empty State */}
+      {/* Active Cases Summary */}
       {casesLoading ? (
         <Card className="mb-6">
           <CardContent className="p-8 text-center">
@@ -276,47 +180,61 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ) : activeCase ? (
-        <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
+        <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Case #{activeCase.case_number}</p>
-                <CardTitle className="text-xl">{activeCase.subject}</CardTitle>
-              </div>
-              <Badge className={cn("hover:bg-opacity-100", getStatusBadge(activeCase.status).className)}>
-                <Clock className="h-3 w-3 mr-1" />
-                {getStatusBadge(activeCase.status).label}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex flex-wrap gap-4 text-sm mb-4">
-              <div>
-                <p className="text-muted-foreground text-xs">Company</p>
-                <p className="font-medium">
-                  {activeCase.insurance_company_data?.name || activeCase.insurance_company_name || 'N/A'}
+                <h2 className="text-lg font-semibold">Active Cases</h2>
+                <p className="text-sm text-muted-foreground">
+                  You have {caseStats.total} total cases • {caseStats.draft} drafts • {caseStats.active} active
                 </p>
               </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Status</p>
-                <p className="font-medium capitalize">{activeCase.status.replace(/_/g, ' ')}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Priority</p>
-                <p className="font-medium capitalize">{activeCase.priority}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs">Created</p>
-                <p className="font-medium">{formatDate(activeCase.created_at)}</p>
+              <Button onClick={() => navigate("/cases")} variant="outline">
+                View All Cases
+              </Button>
+            </div>
+            
+            {/* Most Recent Case */}
+            <div className="bg-white rounded-lg p-4 border border-primary/10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{activeCase.case_number}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{activeCase.subject}</p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        activeCase.status === 'draft' ? 'bg-orange-500' :
+                        activeCase.status === 'submitted' ? 'bg-blue-500' :
+                        activeCase.status === 'in_review' ? 'bg-purple-500' :
+                        activeCase.status === 'resolved' ? 'bg-green-500' : 'bg-gray-500'
+                      )} />
+                      <span className="capitalize">{activeCase.status.replace('_', ' ')}</span>
+                    </div>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">{formatDate(activeCase.created_at)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {activeCase.status === 'draft' && (
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/drafter/${activeCase.id}`)}
+                      variant="outline"
+                    >
+                      <FileEdit className="h-4 w-4 mr-1" />
+                      Edit Draft
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => navigate(`/cases/${activeCase.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </div>
               </div>
             </div>
-            <Button 
-              className="w-full sm:w-auto" 
-              onClick={() => navigate(`/cases/${activeCase.id}`)}
-            >
-              View Case
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -335,103 +253,115 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Progress Timeline */}
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: Plus, label: "New Case", path: "/start-grievance", primary: true },
+          { icon: FileText, label: "View Cases", path: "/cases" },
+          { icon: Scale, label: "Guide", path: "/guide" },
+          { icon: Users, label: "Get Help", path: "/handoff" },
+        ].map((action) => (
+          <Card 
+            key={action.label}
+            className={cn(
+              "cursor-pointer hover:shadow-md transition-all",
+              action.primary ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:border-primary/30"
+            )}
+            onClick={() => navigate(action.path)}
+          >
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center mb-2",
+                action.primary ? "bg-primary-foreground/20" : "bg-muted"
+              )}>
+                <action.icon className={cn(
+                  "h-5 w-5",
+                  action.primary ? "text-primary-foreground" : "text-muted-foreground"
+                )} />
+              </div>
+              <span className={cn(
+                "text-sm font-medium",
+                action.primary ? "text-primary-foreground" : "text-foreground"
+              )}>
+                {action.label}
+              </span>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid md:grid-cols-2 gap-6 mt-6">
+        {/* Case Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Progress</CardTitle>
+            <CardTitle className="text-lg">Case Statistics</CardTitle>
           </CardHeader>
           <CardContent>
-            {steps.map((step, index) => (
-              <Step
-                key={step.title}
-                icon={step.icon}
-                title={step.title}
-                status={step.status}
-                index={index}
-                isLast={index === steps.length - 1}
-              />
-            ))}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total Cases</span>
+                <span className="font-medium">{caseStats.total}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Draft Cases</span>
+                <span className="font-medium text-orange-600">{caseStats.draft}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Active Cases</span>
+                <span className="font-medium text-blue-600">{caseStats.active}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Resolved Cases</span>
+                <span className="font-medium text-green-600">{caseStats.resolved}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Action Required */}
-        <Card className="h-fit">
+        {/* Recent Activity */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-primary" />
-              Action Required
-            </CardTitle>
+            <CardTitle className="text-lg">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             {activeCase ? (
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <FileEdit className="h-6 w-6 text-primary" />
+              <div className="space-y-3">
+                <div className="text-sm">
+                  <span className="font-medium">Latest case:</span> {activeCase.case_number}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">
-                    {activeCase.status === 'draft' ? 'Complete Your Draft' : 'Review Your Case'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {activeCase.status === 'draft'
-                      ? 'Your grievance email is ready to review. Make any final edits before sending.'
-                      : `Your case is currently ${getStatusBadge(activeCase.status).label.toLowerCase()}. Check for updates.`}
-                  </p>
-                  <Button 
-                    onClick={() => navigate(activeCase.status === 'draft' ? "/drafter" : `/cases/${activeCase.id}`)} 
-                    variant="outline" 
-                    className="gap-2"
-                  >
-                    {activeCase.status === 'draft' ? 'Open Drafter' : 'View Case'}
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                <div className="text-sm text-muted-foreground">
+                  Status: {activeCase.status.replace('_', ' ')}
                 </div>
+                <div className="text-sm text-muted-foreground">
+                  Created: {formatDate(activeCase.created_at)}
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => navigate("/cases")}
+                  className="w-full mt-3"
+                >
+                  View All Activity
+                </Button>
               </div>
             ) : (
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Plus className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Start Your First Case</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    You haven't created any cases yet. Start your first grievance to get help with your insurance claim.
-                  </p>
-                  <Button onClick={() => navigate("/start-grievance")} variant="outline" className="gap-2">
-                    Create Case
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground mb-4">No recent activity</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate("/start-grievance")}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Your First Case
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { icon: FileEdit, label: "Drafter", path: "/drafter" },
-          { icon: Scale, label: "Guide", path: "/guide" },
-          { icon: Users, label: "Get Help", path: "/handoff" },
-          { icon: Mail, label: "Settings", path: "/settings" },
-        ].map((action) => (
-          <Card 
-            key={action.label}
-            className="cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
-            onClick={() => navigate(action.path)}
-          >
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center mb-2">
-                <action.icon className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <span className="text-sm font-medium">{action.label}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+     
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

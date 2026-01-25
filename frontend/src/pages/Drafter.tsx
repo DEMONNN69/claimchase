@@ -1,15 +1,16 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Copy, Check, Building2, FileText, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateCase, useInsuranceCompanies } from "@/hooks/useApi";
 import { caseAPI } from "@/services/cases";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import {
   Command,
   CommandEmpty,
@@ -55,6 +56,7 @@ Regards,
 
 export default function Drafter() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [copiedSubject, setCopiedSubject] = useState(false);
   const [copiedBody, setCopiedBody] = useState(false);
@@ -62,7 +64,16 @@ export default function Drafter() {
   const [isCreatingCase, setIsCreatingCase] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   
-  // Form fields
+  const caseId = id ? parseInt(id) : null;
+  
+  // Fetch existing case data if editing
+  const { data: caseData, isLoading: loadingCase } = useQuery({
+    queryKey: ["case", caseId],
+    queryFn: () => caseAPI.get(caseId!),
+    enabled: !!caseId,
+  });
+  
+  // Form fields - initialize with existing case data or defaults
   const [formData, setFormData] = useState({
     insurance_company: null as number | null,
     policy_number: "",
@@ -71,6 +82,21 @@ export default function Drafter() {
     description: emailBody,
     date_of_incident: new Date().toISOString().split("T")[0],
   });
+  
+  // Update form when case data loads
+  React.useEffect(() => {
+    if (caseData?.data) {
+      const case_info = caseData.data;
+      setFormData({
+        insurance_company: case_info.insurance_company || null,
+        policy_number: case_info.policy_number || "",
+        insurance_type: case_info.insurance_type || "health",
+        subject: case_info.subject || emailSubject,
+        description: case_info.description || emailBody,
+        date_of_incident: case_info.date_of_incident || new Date().toISOString().split("T")[0],
+      });
+    }
+  }, [caseData]);
 
   // Fetch insurance companies
   const { data: companies = [], isLoading: loadingCompanies } = useInsuranceCompanies();
@@ -101,52 +127,53 @@ export default function Drafter() {
       return;
     }
 
-    if (Object.keys(createCaseMutation).length === 0) {
-      toast.success("Case created! Ready to send grievance.");
-      navigate("/dashboard");
+    if (!user?.gmail_connected) {
+      toast.error("Please connect your Gmail account to send emails");
+      navigate("/settings");
       return;
     }
 
     try {
-      createCaseMutation.mutate(formData, {
-        onSuccess: async (response: any) => {
-          const caseId = response.data.id;
-          
-          // Show initial success
-          toast.success("Case created! Sending email...");
-          
-          try {
-            // Send email automatically via caseAPI
-            const emailResult = await caseAPI.sendEmail(caseId, {
-              email_body: formData.description
-            });
-            
-            if (emailResult.data.success) {
-              toast.success("Grievance email sent successfully!");
-              navigate("/dashboard");
-            } else {
-              toast.error(emailResult.data.message || "Failed to send email");
-              navigate("/dashboard");
-            }
-          } catch (emailError: any) {
-            // Case created but email failed
-            const errorMsg = emailError.response?.data?.message || "Failed to send email";
-            
-            if (errorMsg.includes("Gmail account not connected")) {
-              toast.error("Please connect your Gmail account in Settings to send emails");
-              navigate("/settings");
-            } else {
-              toast.error(`Case created, but ${errorMsg}. You can resend from Dashboard.`);
-              navigate("/dashboard");
-            }
-          }
-        },
-        onError: (error: any) => {
-          toast.error(error.message || "Failed to create case");
-        },
+      let finalCaseId = caseId;
+      
+      // If editing existing case, just send email
+      if (caseId) {
+        setIsSendingEmail(true);
+      } else {
+        // Create new case if no caseId
+        if (Object.keys(createCaseMutation).length === 0) {
+          toast.error("Unable to create case at this time");
+          return;
+        }
+        
+        setIsCreatingCase(true);
+        const caseResult = await createCaseMutation.mutateAsync(formData);
+        finalCaseId = caseResult.id;
+        toast.success("Case created successfully!");
+        
+        setIsCreatingCase(false);
+        setIsSendingEmail(true);
+      }
+      
+      // Send the email
+      const emailResult = await caseAPI.sendEmail(finalCaseId!, {
+        email_body: formData.description
       });
-    } catch {
-      toast.error("Error creating case");
+      
+      if (emailResult.data.success) {
+        toast.success("Grievance email sent successfully!");
+        navigate("/dashboard");
+      } else {
+        toast.error(emailResult.data.message || "Failed to send email");
+        navigate(`/cases/${finalCaseId}`); // Navigate to case detail even if email failed
+      }
+      
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || "Failed to process case and send email";
+      toast.error(errorMessage);
+    } finally {
+      setIsCreatingCase(false);
+      setIsSendingEmail(false);
     }
   };
 
@@ -170,12 +197,23 @@ export default function Drafter() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold">Grievance Drafter</h1>
-          <p className="text-sm text-muted-foreground">Draft and send your formal grievance</p>
+          <h1 className="text-xl lg:text-2xl font-bold">
+            {caseId ? "Edit Grievance" : "Grievance Drafter"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {caseId ? "Review and send your grievance" : "Draft and send your formal grievance"}
+          </p>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
+        {/* Show loading state while fetching case data */}
+        {caseId && loadingCase ? (
+          <div className="lg:col-span-3 flex justify-center py-12">
+            <div className="text-muted-foreground">Loading case details...</div>
+          </div>
+        ) : (
+          <>
         {/* Left: Case Details */}
         <div className="lg:col-span-1">
           <Card>
@@ -331,11 +369,12 @@ export default function Drafter() {
               <Send className="h-4 w-4" />
               {isCreatingCase ? "Creating Case..." : 
                isSendingEmail ? "Sending Email..." : 
-               "Send Grievance Email"}
+               caseId ? "Send Grievance Email" : "Create & Send Email"}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
               {!user?.gmail_connected ? 
                 "Please connect Gmail in Settings first" :
+                caseId ? "This will send the email via your connected Gmail" :
                 "This will create a case and send the email via your connected Gmail"}
             </p>
             
@@ -353,6 +392,8 @@ export default function Drafter() {
             )}
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
