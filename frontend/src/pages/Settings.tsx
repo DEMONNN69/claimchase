@@ -17,6 +17,14 @@ export default function Settings() {
   const { user, logout, refreshUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Initialize Gmail state from user data
+  useEffect(() => {
+    if (user?.gmail_connected) {
+      setGmailConnected(true);
+      setGmailEmail(user.gmail_email);
+    }
+  }, [user]);
+
   // Handle OAuth redirect from backend
   useEffect(() => {
     const gmailConnectedParam = searchParams.get('gmail_connected');

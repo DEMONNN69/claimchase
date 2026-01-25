@@ -329,7 +329,7 @@ class AuthViewSet(viewsets.ViewSet):
             user.gmail_email = gmail_email
             user.gmail_connected = True
             user.gmail_token_expires_at = tokens['expires_at']
-            user.save()
+            user.save(update_fields=['gmail_refresh_token', 'gmail_email', 'gmail_connected', 'gmail_token_expires_at'])
             
             logger.info(f"User {user.email} connected Gmail account: {gmail_email}")
             
@@ -367,7 +367,7 @@ class AuthViewSet(viewsets.ViewSet):
             user.gmail_email = None
             user.gmail_connected = False
             user.gmail_token_expires_at = None
-            user.save()
+            user.save(update_fields=['gmail_refresh_token', 'gmail_email', 'gmail_connected', 'gmail_token_expires_at'])
             
             logger.info(f"User {user.email} disconnected Gmail account")
             

@@ -18,9 +18,11 @@ import {
   X,
   ExternalLink,
   Plus,
+  Send,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { caseAPI } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -42,11 +44,13 @@ const documentTypes = [
 export default function CaseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadingFiles, setUploadingFiles] = useState<File[]>([]);
   const [documentType, setDocumentType] = useState("other");
   const [description, setDescription] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const caseId = id ? parseInt(id) : null;
 
@@ -116,7 +120,37 @@ export default function CaseDetail() {
   const removeFile = (index: number) => {
     setUploadingFiles((prev) => prev.filter((_, i) => i !== index));
   };
+  const handleSendEmail = async () => {
+    if (!user?.gmail_connected) {
+      toast.error("Please connect your Gmail account to send emails");
+      navigate("/settings");
+      return;
+    }
 
+    if (!caseData?.data.description) {
+      toast.error("No email content available to send");
+      return;
+    }
+
+    try {
+      setIsSendingEmail(true);
+      const emailResult = await caseAPI.sendEmail(caseId!, {
+        email_body: caseData.data.description
+      });
+      
+      if (emailResult.data.success) {
+        toast.success("Email sent successfully!");
+        refetch(); // Refresh case data to update status
+      } else {
+        toast.error(emailResult.data.message || "Failed to send email");
+      }
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || "Failed to send email";
+      toast.error(errorMessage);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -169,6 +203,19 @@ export default function CaseDetail() {
               </h1>
               <p className="text-slate-500 mt-1">{caseData.data.subject}</p>
             </div>
+            
+            {/* Send Email Button */}
+            {caseData.data.status === 'draft' && (
+              <Button
+                onClick={handleSendEmail}
+                disabled={isSendingEmail || !user?.gmail_connected}
+                className="gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {isSendingEmail ? "Sending..." : "Send Email"}
+              </Button>
+            )}
+            
             <Badge className={statusColors[caseData.data.status] || ""}>
               {caseData.data.status.replace("_", " ")}
             </Badge>

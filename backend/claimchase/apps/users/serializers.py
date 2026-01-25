@@ -47,6 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
             'insurance_company',
             'insurance_company_id',
             'problem_type',
+            'gmail_connected',
+            'gmail_email',
             'created_at',
         )
         read_only_fields = (
@@ -56,6 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at',
             'is_verified',
             'is_ombudsman_eligible',
+            'gmail_connected',
+            'gmail_email',
         )
     
     def to_representation(self, instance):

@@ -15,6 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   getProfile: () => Promise<void>;
   updateProfile: (data: any) => Promise<void>;
+  refreshUser: () => Promise<void>;
   error: string | null;
 }
 
@@ -25,21 +26,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('authToken');
-
-    if (storedUser && token) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('authToken');
-      }
+  const getProfile = async () => {
+    try {
+      const response = await authAPI.getProfile();
+      // Handle both response.data.user and response.data structures
+      const responseData = response.data as any;
+      const userData = responseData.user || responseData;
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (err: any) {
+      setError('Failed to fetch profile');
+      throw err;
     }
+  };
 
-    setIsLoading(false);
+  // Load user from localStorage on mount and fetch fresh data
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('authToken');
+
+      if (storedUser && token) {
+        try {
+          // Set user from localStorage first
+          setUser(JSON.parse(storedUser));
+          // Then fetch fresh profile data
+          await getProfile();
+        } catch (e) {
+          localStorage.removeItem('user');
+          localStorage.removeItem('authToken');
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    loadUser();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -94,20 +116,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const getProfile = async () => {
-    try {
-      const response = await authAPI.getProfile();
-      // Handle both response.data.user and response.data structures
-      const responseData = response.data as any;
-      const userData = responseData.user || responseData;
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch (err: any) {
-      setError('Failed to fetch profile');
-      throw err;
-    }
-  };
-
   const updateProfile = async (data: any) => {
     try {
       setIsLoading(true);
@@ -127,6 +135,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Alias for getProfile to match usage in components
+  const refreshUser = async () => {
+    await getProfile();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         getProfile,
         updateProfile,
+        refreshUser,
         error,
       }}
     >

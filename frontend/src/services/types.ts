@@ -337,3 +337,16 @@ export interface OnboardingCheckResponse {
   is_reviewer: boolean;
   profile: MedicalReviewerProfile | null;
 }
+
+export interface EmailSendResponse {
+  success: boolean;
+  message: string;
+  message_id?: string;
+  thread_id?: string;
+  case?: Case;
+}
+
+export interface EmailSendRequest {
+  email_body: string;
+  cc_emails?: string[];
+}

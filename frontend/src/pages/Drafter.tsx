@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, Check, Building2, FileText, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateCase, useInsuranceCompanies } from "@/hooks/useApi";
-import { gmailAPI } from "@/services/gmail";
+import { caseAPI } from "@/services/cases";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Command,
   CommandEmpty,
@@ -54,9 +55,12 @@ Regards,
 
 export default function Drafter() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [copiedSubject, setCopiedSubject] = useState(false);
   const [copiedBody, setCopiedBody] = useState(false);
   const [companySearchOpen, setCompanySearchOpen] = useState(false);
+  const [isCreatingCase, setIsCreatingCase] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   // Form fields
   const [formData, setFormData] = useState({
@@ -112,11 +116,18 @@ export default function Drafter() {
           toast.success("Case created! Sending email...");
           
           try {
-            // Send email automatically via Gmail
-            await gmailAPI.sendEmail(caseId, formData.description, []);
+            // Send email automatically via caseAPI
+            const emailResult = await caseAPI.sendEmail(caseId, {
+              email_body: formData.description
+            });
             
-            toast.success("Grievance email sent successfully!");
-            navigate("/dashboard");
+            if (emailResult.data.success) {
+              toast.success("Grievance email sent successfully!");
+              navigate("/dashboard");
+            } else {
+              toast.error(emailResult.data.message || "Failed to send email");
+              navigate("/dashboard");
+            }
           } catch (emailError: any) {
             // Case created but email failed
             const errorMsg = emailError.response?.data?.message || "Failed to send email";
@@ -315,14 +326,31 @@ export default function Drafter() {
               size="lg"
               className="w-full lg:w-auto h-12 px-8 gap-2"
               onClick={handleSubmitCase}
-              disabled={createCaseMutation.isPending}
+              disabled={isCreatingCase || isSendingEmail || createCaseMutation.isPending}
             >
               <Send className="h-4 w-4" />
-              {createCaseMutation.isPending ? "Sending..." : "Send Grievance Email"}
+              {isCreatingCase ? "Creating Case..." : 
+               isSendingEmail ? "Sending Email..." : 
+               "Send Grievance Email"}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
-              This will create a case and automatically send the email via your connected Gmail
+              {!user?.gmail_connected ? 
+                "Please connect Gmail in Settings first" :
+                "This will create a case and send the email via your connected Gmail"}
             </p>
+            
+            {/* Gmail Connection Status */}
+            {user?.gmail_connected ? (
+              <div className="flex items-center gap-2 mt-3 text-sm text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Gmail connected: {user.gmail_email}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-3 text-sm text-orange-600">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                Gmail not connected - go to Settings
+              </div>
+            )}
           </div>
         </div>
       </div>

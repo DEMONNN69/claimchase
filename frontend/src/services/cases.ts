@@ -4,7 +4,7 @@
  */
 
 import apiClient from './client';
-import { Case, CaseList, CaseCreateData, TimelineEvent, EmailTracking, Document, OmbudsmanStatus } from './types';
+import { Case, CaseList, CaseCreateData, TimelineEvent, EmailTracking, Document, OmbudsmanStatus, EmailSendResponse, EmailSendRequest } from './types';
 
 export const caseAPI = {
   /**
@@ -91,4 +91,12 @@ export const caseAPI = {
    */
   escalateToOmbudsman: (caseId: number) =>
     apiClient.post(`/cases/${caseId}/escalate_to_ombudsman/`),
+
+  /**
+   * Send email for case via Gmail
+   */
+  sendEmail: (
+    caseId: number,
+    data: EmailSendRequest
+  ) => apiClient.post<EmailSendResponse>(`/cases/${caseId}/send_email/`, data),
 };

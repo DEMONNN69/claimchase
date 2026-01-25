@@ -117,7 +117,7 @@ class GmailOAuthService:
             return {
                 'access_token': creds.get('access_token'),
                 'refresh_token': creds.get('refresh_token'),
-                'expires_at': datetime.utcnow() + timedelta(seconds=creds.get('expires_in', 3600)),
+                'expires_at': timezone.now() + timedelta(seconds=creds.get('expires_in', 3600)),
             }
         except Exception as e:
             logger.error(f"Token exchange error: {e}")
