@@ -149,6 +149,31 @@ export interface Entity {
   is_verified: boolean;
 }
 
+export interface DisputeDocument {
+  id: number;
+  dispute: number;
+  file: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  document_type: string;
+  description: string;
+  file_url: string;
+  uploaded_by: number;
+  uploaded_by_name: string;
+  uploaded_at: string;
+}
+
+export interface DisputeTimelineEvent {
+  id: number;
+  event_type: string;
+  description: string;
+  performed_by: number;
+  performed_by_name: string;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
 export interface ConsumerDispute {
   id: number;
   dispute_id: string;
@@ -173,10 +198,14 @@ export interface ConsumerDispute {
   preferred_contact_time: string;
   status: 'new' | 'contacted' | 'in_progress' | 'resolved' | 'closed' | 'rejected';
   priority: 'low' | 'medium' | 'high' | 'urgent';
+  internal_notes: string;
+  assigned_to: number | null;
   created_at: string;
   updated_at: string;
   contacted_at: string | null;
   resolved_at: string | null;
+  documents: DisputeDocument[];
+  timeline: DisputeTimelineEvent[];
 }
 
 export interface ConsumerDisputeList {
