@@ -1,0 +1,17 @@
+{
+  "account_title": "खाते",
+  "free_plan": "विनामूल्य प्लान",
+  "language_title": "भाषा आणि प्रदेश",
+  "language_label": "प्रदर्शन भाषा",
+  "language_description": "इंटरफेससाठी आपली पसंतीची भाषा निवडा",
+  "email_integration_title": "ईमेल एकीकरण",
+  "preferences_title": "प्राधान्ये",
+  "email_tracking_label": "ईमेल ट्रॅकिंग",
+  "email_tracking_description": "ईमेल उघडल्यावर सूचना मिळवा",
+  "notifications_label": "पुश सूचना",
+  "notifications_description": "आपल्या फोनवर अपडेट प्राप्त करा",
+  "account_actions_title": "खाते क्रिया",
+  "sign_out": "साइन आउट",
+  "delete_account": "खाते हटवा",
+  "delete_account_warning": "आपले खाते हटवणे कायमचे आहे आणि ते पूर्ववत करता येणार नाही."
+}

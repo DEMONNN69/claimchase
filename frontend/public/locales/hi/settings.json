@@ -1,0 +1,17 @@
+{
+  "account_title": "खाता",
+  "free_plan": "मुफ्त प्लान",
+  "language_title": "भाषा और क्षेत्र",
+  "language_label": "प्रदर्शन भाषा",
+  "language_description": "इंटरफेस के लिए अपनी पसंदीदा भाषा चुनें",
+  "email_integration_title": "ईमेल एकीकरण",
+  "preferences_title": "प्राथमिकताएं",
+  "email_tracking_label": "ईमेल ट्रैकिंग",
+  "email_tracking_description": "ईमेल खुलने पर सूचना प्राप्त करें",
+  "notifications_label": "पुश सूचनाएं",
+  "notifications_description": "अपने फोन पर अपडेट प्राप्त करें",
+  "account_actions_title": "खाता क्रियाएं",
+  "sign_out": "साइन आउट",
+  "delete_account": "खाता हटाएं",
+  "delete_account_warning": "अपना खाता हटाना स्थायी है और इसे पूर्ववत नहीं किया जा सकता।"
+}

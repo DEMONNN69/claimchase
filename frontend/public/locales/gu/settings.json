@@ -1,0 +1,17 @@
+{
+  "account_title": "એકાઉન્ટ",
+  "free_plan": "ફ્રી પ્લાન",
+  "language_title": "ભાષા અને પ્રદેશ",
+  "language_label": "ડિસ્પ્લે ભાષા",
+  "language_description": "ઇન્ટરફેસ માટે તમારી પસંદગીની ભાષા પસંદ કરો",
+  "email_integration_title": "ઇમેઇલ એકીકરણ",
+  "preferences_title": "પસંદગીઓ",
+  "email_tracking_label": "ઇમેઇલ ટ્રેકિંગ",
+  "email_tracking_description": "ઇમેઇલ ખુલે ત્યારે સૂચના મેળવો",
+  "notifications_label": "પુશ સૂચનાઓ",
+  "notifications_description": "તમારા ફોન પર અપડેટ મેળવો",
+  "account_actions_title": "એકાઉન્ટ ક્રિયાઓ",
+  "sign_out": "સાઇન આઉટ",
+  "delete_account": "એકાઉન્ટ ડિલીટ કરો",
+  "delete_account_warning": "તમારું એકાઉન્ટ ડિલીટ કરવું કાયમી છે અને તેને પૂર્વવત કરી શકાતું નથી."
+}

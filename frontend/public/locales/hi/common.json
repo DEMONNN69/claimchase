@@ -1,0 +1,9 @@
+{
+  "app_name": "क्लेमचेज़",
+  "navigation": {
+    "settings": "सेटिंग्स"
+  },
+  "actions": {
+    "edit": "संपादित करें"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "account_title": "Account",
+  "free_plan": "Free Plan",
+  "language_title": "Language & Region",
+  "language_label": "Display Language",
+  "language_description": "Choose your preferred language for the interface",
+  "email_integration_title": "Email Integration",
+  "preferences_title": "Preferences",
+  "email_tracking_label": "Email Tracking",
+  "email_tracking_description": "Get notified when emails are opened",
+  "notifications_label": "Push Notifications",
+  "notifications_description": "Receive updates on your phone",
+  "account_actions_title": "Account Actions",
+  "sign_out": "Sign Out",
+  "delete_account": "Delete Account",
+  "delete_account_warning": "Deleting your account is permanent and cannot be undone."
+}
