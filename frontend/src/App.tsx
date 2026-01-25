@@ -27,6 +27,7 @@ import ReviewerSettings from "./pages/ReviewerSettings";
 import AssignmentReview from "./pages/AssignmentReview";
 import CaseDetail from "./pages/CaseDetail";
 import Cases from "./pages/Cases";
+import DisputeDetail from "./pages/DisputeDetail";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,11 @@ const App = () => (
               <Route path="/disputes" element={
                 <ProtectedRoute requireOnboarding>
                   <DisputesList />
+                </ProtectedRoute>
+              } />
+              <Route path="/disputes/:id" element={
+                <ProtectedRoute requireOnboarding>
+                  <DisputeDetail />
                 </ProtectedRoute>
               } />
               <Route path="/disputes/new" element={
