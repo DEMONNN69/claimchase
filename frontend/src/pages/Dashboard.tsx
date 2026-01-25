@@ -92,85 +92,96 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-5 lg:p-8 animate-fade-in space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold">Welcome back, {user?.first_name}!</h1>
-        <p className="text-muted-foreground mt-2">Let's get your insurance grievance resolved.</p>
-      </div>
-
-      {/* Profile Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Insurance Company Card */}
-        <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Insurance Company</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-semibold text-lg">{currentCompany?.name || "Not selected"}</p>
-                <p className="text-sm text-muted-foreground mt-1">Selected during onboarding</p>
-              </div>
-              <button
-                onClick={() => handleEditClick("company")}
-                className="p-2 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
-              >
-                <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Problem Type Card */}
-        <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Issue Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-semibold text-lg capitalize">
-                  {user?.problem_type?.replace(/_/g, " ") || "Not selected"}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">Problem you're facing</p>
-              </div>
-              <button
-                onClick={() => handleEditClick("problem")}
-                className="p-2 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
-              >
-                <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Start New Grievance CTA */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold mb-2">Ready to file a grievance?</h2>
-            <p className="text-muted-foreground">Start documenting your insurance issue step by step.</p>
+    <div className="min-h-screen">
+      {/* Mobile Navbar - Only visible on mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <div className="text-sm text-muted-foreground">
+            {user?.first_name}
           </div>
-          <Button
-            onClick={() => navigate("/start-grievance")}
-            size="lg"
-            className="gap-2 flex-shrink-0"
-          >
-            <Plus className="h-5 w-5" />
-            New Grievance
-          </Button>
         </div>
       </div>
 
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Your cases</p>
-          <h2 className="text-2xl font-bold">Cases {cases.length > 0 && `(${cases.length})`}</h2>
+      <div className="p-4 lg:p-8 animate-fade-in space-y-6 max-w-full overflow-x-hidden">
+        {/* Welcome Section */}
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold break-words">Welcome back, {user?.first_name}!</h1>
+          <p className="text-muted-foreground mt-2">Let's get your insurance grievance resolved.</p>
         </div>
-      </div>
+
+        {/* Profile Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Insurance Company Card */}
+          <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent min-w-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Insurance Company</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-base lg:text-lg break-words">{currentCompany?.name || "Not selected"}</p>
+                  <p className="text-sm text-muted-foreground mt-1">Selected during onboarding</p>
+                </div>
+                <button
+                  onClick={() => handleEditClick("company")}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
+                >
+                  <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Problem Type Card */}
+          <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent min-w-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Issue Type</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-base lg:text-lg capitalize break-words">
+                    {user?.problem_type?.replace(/_/g, " ") || "Not selected"}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Problem you're facing</p>
+                </div>
+                <button
+                  onClick={() => handleEditClick("problem")}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
+                >
+                  <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Start New Grievance CTA */}
+        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 lg:p-6 border border-primary/20">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg lg:text-xl font-bold mb-2 break-words">Ready to file a grievance?</h2>
+              <p className="text-muted-foreground text-sm lg:text-base">Start documenting your insurance issue step by step.</p>
+            </div>
+            <Button
+              onClick={() => navigate("/start-grievance")}
+              size="lg"
+              className="gap-2 flex-shrink-0 w-full sm:w-auto"
+            >
+              <Plus className="h-5 w-5" />
+              New Grievance
+            </Button>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-muted-foreground">Your cases</p>
+            <h2 className="text-xl lg:text-2xl font-bold break-words">Cases {cases.length > 0 && `(${cases.length})`}</h2>
+          </div>
+        </div>
 
       {/* Active Cases Summary */}
       {casesLoading ? (
@@ -180,63 +191,65 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ) : activeCase ? (
-        <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold">Active Cases</h2>
-                <p className="text-sm text-muted-foreground">
-                  You have {caseStats.total} total cases • {caseStats.draft} drafts • {caseStats.active} active
-                </p>
-              </div>
-              <Button onClick={() => navigate("/cases")} variant="outline">
-                View All Cases
-              </Button>
-            </div>
-            
-            {/* Most Recent Case */}
-            <div className="bg-white rounded-lg p-4 border border-primary/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">{activeCase.case_number}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{activeCase.subject}</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        activeCase.status === 'draft' ? 'bg-orange-500' :
-                        activeCase.status === 'submitted' ? 'bg-blue-500' :
-                        activeCase.status === 'in_review' ? 'bg-purple-500' :
-                        activeCase.status === 'resolved' ? 'bg-green-500' : 'bg-gray-500'
-                      )} />
-                      <span className="capitalize">{activeCase.status.replace('_', ' ')}</span>
-                    </div>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">{formatDate(activeCase.created_at)}</span>
-                  </div>
+          <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg font-semibold">Active Cases</h2>
+                  <p className="text-sm text-muted-foreground break-words">
+                    You have {caseStats.total} total cases • {caseStats.draft} drafts • {caseStats.active} active
+                  </p>
                 </div>
-                <div className="flex gap-2">
-                  {activeCase.status === 'draft' && (
+                <Button onClick={() => navigate("/cases")} variant="outline" className="w-full sm:w-auto">
+                  View All Cases
+                </Button>
+              </div>
+              
+              {/* Most Recent Case */}
+              <div className="bg-white rounded-lg p-4 border border-primary/10">
+                <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-medium break-words">{activeCase.case_number}</h3>
+                    <p className="text-sm text-muted-foreground mb-2 break-words">{activeCase.subject}</p>
+                    <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full",
+                          activeCase.status === 'draft' ? 'bg-orange-500' :
+                          activeCase.status === 'submitted' ? 'bg-blue-500' :
+                          activeCase.status === 'in_review' ? 'bg-purple-500' :
+                          activeCase.status === 'resolved' ? 'bg-green-500' : 'bg-gray-500'
+                        )} />
+                        <span className="capitalize">{activeCase.status.replace('_', ' ')}</span>
+                      </div>
+                      <span className="text-muted-foreground hidden sm:inline">•</span>
+                      <span className="text-muted-foreground">{formatDate(activeCase.created_at)}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                    {activeCase.status === 'draft' && (
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/drafter/${activeCase.id}`)}
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                      >
+                        <FileEdit className="h-4 w-4 mr-1" />
+                        Edit Draft
+                      </Button>
+                    )}
                     <Button
                       size="sm"
-                      onClick={() => navigate(`/drafter/${activeCase.id}`)}
-                      variant="outline"
+                      onClick={() => navigate(`/cases/${activeCase.id}`)}
+                      className="w-full sm:w-auto"
                     >
-                      <FileEdit className="h-4 w-4 mr-1" />
-                      Edit Draft
+                      View Details
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/cases/${activeCase.id}`)}
-                  >
-                    View Details
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
       ) : (
         <Card className="mb-6 border-dashed">
           <CardContent className="p-8 text-center">
@@ -467,6 +480,7 @@ export default function Dashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
