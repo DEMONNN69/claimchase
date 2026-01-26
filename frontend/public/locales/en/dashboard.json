@@ -1,0 +1,34 @@
+{
+  "title": "Dashboard Overview",
+  "welcome_message": "Welcome back,",
+  "tagline": "Let's get your insurance grievance resolved.",
+  "insurance_company": "Insurance Company",
+  "selected_during_onboarding": "Selected during onboarding",
+  "issue_type": "Issue Type",
+  "problem_facing": "Problem you're facing",
+  "not_selected": "Not selected",
+  "ready_to_file": "Ready to file a grievance?",
+  "start_documenting": "Start documenting your insurance issue step by step.",
+  "new_grievance": "New Grievance",
+  "your_cases": "Your cases",
+  "cases_count": "Cases",
+  "active_cases": "Active Cases",
+  "case_stats": {
+    "total_cases": "total cases",
+    "drafts": "drafts",
+    "active": "active"
+  },
+  "insurance_grievance": "Insurance Grievance",
+  "view_details": "View Details",
+  "view_all_cases": "View All Cases",
+  "actions": {
+    "new_case": "New Case",
+    "view_cases": "View Cases",
+    "guide": "Guide",
+    "get_help": "Get Help"
+  },
+  "case_statistics": "Case Statistics",
+  "recent_activity": "Recent Activity",
+  "loading_cases": "Loading your cases...",
+  "no_recent_activity": "No recent activity to display"
+}

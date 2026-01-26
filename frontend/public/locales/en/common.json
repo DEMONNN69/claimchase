@@ -1,9 +1,34 @@
 {
   "app_name": "ClaimChase",
   "navigation": {
-    "settings": "Settings"
+    "home": "Home",
+    "settings": "Settings",
+    "my_cases": "My Cases",
+    "consumer_disputes": "Consumer Disputes",
+    "guide": "Guide",
+    "cases": "Cases",
+    "disputes": "Disputes",
+    "drafter": "Drafter"
   },
   "actions": {
-    "edit": "Edit"
-  }
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "in_review": "In Review", 
+    "resolved": "Resolved",
+    "pending": "Pending",
+    "active": "Active"
+  },
+  "loading": "Loading...",
+  "error": "Error occurred",
+  "success": "Success"
 }

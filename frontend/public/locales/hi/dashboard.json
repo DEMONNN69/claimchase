@@ -1,0 +1,34 @@
+{
+  "title": "डैशबोर्ड अवलोकन",
+  "welcome_message": "वापस आपका स्वागत,",
+  "tagline": "आइए आपके बीमा शिकायत का समाधान कराते हैं।",
+  "insurance_company": "बीमा कंपनी",
+  "selected_during_onboarding": "ऑनबोर्डिंग के दौरान चुना गया",
+  "issue_type": "समस्या का प्रकार",
+  "problem_facing": "आप जिस समस्या का सामना कर रहे हैं",
+  "not_selected": "चयनित नहीं",
+  "ready_to_file": "शिकायत दर्ज करने के लिए तैयार?",
+  "start_documenting": "अपनी बीमा समस्या का चरणबद्ध दस्तावेजीकरण शुरू करें।",
+  "new_grievance": "नई शिकायत",
+  "your_cases": "आपके मामले",
+  "cases_count": "मामले",
+  "active_cases": "सक्रिय मामले",
+  "case_stats": {
+    "total_cases": "कुल मामले",
+    "drafts": "ड्राफ्ट",
+    "active": "सक्रिय"
+  },
+  "insurance_grievance": "बीमा शिकायत",
+  "view_details": "विवरण देखें",
+  "view_all_cases": "सभी मामले देखें",
+  "actions": {
+    "new_case": "नया मामला",
+    "view_cases": "मामले देखें",
+    "guide": "मार्गदर्शिका",
+    "get_help": "सहायता प्राप्त करें"
+  },
+  "case_statistics": "मामले के आंकडे",
+  "recent_activity": "हाल की गतिविधि",
+  "loading_cases": "आपके मामले लोड हो रहे हैं...",
+  "no_recent_activity": "प्रदर्शित करने के लिए कोई हाल की गतिविधि नहीं"
+}

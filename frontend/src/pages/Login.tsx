@@ -6,8 +6,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
+  const { t } = useTranslation(['auth', 'common']);
   const navigate = useNavigate();
   const { login, isLoading, error } = useAuth();
   const [email, setEmail] = useState("");
@@ -45,7 +47,7 @@ export default function Login() {
       {/* Left Panel - Branding */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary to-primary/80 p-6 py-10 lg:p-12 lg:min-h-screen flex flex-col justify-between">
         <div>
-          <h1 className="text-white text-xl lg:text-2xl font-bold">ClaimChase</h1>
+          <h1 className="text-white text-xl lg:text-2xl font-bold">{t('common:app_name')}</h1>
         </div>
         <div className="text-white my-8 lg:my-0">
           <h2 className="text-2xl lg:text-4xl font-bold mb-2 lg:mb-4">
@@ -60,12 +62,12 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex-1 flex items-center justify-center p-6 lg:p-12">
         <Card className="w-full max-w-md border-0 shadow-none lg:border lg:shadow-sm">
           <CardContent className="p-0 lg:p-8">
-            <h2 className="text-2xl font-semibold mb-1">Welcome back</h2>
-            <p className="text-muted-foreground text-sm mb-8">Sign in to continue</p>
+            <h2 className="text-2xl font-semibold mb-1">{t('auth:login.title')}</h2>
+            <p className="text-muted-foreground text-sm mb-8">{t('auth:login.subtitle')}</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth:login.email_label')}</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -79,9 +81,9 @@ export default function Login() {
 
               <div>
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth:login.password_label')}</Label>
                   <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot?
+                    {t('auth:login.forgot_password')}
                   </Link>
                 </div>
                 <Input 
@@ -100,7 +102,7 @@ export default function Login() {
               )}
 
               <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Signing in..." : t('auth:login.signin_button')}
               </Button>
             </form>
 
@@ -129,9 +131,9 @@ export default function Login() {
             </Button>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
-              New here?{" "}
+              {t('auth:login.no_account')}{" "}
               <Link to="/signup" className="text-primary font-medium hover:underline">
-                Create account
+                {t('auth:login.signup_link')}
               </Link>
             </p>
           </CardContent>

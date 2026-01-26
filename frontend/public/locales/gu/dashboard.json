@@ -1,0 +1,34 @@
+{
+  "title": "ડેશબોર્ડ ઝાંખી",
+  "welcome_message": "પાછા આપનું સ્વાગત,",
+  "tagline": "આખો તમારી વિમા સમસ્યાનું સમાધાન કરીએ.",
+  "insurance_company": "વિમા કંપની",
+  "selected_during_onboarding": "ઑનબોર્ડિંગ દરમિયાન પસંદ કરેલ",
+  "issue_type": "સમસ્યાનો પ્રકાર",
+  "problem_facing": "તમે જે સમસ્યાનો સામનો કરી રહ્યા છો",
+  "not_selected": "પસંદ કરેલ નથી",
+  "ready_to_file": "શિકાયત દાખલ કરવા માટે તૈયાર?",
+  "start_documenting": "તમારી વિમા સમસ્યાનું સટેપ બાઈ સટેપ દસ્તાવેજીકરણ શરૂ કરો.",
+  "new_grievance": "નવી શિકાયત",
+  "your_cases": "તમારા કેસો",
+  "cases_count": "કેસો",
+  "active_cases": "સક્રિય કેસો",
+  "case_stats": {
+    "total_cases": "કુલ કેસો",
+    "drafts": "ડ્રાફ્ટ",
+    "active": "સક્રિય"
+  },
+  "insurance_grievance": "વિમા શિકાયત",
+  "view_details": "વિગતો જુઓ",
+  "view_all_cases": "બધા કેસો જુઓ",
+  "actions": {
+    "new_case": "નવો કેસ",
+    "view_cases": "કેસો જુઓ",
+    "guide": "માર્ગદર્શિકા",
+    "get_help": "મદત મેળવો"
+  },
+  "case_statistics": "કેસ આંકડાઓ",
+  "recent_activity": "તાજેતરની પ્રવૃત્તિ",
+  "loading_cases": "તમારા કેસો લોડ થઈ રહ્યા છે...",
+  "no_recent_activity": "દર્શાવવા માટે કોઈ તાજેતરની પ્રવૃત્તિ નથી"
+}

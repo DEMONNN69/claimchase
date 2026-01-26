@@ -1,9 +1,34 @@
 {
   "app_name": "ક્લેમચેઝ",
   "navigation": {
-    "settings": "સેટિંગ્સ"
+    "home": "હોમ",
+    "settings": "સેટિંગ્સ",
+    "my_cases": "મારા કેસો",
+    "consumer_disputes": "ગ્રાહક વિવાદો",
+    "guide": "માર્ગદર્શિકા",
+    "cases": "કેસો",
+    "disputes": "વિવાદો",
+    "drafter": "ડ્રાફ્ટર"
   },
   "actions": {
-    "edit": "સંપાદિત કરો"
-  }
+    "edit": "સંપાદિત કરો",
+    "view": "જુઓ",
+    "delete": "ડિલીટ કરો",
+    "save": "સેવ કરો",
+    "cancel": "રદ કરો",
+    "submit": "સબમિટ કરો",
+    "back": "પાછળ",
+    "next": "આગળ"
+  },
+  "status": {
+    "draft": "ડ્રાફ્ટ",
+    "submitted": "સબમિટ કર્યું",
+    "in_review": "સમીક્ષામાં",
+    "resolved": "ઉકેલાયું",
+    "pending": "બાકી",
+    "active": "સક્રિય"
+  },
+  "loading": "લોડ થઈ રહ્યું છે...",
+  "error": "એરર થયો",
+  "success": "સફળતા"
 }

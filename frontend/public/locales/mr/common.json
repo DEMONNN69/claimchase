@@ -1,9 +1,34 @@
 {
   "app_name": "क्लेमचेज",
   "navigation": {
-    "settings": "सेटिंग्ज"
+    "home": "होम",
+    "settings": "सेटिंग्ज",
+    "my_cases": "माझे केसेस",
+    "consumer_disputes": "ग्राहक वाद",
+    "guide": "मार्गदर्शक",
+    "cases": "केसेस",
+    "disputes": "वाद",
+    "drafter": "ड्राफ्टर"
   },
   "actions": {
-    "edit": "संपादित करा"
-  }
+    "edit": "संपादित करा",
+    "view": "पहा",
+    "delete": "हटवा",
+    "save": "सेव्ह करा",
+    "cancel": "रद्द करा",
+    "submit": "सबमिट करा",
+    "back": "परत",
+    "next": "पुढे"
+  },
+  "status": {
+    "draft": "ड्राफ्ट",
+    "submitted": "सबमिट केले",
+    "in_review": "समीक्षेत",
+    "resolved": "निराकरण झाले",
+    "pending": "प्रलंबित",
+    "active": "सक्रिय"
+  },
+  "loading": "लोड होत आहे...",
+  "error": "त्रुटी झाली",
+  "success": "यशस्वी"
 }

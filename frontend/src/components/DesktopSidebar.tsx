@@ -1,16 +1,20 @@
 import { Home, BookOpen, Settings, Shield, AlertTriangle, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { to: "/dashboard", icon: Home, label: "Home" },
-  { to: "/cases", icon: FileText, label: "My Cases" },
-  { to: "/disputes", icon: AlertTriangle, label: "Consumer Disputes" },
-  { to: "/guide", icon: BookOpen, label: "Guide" },
-  { to: "/settings", icon: Settings, label: "Settings" },
-];
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function DesktopSidebar() {
+  const { t } = useTranslation('common');
+  
+  const navItems = [
+    { to: "/dashboard", icon: Home, label: t('navigation.home') },
+    { to: "/cases", icon: FileText, label: t('navigation.my_cases') },
+    { to: "/disputes", icon: AlertTriangle, label: t('navigation.consumer_disputes') },
+    { to: "/guide", icon: BookOpen, label: t('navigation.guide') },
+    { to: "/settings", icon: Settings, label: t('navigation.settings') },
+  ];
+
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card min-h-screen">
       {/* Logo */}
@@ -19,7 +23,7 @@ export function DesktopSidebar() {
           <div className="p-2 bg-primary/10 rounded-xl">
             <Shield className="h-6 w-6 text-primary" />
           </div>
-          <span className="font-bold text-lg">ClaimChase</span>
+          <span className="font-bold text-lg">{t('app_name')}</span>
         </div>
       </div>
 
@@ -48,7 +52,10 @@ export function DesktopSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-3">
+        <div className="flex items-center justify-center">
+          <LanguageSwitcher variant="compact" />
+        </div>
         <p className="text-xs text-muted-foreground text-center">
           Not legal advice. Guidance only.
         </p>

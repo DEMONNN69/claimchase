@@ -1,0 +1,34 @@
+{
+  "title": "डॅशबोर्ड विहंगावलोकन",
+  "welcome_message": "परत आपले स्वागत,",
+  "tagline": "आपल्या विमा तक्रारीचे निराकरण करूया.",
+  "insurance_company": "विमा कंपनी",
+  "selected_during_onboarding": "ऑनबोर्डिंग दरम्यान निवडले",
+  "issue_type": "समस्येचा प्रकार",
+  "problem_facing": "आपण ज्या समस्येचा सामना करत आहात",
+  "not_selected": "निवडले नाही",
+  "ready_to_file": "तक्रार दाखल करण्यासाठी तयार?",
+  "start_documenting": "आपल्या विमा समस्येचे पायरी पायरीने दस्तऐवजीकरण सुरू करा.",
+  "new_grievance": "नवीन तक्रार",
+  "your_cases": "आपले केसेस",
+  "cases_count": "केसेस",
+  "active_cases": "सक्रिय केसेस",
+  "case_stats": {
+    "total_cases": "एकूण केसेस",
+    "drafts": "ड्राफ्ट",
+    "active": "सक्रिय"
+  },
+  "insurance_grievance": "विमा तक्रार",
+  "view_details": "तपशील पहा",
+  "view_all_cases": "सर्व केसेस पहा",
+  "actions": {
+    "new_case": "नवीन केस",
+    "view_cases": "केसेस पहा",
+    "guide": "मार्गदर्शक",
+    "get_help": "मदत मिळवा"
+  },
+  "case_statistics": "केस आकडेवारी",
+  "recent_activity": "अलीकडील क्रियाकलाप",
+  "loading_cases": "आपले केसेस लोड होत आहेत...",
+  "no_recent_activity": "दाखवण्यासाठी अलीकडील कोणतीही क्रियाकलाप नाही"
+}

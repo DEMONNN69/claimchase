@@ -6,6 +6,7 @@ import { Scale, Users, CheckCircle, Plus, FileText, Edit2 , FileEdit } from "luc
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,                                                             
   DialogContent,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 import type { InsuranceCompany } from "@/services/types";
 
 export default function Dashboard() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const { user, updateProfile } = useAuth();
   const { data: allCompanies = [] } = useInsuranceCompanies();
@@ -96,7 +98,7 @@ export default function Dashboard() {
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <h1 className="text-lg font-semibold text-primary">{t('common:app_name')}</h1>
           <div className="text-sm text-muted-foreground">
             {user?.first_name}
           </div>
@@ -106,8 +108,8 @@ export default function Dashboard() {
       <div className="p-4 lg:p-8 animate-fade-in space-y-6 max-w-full overflow-x-hidden">
         {/* Welcome Section */}
         <div className="min-w-0">
-          <h1 className="text-2xl lg:text-3xl font-bold break-words">Welcome back, {user?.first_name}!</h1>
-          <p className="text-muted-foreground mt-2">Let's get your insurance grievance resolved.</p>
+          <h1 className="text-2xl lg:text-3xl font-bold break-words">{t('dashboard:welcome_message')} {user?.first_name}!</h1>
+          <p className="text-muted-foreground mt-2">{t('dashboard:tagline')}</p>
         </div>
 
         {/* Profile Summary Cards */}
@@ -115,13 +117,13 @@ export default function Dashboard() {
           {/* Insurance Company Card */}
           <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent min-w-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Insurance Company</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard:insurance_company')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-base lg:text-lg break-words">{currentCompany?.name || "Not selected"}</p>
-                  <p className="text-sm text-muted-foreground mt-1">Selected during onboarding</p>
+                  <p className="font-semibold text-base lg:text-lg break-words">{currentCompany?.name || t('dashboard:not_selected')}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('dashboard:selected_during_onboarding')}</p>
                 </div>
                 <button
                   onClick={() => handleEditClick("company")}
@@ -136,15 +138,15 @@ export default function Dashboard() {
           {/* Problem Type Card */}
           <Card className="border-primary/10 bg-gradient-to-br from-primary/5 to-transparent min-w-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Issue Type</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard:issue_type')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-base lg:text-lg capitalize break-words">
-                    {user?.problem_type?.replace(/_/g, " ") || "Not selected"}
+                    {user?.problem_type?.replace(/_/g, " ") || t('dashboard:not_selected')}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-1">Problem you're facing</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('dashboard:problem_facing')}</p>
                 </div>
                 <button
                   onClick={() => handleEditClick("problem")}
@@ -161,8 +163,8 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 lg:p-6 border border-primary/20">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg lg:text-xl font-bold mb-2 break-words">Ready to file a grievance?</h2>
-              <p className="text-muted-foreground text-sm lg:text-base">Start documenting your insurance issue step by step.</p>
+              <h2 className="text-lg lg:text-xl font-bold mb-2 break-words">{t('dashboard:ready_to_file')}</h2>
+              <p className="text-muted-foreground text-sm lg:text-base">{t('dashboard:start_documenting')}</p>
             </div>
             <Button
               onClick={() => navigate("/start-grievance")}
@@ -170,7 +172,7 @@ export default function Dashboard() {
               className="gap-2 flex-shrink-0 w-full sm:w-auto"
             >
               <Plus className="h-5 w-5" />
-              New Grievance
+              {t('dashboard:new_grievance')}
             </Button>
           </div>
         </div>
@@ -178,8 +180,8 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-muted-foreground">Your cases</p>
-            <h2 className="text-xl lg:text-2xl font-bold break-words">Cases {cases.length > 0 && `(${cases.length})`}</h2>
+            <p className="text-sm text-muted-foreground">{t('dashboard:your_cases')}</p>
+            <h2 className="text-xl lg:text-2xl font-bold break-words">{t('dashboard:cases_count')} {cases.length > 0 && `(${cases.length})`}</h2>
           </div>
         </div>
 
@@ -187,7 +189,7 @@ export default function Dashboard() {
       {casesLoading ? (
         <Card className="mb-6">
           <CardContent className="p-8 text-center">
-            <p className="text-muted-foreground">Loading your cases...</p>
+            <p className="text-muted-foreground">{t('dashboard:loading_cases')}</p>
           </CardContent>
         </Card>
       ) : activeCase ? (
@@ -195,13 +197,13 @@ export default function Dashboard() {
             <CardContent className="p-4 lg:p-6">
               <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold">Active Cases</h2>
+                  <h2 className="text-lg font-semibold">{t('dashboard:active_cases')}</h2>
                   <p className="text-sm text-muted-foreground break-words">
-                    You have {caseStats.total} total cases • {caseStats.draft} drafts • {caseStats.active} active
+                    You have {caseStats.total} {t('dashboard:case_stats.total_cases')} • {caseStats.draft} {t('dashboard:case_stats.drafts')} • {caseStats.active} {t('dashboard:case_stats.active')}
                   </p>
                 </div>
                 <Button onClick={() => navigate("/cases")} variant="outline" className="w-full sm:w-auto">
-                  View All Cases
+                  {t('dashboard:view_all_cases')}
                 </Button>
               </div>
               
@@ -243,7 +245,7 @@ export default function Dashboard() {
                       onClick={() => navigate(`/cases/${activeCase.id}`)}
                       className="w-full sm:w-auto"
                     >
-                      View Details
+                      {t('dashboard:view_details')}
                     </Button>
                   </div>
                 </div>
@@ -269,10 +271,10 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: Plus, label: "New Case", path: "/start-grievance", primary: true },
-          { icon: FileText, label: "View Cases", path: "/cases" },
-          { icon: Scale, label: "Guide", path: "/guide" },
-          { icon: Users, label: "Get Help", path: "/handoff" },
+          { icon: Plus, label: t('dashboard:actions.new_case'), path: "/start-grievance", primary: true },
+          { icon: FileText, label: t('dashboard:actions.view_cases'), path: "/cases" },
+          { icon: Scale, label: t('dashboard:actions.guide'), path: "/guide" },
+          { icon: Users, label: t('dashboard:actions.get_help'), path: "/handoff" },
         ].map((action) => (
           <Card 
             key={action.label}
@@ -308,7 +310,7 @@ export default function Dashboard() {
         {/* Case Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Case Statistics</CardTitle>
+            <CardTitle className="text-lg">{t('dashboard:case_statistics')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -335,7 +337,7 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
+            <CardTitle className="text-lg">{t('dashboard:recent_activity')}</CardTitle>
           </CardHeader>
           <CardContent>
             {activeCase ? (
@@ -360,7 +362,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground mb-4">No recent activity</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('dashboard:no_recent_activity')}</p>
                 <Button 
                   size="sm" 
                   onClick={() => navigate("/start-grievance")}
