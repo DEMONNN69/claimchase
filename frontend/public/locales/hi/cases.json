@@ -1,0 +1,46 @@
+{
+  "title": "मेरे मामले",
+  "subtitle": "अपने बीमा दावों को ट्रैक और प्रबंधित करें",
+  "search_placeholder": "मामले खोजें...",
+  "filters": {
+    "all": "सभी मामले",
+    "draft": "ड्राफ्ट",
+    "submitted": "जमा किया गया",
+    "in_review": "समीक्षा में",
+    "resolved": "हल हो गया"
+  },
+  "status": {
+    "draft": "ड्राफ्ट",
+    "submitted": "जमा किया गया",
+    "in_review": "समीक्षा में",
+    "resolved": "हल हो गया",
+    "rejected": "अस्वीकृत"
+  },
+  "progress_steps": {
+    "draft_created": "ड्राफ्ट बनाया गया",
+    "submitted": "जमा किया गया",
+    "under_review": "समीक्षा में",
+    "resolved": "हल हो गया"
+  },
+  "actions": {
+    "edit_draft": "ड्राफ्ट संपादित करें",
+    "view_details": "विवरण देखें"
+  },
+  "progress_text": "चरण {{current}} का {{total}}",
+  "case_number": "मामला {{number}}",
+  "stats": {
+    "total_cases": "कुल मामले",
+    "draft": "ड्राफ्ट",
+    "active": "सक्रिय",
+    "resolved": "हल किया गया"
+  },
+  "empty_state": {
+    "no_cases": "अभी कोई मामले नहीं",
+    "no_matches": "कोई मिलान नहीं",
+    "start_first": "अपनी पहली शिकायत शुरू करें अपने दावों को ट्रैक करना शुरू करने के लिए",
+    "adjust_filters": "अपनी खोज या फिल्टर को समायोजित करने का प्रयास करें",
+    "create_first": "पहला मामला बनाएं"
+  },
+  "loading": "आपके मामले लोड हो रहे हैं...",
+  "case_number": "मामला #"
+}

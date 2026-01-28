@@ -3,41 +3,43 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { t } = useTranslation('landing');
 
   const services = [
     {
       icon: FileText,
-      title: "Draft Grievance",
-      description: "AI-powered email drafting",
+      title: t('services.draft_grievance.title'),
+      description: t('services.draft_grievance.description'),
       color: "bg-blue-500/10 text-blue-600",
     },
     {
       icon: Mail,
-      title: "Send & Track",
-      description: "Auto-send and monitor status",
+      title: t('services.send_track.title'),
+      description: t('services.send_track.description'),
       color: "bg-green-500/10 text-green-600",
     },
     {
       icon: Scale,
-      title: "Ombudsman",
-      description: "Escalate if unresolved",
+      title: t('services.ombudsman.title'),
+      description: t('services.ombudsman.description'),
       color: "bg-orange-500/10 text-orange-600",
     },
     {
       icon: Users,
-      title: "Expert Help",
-      description: "Connect with professionals",
+      title: t('services.expert_help.title'),
+      description: t('services.expert_help.description'),
       color: "bg-purple-500/10 text-purple-600",
     },
   ];
 
   const stats = [
-    { value: "10K+", label: "Claims Resolved" },
-    { value: "₹50Cr+", label: "Amount Recovered" },
-    { value: "4.8★", label: "User Rating" },
+    { value: "10K+", label: t('stats.claims_resolved') },
+    { value: "₹50Cr+", label: t('stats.amount_recovered') },
+    { value: "4.8★", label: t('stats.user_rating') },
   ];
 
   return (
@@ -52,10 +54,10 @@ export default function Landing() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Login</Link>
+            <Link to="/login">{t('header.login')}</Link>
           </Button>
           <Button size="sm" onClick={() => navigate("/login")}>
-            Get Started
+            {t('header.get_started')}
           </Button>
         </div>
       </header>
@@ -68,21 +70,21 @@ export default function Landing() {
             <div className="flex-1 text-center lg:text-left">
               <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
                 <Sparkles className="h-3 w-3 mr-1" />
-                AI-Powered Grievance Platform
+                {t('hero.badge')}
               </Badge>
               <h1 className="text-3xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
-                Your Claim,<br />We Chase.
+                {t('hero.title')}
               </h1>
               <p className="text-muted-foreground text-base lg:text-lg mb-8 max-w-md mx-auto lg:mx-0">
-                Fight insurance grievances the smart way. Draft, send, and escalate with ease.
+                {t('hero.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Button size="lg" className="h-12 px-8" onClick={() => navigate("/login")}>
-                  Start Your Claim
+                  {t('hero.start_claim')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" className="h-12 px-8">
-                  How It Works
+                  {t('hero.how_works')}
                 </Button>
               </div>
             </div>
@@ -97,8 +99,8 @@ export default function Landing() {
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-semibold">Claim Approved</p>
-                        <p className="text-sm text-white/70">₹2,50,000 recovered</p>
+                        <p className="font-semibold">{t('hero.claim_approved')}</p>
+                        <p className="text-sm text-white/70">{t('hero.amount_recovered', { amount: '2,50,000' })}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -113,8 +115,8 @@ export default function Landing() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-green-500" />
                     <div>
-                      <p className="font-semibold text-sm">Avg. Resolution</p>
-                      <p className="text-xs text-muted-foreground">7-14 days</p>
+                      <p className="font-semibold text-sm">{t('hero.avg_resolution')}</p>
+                      <p className="text-xs text-muted-foreground">{t('hero.resolution_time')}</p>
                     </div>
                   </div>
                 </div>
@@ -142,8 +144,8 @@ export default function Landing() {
       <section className="w-full px-6 py-12 lg:py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-2xl lg:text-3xl font-bold mb-2">Our Services</h2>
-            <p className="text-muted-foreground">End-to-end grievance resolution</p>
+            <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t('services.title')}</h2>
+            <p className="text-muted-foreground">{t('services.subtitle')}</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service) => (
@@ -168,14 +170,14 @@ export default function Landing() {
       <section className="w-full px-6 py-12 lg:py-16 bg-muted/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-2xl lg:text-3xl font-bold mb-2">How It Works</h2>
-            <p className="text-muted-foreground">Three simple steps to resolve your claim</p>
+            <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t('how_it_works.title')}</h2>
+            <p className="text-muted-foreground">{t('how_it_works.subtitle')}</p>
           </div>
           <div className="flex flex-col lg:flex-row gap-6">
             {[
-              { step: "1", title: "Submit Details", desc: "Share your policy and issue details" },
-              { step: "2", title: "AI Drafts Email", desc: "We create a professional grievance" },
-              { step: "3", title: "Track & Escalate", desc: "Monitor progress, escalate if needed" },
+              { step: "1", title: t('how_it_works.step1.title'), desc: t('how_it_works.step1.description') },
+              { step: "2", title: t('how_it_works.step2.title'), desc: t('how_it_works.step2.description') },
+              { step: "3", title: t('how_it_works.step3.title'), desc: t('how_it_works.step3.description') },
             ].map((item, index) => (
               <div key={item.step} className="flex-1 relative">
                 <div className="bg-white rounded-2xl p-6 border-2 border-transparent hover:border-primary/20 transition-colors">
@@ -197,10 +199,10 @@ export default function Landing() {
       {/* CTA Section */}
       <section className="w-full px-6 py-16 lg:py-20">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl lg:text-3xl font-bold mb-4">Ready to fight for your claim?</h2>
-          <p className="text-muted-foreground mb-8">Join thousands who have successfully recovered their insurance claims.</p>
+          <h2 className="text-2xl lg:text-3xl font-bold mb-4">{t('cta.title')}</h2>
+          <p className="text-muted-foreground mb-8">{t('cta.subtitle')}</p>
           <Button size="lg" className="h-12 px-10" onClick={() => navigate("/login")}>
-            Get Started Free
+            {t('cta.get_started')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -214,10 +216,10 @@ export default function Landing() {
               <Shield className="h-4 w-4 text-white" />
             </div>
             <span className="font-semibold text-primary">ClaimChase</span>
-            <span className="text-muted-foreground text-sm">360 Solutions</span>
+            <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            © 2025 ClaimChase. Not legal advice. Guidance only.
+            {t('footer.copyright')}
           </p>
         </div>
       </footer>

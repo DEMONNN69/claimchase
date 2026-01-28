@@ -1,0 +1,47 @@
+{
+  "title": "My Cases",
+  "subtitle": "Manage and track your insurance grievances",
+  "new_case": "New Case",
+  "search_placeholder": "Search cases...",
+  "stats": {
+    "total_cases": "Total Cases",
+    "draft": "Draft",
+    "active": "Active",
+    "resolved": "Resolved"
+  },
+  "filters": {
+    "all": "All Status",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "in_review": "In Review",
+    "resolved": "Resolved",
+    "rejected": "Rejected"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "in_review": "In Review",
+    "resolved": "Resolved",
+    "rejected": "Rejected"
+  },
+  "progress_steps": {
+    "draft_created": "Draft Created",
+    "submitted": "Submitted",
+    "under_review": "Under Review",
+    "resolved": "Resolved"
+  },
+  "progress_text": "Step {{current}} of {{total}}",
+  "case_number": "Case {{number}}",
+  "actions": {
+    "edit_draft": "Edit Draft",
+    "view_details": "View Details"
+  },
+  "empty_state": {
+    "no_cases": "No cases yet",
+    "no_matches": "No matching cases",
+    "start_first": "Start your first grievance to begin tracking your claims",
+    "adjust_filters": "Try adjusting your search or filters",
+    "create_first": "Create First Case"
+  },
+  "loading": "Loading cases..."
+}

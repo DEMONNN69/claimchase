@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,20 +23,12 @@ import { useCases } from "@/hooks/useApi";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-orange-500/10 text-orange-600 border-orange-200', icon: FileEdit },
-  submitted: { label: 'Submitted', color: 'bg-blue-500/10 text-blue-600 border-blue-200', icon: Clock },
-  in_review: { label: 'In Review', color: 'bg-purple-500/10 text-purple-600 border-purple-200', icon: Clock },
-  resolved: { label: 'Resolved', color: 'bg-green-500/10 text-green-600 border-green-200', icon: CheckCircle },
-  rejected: { label: 'Rejected', color: 'bg-red-500/10 text-red-600 border-red-200', icon: AlertCircle },
-};
-
-const getProgressSteps = (status: string) => {
+const getProgressSteps = (status: string, t: any) => {
   const steps = [
-    { name: 'Draft Created', completed: true },
-    { name: 'Submitted', completed: ['submitted', 'in_review', 'resolved', 'rejected'].includes(status) },
-    { name: 'Under Review', completed: ['in_review', 'resolved', 'rejected'].includes(status) },
-    { name: 'Resolved', completed: ['resolved'].includes(status) },
+    { name: t('progress_steps.draft_created'), completed: true },
+    { name: t('progress_steps.submitted'), completed: ['submitted', 'in_review', 'resolved', 'rejected'].includes(status) },
+    { name: t('progress_steps.under_review'), completed: ['in_review', 'resolved', 'rejected'].includes(status) },
+    { name: t('progress_steps.resolved'), completed: ['resolved'].includes(status) },
   ];
   
   const currentStep = steps.filter(s => s.completed).length;
@@ -44,10 +37,20 @@ const getProgressSteps = (status: string) => {
 
 export default function Cases() {
   const navigate = useNavigate();
+  const { t } = useTranslation('cases');
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   
   const { data: cases = [], isLoading } = useCases();
+
+  // Status config that uses translations
+  const statusConfig = {
+    draft: { label: t('status.draft'), color: 'bg-orange-500/10 text-orange-600 border-orange-200', icon: FileEdit },
+    submitted: { label: t('status.submitted'), color: 'bg-blue-500/10 text-blue-600 border-blue-200', icon: Clock },
+    in_review: { label: t('status.in_review'), color: 'bg-purple-500/10 text-purple-600 border-purple-200', icon: Clock },
+    resolved: { label: t('status.resolved'), color: 'bg-green-500/10 text-green-600 border-green-200', icon: CheckCircle },
+    rejected: { label: t('status.rejected'), color: 'bg-red-500/10 text-red-600 border-red-200', icon: AlertCircle },
+  };
 
   // Filter cases based on search and status
   const filteredCases = cases.filter((case_item: any) => {
@@ -73,7 +76,7 @@ export default function Cases() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading cases...</p>
+          <p className="text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -85,9 +88,9 @@ export default function Cases() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">My Cases</h1>
+            <h1 className="text-3xl font-bold text-slate-900">{t('title')}</h1>
             <p className="text-slate-600 mt-1">
-              Manage and track your insurance grievances
+              {t('subtitle')}
             </p>
           </div>
           <Button 
@@ -95,7 +98,7 @@ export default function Cases() {
             className="gap-2 mt-4 sm:mt-0"
           >
             <Plus className="h-4 w-4" />
-            New Case
+            {t('actions.new_case')}
           </Button>
         </div>
 
@@ -105,7 +108,7 @@ export default function Cases() {
             <CardContent className="p-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-slate-900">{cases.length}</p>
-                <p className="text-sm text-slate-600">Total Cases</p>
+                <p className="text-sm text-slate-600">{t('stats.total_cases')}</p>
               </div>
             </CardContent>
           </Card>
@@ -115,7 +118,7 @@ export default function Cases() {
                 <p className="text-2xl font-bold text-orange-600">
                   {cases.filter((c: any) => c.status === 'draft').length}
                 </p>
-                <p className="text-sm text-slate-600">Draft</p>
+                <p className="text-sm text-slate-600">{t('stats.draft')}</p>
               </div>
             </CardContent>
           </Card>
@@ -125,7 +128,7 @@ export default function Cases() {
                 <p className="text-2xl font-bold text-blue-600">
                   {cases.filter((c: any) => ['submitted', 'in_review'].includes(c.status)).length}
                 </p>
-                <p className="text-sm text-slate-600">Active</p>
+                <p className="text-sm text-slate-600">{t('stats.active')}</p>
               </div>
             </CardContent>
           </Card>
@@ -135,7 +138,7 @@ export default function Cases() {
                 <p className="text-2xl font-bold text-green-600">
                   {cases.filter((c: any) => c.status === 'resolved').length}
                 </p>
-                <p className="text-sm text-slate-600">Resolved</p>
+                <p className="text-sm text-slate-600">{t('stats.resolved')}</p>
               </div>
             </CardContent>
           </Card>
@@ -146,7 +149,7 @@ export default function Cases() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search cases..."
+              placeholder={t('search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -157,12 +160,12 @@ export default function Cases() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Submitted</option>
-            <option value="in_review">In Review</option>
-            <option value="resolved">Resolved</option>
-            <option value="rejected">Rejected</option>
+            <option value="all">{t('filters.all')}</option>
+            <option value="draft">{t('filters.draft')}</option>
+            <option value="submitted">{t('filters.submitted')}</option>
+            <option value="in_review">{t('filters.in_review')}</option>
+            <option value="resolved">{t('filters.resolved')}</option>
+            <option value="rejected">{t('filters.rejected')}</option>
           </select>
         </div>
 
@@ -172,17 +175,17 @@ export default function Cases() {
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
               <h3 className="font-semibold text-slate-900 mb-2">
-                {searchQuery || statusFilter !== "all" ? "No matching cases" : "No cases yet"}
+                {searchQuery || statusFilter !== "all" ? t('empty_state.no_matches') : t('empty_state.no_cases')}
               </h3>
               <p className="text-slate-600 mb-6">
                 {searchQuery || statusFilter !== "all" 
-                  ? "Try adjusting your search or filters" 
-                  : "Start your first grievance to begin tracking your claims"}
+                  ? t('empty_state.adjust_filters') 
+                  : t('empty_state.start_first')}
               </p>
               {(!searchQuery && statusFilter === "all") && (
                 <Button onClick={() => navigate("/start-grievance")} className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Create First Case
+                  {t('empty_state.create_first')}
                 </Button>
               )}
             </CardContent>
@@ -190,7 +193,7 @@ export default function Cases() {
         ) : (
           <div className="space-y-4">
             {filteredCases.map((case_item: any, index: number) => {
-              const progress = getProgressSteps(case_item.status);
+              const progress = getProgressSteps(case_item.status, t);
               const statusInfo = statusConfig[case_item.status as keyof typeof statusConfig];
               
               return (
@@ -209,7 +212,7 @@ export default function Cases() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <h3 className="font-semibold text-slate-900">
-                                  {case_item.case_number}
+                                  {t('case_number', { number: case_item.case_number })}
                                 </h3>
                                 <Badge className={cn("text-xs", statusInfo?.color)}>
                                   {statusInfo?.label}
@@ -241,7 +244,7 @@ export default function Cases() {
                               />
                             </div>
                             <span className="text-xs text-slate-500 whitespace-nowrap">
-                              Step {progress.currentStep} of {progress.totalSteps}
+                              {t('progress_text', { current: progress.currentStep, total: progress.totalSteps })}
                             </span>
                           </div>
                         </div>
@@ -255,7 +258,7 @@ export default function Cases() {
                               className="gap-2"
                             >
                               <FileEdit className="h-4 w-4" />
-                              Edit Draft
+                              {t('actions.edit_draft')}
                             </Button>
                           )}
                           <Button
@@ -263,7 +266,7 @@ export default function Cases() {
                             className="gap-2"
                           >
                             <Eye className="h-4 w-4" />
-                            View Details
+                            {t('actions.view_details')}
                           </Button>
                         </div>
                       </div>

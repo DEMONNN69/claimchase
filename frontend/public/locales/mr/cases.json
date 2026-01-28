@@ -1,0 +1,45 @@
+                {
+  "title": "माझे केसेस",
+  "subtitle": "आपल्या विमा दाव्यांचा मागोवा आणि व्यवस्थापन करा",
+  "search_placeholder": "केसेस शोधा...",
+  "filters": {
+    "all": "सर्व केसेस",
+    "draft": "ड्राफ्ट",
+    "submitted": "सबमिट केले",
+    "in_review": "समीक्षेत",
+    "resolved": "निराकरण झाले"
+  },
+  "status": {
+    "draft": "ड्राफ्ट",
+    "submitted": "सबमिट केले",
+    "in_review": "समीक्षेत",
+    "resolved": "निराकरण झाले",
+    "rejected": "नाकारले"
+  },
+  "progress_steps": {
+    "draft_created": "ड्राफ्ट तयार केले",
+    "submitted": "सबमिट केले",
+    "under_review": "समीक्षेत",
+    "resolved": "निराकरण झाले"
+  },
+  "actions": {
+    "edit_draft": "ड्राफ्ट संपादित करा",
+    "view_details": "तपशील पहा"
+  },
+  "progress_text": "पायरी {{current}} च्या {{total}}",
+  "case_number": "प्रकरण {{number}}",
+  "stats": {
+    "total_cases": "एकूण केसेस",
+    "active_cases": "सक्रिय केसेस",
+    "resolved_cases": "निराकरण झालेले केसेस"
+  },
+  "empty_state": {
+    "no_cases": "अजून कोणतीही प्रकरणे नाहीत",
+    "no_matches": "कोणतेही जुळणारे प्रकरण नाहीत",
+    "start_first": "तुमच्या दाव्यांचा ट्रॅक ठेवण्यास सुरुवात करण्यासाठी तुमची पहिली तक्रार सुरू करा",
+    "adjust_filters": "तुमची शोध किंवा फिल्टर समायोजित करण्याचा प्रयत्न करा",
+    "create_first": "पहिले प्रकरण तयार करा"
+  },
+  "loading": "प्रकरणे लोड होत आहेत...",
+  "case_number": "केस #"
+}

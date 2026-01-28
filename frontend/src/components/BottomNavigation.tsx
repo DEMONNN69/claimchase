@@ -1,15 +1,17 @@
 import { Home, BookOpen, Settings, AlertTriangle, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { to: "/dashboard", icon: Home, label: "Home" },
-  { to: "/cases", icon: FileText, label: "Cases" },
-  { to: "/guide", icon: BookOpen, label: "Guide" },
-  { to: "/settings", icon: Settings, label: "Settings" },
-];
-
 export function BottomNavigation() {
+  const { t } = useTranslation('common');
+  
+  const navItems = [
+    { to: "/dashboard", icon: Home, label: t('navigation.home') },
+    { to: "/cases", icon: FileText, label: t('navigation.cases') },
+    { to: "/guide", icon: BookOpen, label: t('navigation.guide') },
+    { to: "/settings", icon: Settings, label: t('navigation.settings') },
+  ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
       <div className="max-w-md mx-auto flex items-center justify-around py-2 px-4">

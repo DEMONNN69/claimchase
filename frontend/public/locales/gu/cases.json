@@ -1,0 +1,46 @@
+{
+  "title": "મારા કેસો",
+  "subtitle": "તમારા વિમા ક્લેમનો માગોવાળો કરો અને વ્યવસ્થા કરો",
+  "search_placeholder": "કેસો શોધો...",
+  "filters": {
+    "all": "બધા કેસો",
+    "draft": "ડ્રાફ્ટ",
+    "submitted": "સબમિટ કર્યા",
+    "in_review": "સમીક્ષામાં",
+    "resolved": "ઉકેલાયા"
+  },
+  "status": {
+    "draft": "ડ્રાફ્ટ",
+    "submitted": "સબમિટ કર્યા",
+    "in_review": "સમીક્ષામાં",
+    "resolved": "ઉકેલાયા",
+    "rejected": "નકારેલ"
+  },
+  "progress_steps": {
+    "draft_created": "ડ્રાફ્ટ તૈયાર કર્યો",
+    "submitted": "સબમિટ કર્યો",
+    "under_review": "સમીક્ષામાં",
+    "resolved": "ઉકેલાયા"
+  },
+  "actions": {
+    "edit_draft": "ડ્રાફ્ટ સંપાદિત કરો",
+    "view_details": "વિગતો જુઓ"
+  },
+  "progress_text": "પગલું {{current}} ના {{total}}",
+  "case_number": "કેસ {{number}}",
+  "stats": {
+    "total_cases": "કુલ કેસો",
+    "draft": "ડ્રાફ્ટ",
+    "active": "સક્રિય",
+    "resolved": "હલ થયું"
+  },
+  "empty_state": {
+    "no_cases": "હજુ કોઈ કેસો નથી",
+    "no_matches": "કોઈ મેળતા આવતા કેસો નથી",
+    "start_first": "તમારા દાવાઓને ટ્રેક કરવાનું શરૂ કરવા માટે તમારું પ્રથમ ફરિયાદ શરૂ કરો",
+    "adjust_filters": "તમારી શોધ અથવા ફિલ્ટરને સમાયોજિત કરવાનો પ્રયાસ કરો",
+    "create_first": "પ્રથમ કેસ બનાવો"
+  },
+  "loading": "કેસો લોડ થઈ રહ્યા છે...",
+  "case_number": "કેસ #"
+}
