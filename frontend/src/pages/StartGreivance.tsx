@@ -84,9 +84,13 @@ export default function StartGreivance() {
         if (documents.length > 0) {
           toast.info(`Uploading ${documents.length} document(s)...`);
           
-          const uploadPromises = documents.map(file => 
-            caseAPI.uploadDocument(caseId, file, 'support_document', file.name)
-          );
+          const uploadPromises = documents.map(file => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('document_type', 'support_document');
+            formData.append('description', file.name);
+            return caseAPI.uploadDocument(caseId, formData);
+          });
           
           try {
             await Promise.all(uploadPromises);

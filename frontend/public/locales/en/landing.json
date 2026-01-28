@@ -1,0 +1,67 @@
+{
+  "header": {
+    "login": "Login",
+    "get_started": "Get Started"
+  },
+  "hero": {
+    "badge": "AI-Powered Grievance Platform",
+    "title": "Your Claim,\nWe Chase.",
+    "subtitle": "Fight insurance grievances the smart way. Draft, send, and escalate with ease.",
+    "start_claim": "Start Your Claim",
+    "how_works": "How It Works",
+    "claim_approved": "Claim Approved",
+    "amount_recovered": "₹{{amount}} recovered",
+    "avg_resolution": "Avg. Resolution",
+    "resolution_time": "7-14 days"
+  },
+  "stats": {
+    "claims_resolved": "Claims Resolved",
+    "amount_recovered": "Amount Recovered",
+    "user_rating": "User Rating"
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "End-to-end grievance resolution",
+    "draft_grievance": {
+      "title": "Draft Grievance",
+      "description": "AI-powered email drafting"
+    },
+    "send_track": {
+      "title": "Send & Track",
+      "description": "Auto-send and monitor status"
+    },
+    "ombudsman": {
+      "title": "Ombudsman",
+      "description": "Escalate if unresolved"
+    },
+    "expert_help": {
+      "title": "Expert Help",
+      "description": "Connect with professionals"
+    }
+  },
+  "how_it_works": {
+    "title": "How It Works",
+    "subtitle": "Three simple steps to resolve your claim",
+    "step1": {
+      "title": "Submit Details",
+      "description": "Share your policy and issue details"
+    },
+    "step2": {
+      "title": "AI Drafts Email",
+      "description": "We create a professional grievance"
+    },
+    "step3": {
+      "title": "Track & Escalate",
+      "description": "Monitor progress, escalate if needed"
+    }
+  },
+  "cta": {
+    "title": "Ready to fight for your claim?",
+    "subtitle": "Join thousands who have successfully recovered their insurance claims.",
+    "get_started": "Get Started Free"
+  },
+  "footer": {
+    "tagline": "360 Solutions",
+    "copyright": "© 2025 ClaimChase. Not legal advice. Guidance only."
+  }
+}

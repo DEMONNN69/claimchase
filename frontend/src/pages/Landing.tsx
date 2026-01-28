@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export default function Landing() {
           <span className="font-bold text-lg text-primary">ClaimChase</span>
         </div>
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <Button variant="ghost" size="sm" asChild>
             <Link to="/login">{t('header.login')}</Link>
           </Button>
