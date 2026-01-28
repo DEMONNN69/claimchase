@@ -2,11 +2,11 @@
 
 from django.contrib import admin
 from django.contrib import messages
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import Group
 from unfold.admin import ModelAdmin
-from unfold.decorators import action, display
-
+from unfold.decorators import action, display 
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm, AdminPasswordChangeForm 
+from django.contrib.auth.models import Group
 from .models import CustomUser
 from claimchase.apps.medical_review.models import MedicalReviewerProfile
 
@@ -41,7 +41,12 @@ class MedicalReviewerProfileInline(admin.StackedInline):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
-    """Streamlined admin for CustomUser model with enhanced features."""
+    '`Streamlined admin for CustomUser model with enhanced features.`'
+
+    # Enable password change functionality
+    change_password_form = AdminPasswordChangeForm
+    form = UserChangeForm
+    add_form = UserCreationForm
 
     list_display = (
         'email',
@@ -136,6 +141,14 @@ class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
     )
 
     inlines = [MedicalReviewerProfileInline]
+
+    def get_urls(self):
+        """Add password change URL."""
+        from django.urls import path
+        from django.contrib.auth.views import redirect_to_login
+        urls = super().get_urls()
+        # Password change URLs are automatically added by BaseUserAdmin
+        return urls
 
     def full_name(self, obj):
         return obj.get_full_name() or obj.email
