@@ -107,6 +107,19 @@ class CustomUser(AbstractUser):
         help_text="When the Gmail access token expires"
     )
     
+    # Gmail Pub/Sub Watch for incoming email tracking
+    gmail_watch_expiration = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the Gmail Pub/Sub watch expires (needs renewal every 7 days)"
+    )
+    gmail_history_id = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="Last known Gmail history ID for incremental sync"
+    )
+    
     class Meta:
         db_table = 'users_customuser'
         verbose_name = 'User'

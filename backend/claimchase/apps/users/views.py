@@ -331,6 +331,22 @@ class AuthViewSet(viewsets.ViewSet):
             user.gmail_token_expires_at = tokens['expires_at']
             user.save(update_fields=['gmail_refresh_token', 'gmail_email', 'gmail_connected', 'gmail_token_expires_at'])
             
+            # Start Gmail watch for incoming email notifications
+            try:
+                from claimchase.apps.grievance_core.gmail_service import GmailWatchService
+                watch_result = GmailWatchService.start_watch(tokens['access_token'])
+                
+                if watch_result['success']:
+                    user.gmail_watch_expiration = watch_result['expiration']
+                    user.gmail_history_id = watch_result['history_id']
+                    user.save(update_fields=['gmail_watch_expiration', 'gmail_history_id'])
+                    logger.info(f"Gmail watch started for {user.email}, expires: {watch_result['expiration']}")
+                else:
+                    logger.warning(f"Failed to start Gmail watch for {user.email}: {watch_result['error']}")
+            except Exception as watch_error:
+                # Don't fail the whole connection if watch setup fails
+                logger.error(f"Error setting up Gmail watch for {user.email}: {watch_error}")
+            
             logger.info(f"User {user.email} connected Gmail account: {gmail_email}")
             
             # Redirect to frontend with success
@@ -363,11 +379,31 @@ class AuthViewSet(viewsets.ViewSet):
         """
         try:
             user = request.user
+            
+            # Try to stop Gmail watch before disconnecting
+            if user.gmail_refresh_token:
+                try:
+                    from claimchase.apps.grievance_core.gmail_service import GmailWatchService, GmailSendService
+                    refresh_token = GmailEncryption.decrypt(user.gmail_refresh_token)
+                    if refresh_token:
+                        access_token = GmailSendService.refresh_access_token(refresh_token)
+                        if access_token:
+                            GmailWatchService.stop_watch(access_token)
+                            logger.info(f"Stopped Gmail watch for {user.email}")
+                except Exception as watch_error:
+                    logger.warning(f"Could not stop Gmail watch for {user.email}: {watch_error}")
+            
+            # Clear all Gmail-related fields
             user.gmail_refresh_token = None
             user.gmail_email = None
             user.gmail_connected = False
             user.gmail_token_expires_at = None
-            user.save(update_fields=['gmail_refresh_token', 'gmail_email', 'gmail_connected', 'gmail_token_expires_at'])
+            user.gmail_watch_expiration = None
+            user.gmail_history_id = None
+            user.save(update_fields=[
+                'gmail_refresh_token', 'gmail_email', 'gmail_connected', 
+                'gmail_token_expires_at', 'gmail_watch_expiration', 'gmail_history_id'
+            ])
             
             logger.info(f"User {user.email} disconnected Gmail account")
             

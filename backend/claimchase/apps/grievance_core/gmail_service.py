@@ -285,3 +285,266 @@ class GmailSendService:
         except Exception as e:
             logger.error(f"Error searching emails: {e}")
             return []
+
+
+class GmailWatchService:
+    """
+    Handle Gmail Pub/Sub Watch for real-time incoming email notifications.
+    
+    This service manages:
+    1. Setting up watch on user's Gmail inbox
+    2. Processing Pub/Sub push notifications
+    3. Fetching new emails via history API
+    """
+    
+    @staticmethod
+    def start_watch(access_token: str) -> dict:
+        """
+        Start watching a user's Gmail inbox for new emails.
+        
+        This calls Gmail's watch() API which sets up a Pub/Sub subscription
+        that notifies us when new emails arrive.
+        
+        Watch expires after 7 days and must be renewed.
+        
+        Returns:
+            {
+                'success': bool,
+                'history_id': str or None,
+                'expiration': datetime or None,
+                'error': str or None,
+            }
+        """
+        try:
+            creds = Credentials(token=access_token)
+            service = build('gmail', 'v1', credentials=creds)
+            
+            # Start watching inbox
+            request_body = {
+                'topicName': settings.GMAIL_PUBSUB_TOPIC,
+                'labelIds': ['INBOX'],
+                'labelFilterBehavior': 'include'
+            }
+            
+            result = service.users().watch(
+                userId='me',
+                body=request_body
+            ).execute()
+            
+            # Convert expiration from milliseconds to datetime
+            expiration_ms = int(result.get('expiration', 0))
+            expiration_dt = datetime.fromtimestamp(expiration_ms / 1000)
+            
+            logger.info(f"Gmail watch started. History ID: {result.get('historyId')}, Expires: {expiration_dt}")
+            
+            return {
+                'success': True,
+                'history_id': result.get('historyId'),
+                'expiration': expiration_dt,
+                'error': None,
+            }
+            
+        except HttpError as e:
+            error_msg = f"Gmail API error starting watch: {e}"
+            logger.error(error_msg)
+            return {
+                'success': False,
+                'history_id': None,
+                'expiration': None,
+                'error': error_msg,
+            }
+        except Exception as e:
+            error_msg = f"Unexpected error starting watch: {e}"
+            logger.error(error_msg)
+            return {
+                'success': False,
+                'history_id': None,
+                'expiration': None,
+                'error': error_msg,
+            }
+    
+    @staticmethod
+    def stop_watch(access_token: str) -> bool:
+        """Stop watching a user's Gmail inbox."""
+        try:
+            creds = Credentials(token=access_token)
+            service = build('gmail', 'v1', credentials=creds)
+            
+            service.users().stop(userId='me').execute()
+            logger.info("Gmail watch stopped successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error stopping Gmail watch: {e}")
+            return False
+    
+    @staticmethod
+    def get_history(access_token: str, start_history_id: str, history_types: list = None) -> dict:
+        """
+        Get Gmail history (changes) since a given history ID.
+        
+        Args:
+            access_token: Valid Gmail access token
+            start_history_id: History ID to start from
+            history_types: List of types to include ('messageAdded', 'messageDeleted', etc.)
+        
+        Returns:
+            {
+                'success': bool,
+                'messages': list of message IDs,
+                'history_id': str (latest history ID),
+                'error': str or None,
+            }
+        """
+        try:
+            creds = Credentials(token=access_token)
+            service = build('gmail', 'v1', credentials=creds)
+            
+            params = {
+                'userId': 'me',
+                'startHistoryId': start_history_id,
+                'labelId': 'INBOX',
+            }
+            
+            if history_types:
+                params['historyTypes'] = history_types
+            
+            result = service.users().history().list(**params).execute()
+            
+            new_messages = []
+            history_records = result.get('history', [])
+            
+            for record in history_records:
+                # Get messages that were added to inbox
+                messages_added = record.get('messagesAdded', [])
+                for msg_data in messages_added:
+                    message = msg_data.get('message', {})
+                    msg_id = message.get('id')
+                    if msg_id:
+                        new_messages.append(msg_id)
+            
+            return {
+                'success': True,
+                'messages': new_messages,
+                'history_id': result.get('historyId'),
+                'error': None,
+            }
+            
+        except HttpError as e:
+            # 404 means history ID is too old, need full sync
+            if e.resp.status == 404:
+                logger.warning(f"History ID {start_history_id} is too old, need full sync")
+                return {
+                    'success': False,
+                    'messages': [],
+                    'history_id': None,
+                    'error': 'history_expired',
+                }
+            error_msg = f"Gmail API error fetching history: {e}"
+            logger.error(error_msg)
+            return {
+                'success': False,
+                'messages': [],
+                'history_id': None,
+                'error': error_msg,
+            }
+        except Exception as e:
+            error_msg = f"Unexpected error fetching history: {e}"
+            logger.error(error_msg)
+            return {
+                'success': False,
+                'messages': [],
+                'history_id': None,
+                'error': error_msg,
+            }
+    
+    @staticmethod
+    def get_message_details(access_token: str, message_id: str) -> dict:
+        """
+        Get full details of a specific email message.
+        
+        Returns:
+            {
+                'success': bool,
+                'message_id': str,
+                'thread_id': str,
+                'from_email': str,
+                'to_email': str,
+                'subject': str,
+                'snippet': str,
+                'body': str,
+                'date': datetime,
+                'error': str or None,
+            }
+        """
+        try:
+            creds = Credentials(token=access_token)
+            service = build('gmail', 'v1', credentials=creds)
+            
+            result = service.users().messages().get(
+                userId='me',
+                id=message_id,
+                format='full'
+            ).execute()
+            
+            # Parse headers
+            headers = result.get('payload', {}).get('headers', [])
+            header_dict = {h['name'].lower(): h['value'] for h in headers}
+            
+            # Parse body
+            body = ''
+            payload = result.get('payload', {})
+            
+            # Check for simple body
+            if 'body' in payload and payload['body'].get('data'):
+                body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8', errors='ignore')
+            
+            # Check for multipart body
+            elif 'parts' in payload:
+                for part in payload['parts']:
+                    if part.get('mimeType') == 'text/plain':
+                        data = part.get('body', {}).get('data', '')
+                        if data:
+                            body = base64.urlsafe_b64decode(data).decode('utf-8', errors='ignore')
+                            break
+                    elif part.get('mimeType') == 'text/html' and not body:
+                        data = part.get('body', {}).get('data', '')
+                        if data:
+                            body = base64.urlsafe_b64decode(data).decode('utf-8', errors='ignore')
+            
+            # Parse date
+            date_str = header_dict.get('date', '')
+            from email.utils import parsedate_to_datetime
+            try:
+                email_date = parsedate_to_datetime(date_str)
+            except:
+                email_date = timezone.now()
+            
+            return {
+                'success': True,
+                'message_id': result.get('id'),
+                'thread_id': result.get('threadId'),
+                'from_email': header_dict.get('from', ''),
+                'to_email': header_dict.get('to', ''),
+                'subject': header_dict.get('subject', '(No Subject)'),
+                'snippet': result.get('snippet', ''),
+                'body': body,
+                'date': email_date,
+                'error': None,
+            }
+            
+        except Exception as e:
+            error_msg = f"Error fetching message details: {e}"
+            logger.error(error_msg)
+            return {
+                'success': False,
+                'message_id': message_id,
+                'thread_id': None,
+                'from_email': None,
+                'to_email': None,
+                'subject': None,
+                'snippet': None,
+                'body': None,
+                'date': None,
+                'error': error_msg,
+            }

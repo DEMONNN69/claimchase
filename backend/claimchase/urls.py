@@ -8,6 +8,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+# Import webhook handler
+from claimchase.apps.grievance_core.webhooks import gmail_webhook
+
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
@@ -15,6 +18,9 @@ urlpatterns = [
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    
+    # Webhooks (outside /api/ prefix for cleaner URLs)
+    path('webhooks/gmail/', gmail_webhook, name='gmail-webhook'),
     
     # App URLs
     path('api/', include('claimchase.apps.users.urls')),

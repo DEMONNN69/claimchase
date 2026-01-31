@@ -83,7 +83,7 @@ export default function Cases() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -91,18 +91,18 @@ export default function Cases() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">{t('title')}</h1>
-            <p className="text-slate-600 mt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 truncate">{t('title')}</h1>
+            <p className="text-slate-600 mt-1 text-sm sm:text-base">
               {t('subtitle')}
             </p>
           </div>
           <Button 
             onClick={() => navigate("/start-grievance")}
-            className="gap-2 mt-4 sm:mt-0"
+            className="gap-2 mt-4 sm:mt-0 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             {t('actions.new_case')}
@@ -110,42 +110,42 @@ export default function Cases() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{cases.length}</p>
-                <p className="text-sm text-slate-600">{t('stats.total_cases')}</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-900">{cases.length}</p>
+                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.total_cases')}</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-xl sm:text-2xl font-bold text-orange-600">
                   {cases.filter((c: any) => c.status === 'draft').length}
                 </p>
-                <p className="text-sm text-slate-600">{t('stats.draft')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.draft')}</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-xl sm:text-2xl font-bold text-blue-600">
                   {cases.filter((c: any) => ['submitted', 'in_review'].includes(c.status)).length}
                 </p>
-                <p className="text-sm text-slate-600">{t('stats.active')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.active')}</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {cases.filter((c: any) => c.status === 'resolved').length}
                 </p>
-                <p className="text-sm text-slate-600">{t('stats.resolved')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.resolved')}</p>
               </div>
             </CardContent>
           </Card>
@@ -210,32 +210,32 @@ export default function Cases() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
+                  <Card className="hover:shadow-md transition-shadow overflow-hidden">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         {/* Case Info */}
-                        <div className="flex-1 space-y-3">
+                        <div className="flex-1 space-y-3 min-w-0">
                           <div className="flex items-start gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-semibold text-slate-900">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-slate-900 text-sm sm:text-base truncate">
                                   {t('case_number', { number: case_item.case_number })}
                                 </h3>
-                                <Badge className={cn("text-xs", statusInfo?.color)}>
+                                <Badge className={cn("text-xs flex-shrink-0", statusInfo?.color)}>
                                   {statusInfo?.label}
                                 </Badge>
                               </div>
-                              <p className="text-slate-700 mb-2">{case_item.subject}</p>
+                              <p className="text-slate-700 mb-2 text-sm line-clamp-2">{case_item.subject}</p>
                               
-                              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500">
                                 {case_item.insurance_company_name && (
-                                  <div className="flex items-center gap-1">
-                                    <Building2 className="h-3 w-3" />
-                                    {case_item.insurance_company_name}
+                                  <div className="flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
+                                    <Building2 className="h-3 w-3 flex-shrink-0" />
+                                    <span className="truncate">{case_item.insurance_company_name}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
+                                  <Calendar className="h-3 w-3 flex-shrink-0" />
                                   {formatDate(case_item.created_at)}
                                 </div>
                               </div>
@@ -257,12 +257,12 @@ export default function Cases() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                           {case_item.status === 'draft' && (
                             <Button
                               variant="outline"
                               onClick={() => navigate(`/drafter/${case_item.id}`)}
-                              className="gap-2"
+                              className="gap-2 w-full sm:w-auto text-sm"
                             >
                               <FileEdit className="h-4 w-4" />
                               {t('actions.edit_draft')}
@@ -270,7 +270,7 @@ export default function Cases() {
                           )}
                           <Button
                             onClick={() => navigate(`/cases/${case_item.id}`)}
-                            className="gap-2"
+                            className="gap-2 w-full sm:w-auto text-sm"
                           >
                             <Eye className="h-4 w-4" />
                             {t('actions.view_details')}

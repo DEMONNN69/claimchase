@@ -216,6 +216,13 @@ GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.modify',
 ]
 
+# Gmail Pub/Sub Configuration for incoming email notifications
+# Format: projects/{project_id}/topics/{topic_name}
+GMAIL_PUBSUB_TOPIC = config(
+    'GMAIL_PUBSUB_TOPIC', 
+    default='projects/your-gcp-project-id/topics/gmail-notifications'
+)
+
 # Encryption key for storing sensitive tokens (use SECRET_KEY)
 ENCRYPTION_KEY = SECRET_KEY[:32]  # First 32 chars of SECRET_KEY
 

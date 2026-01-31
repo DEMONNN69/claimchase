@@ -493,9 +493,11 @@ class CaseViewSet(viewsets.ModelViewSet):
                 created_by=user
             )
             
-            # Update case status
+            # Update case status and save Gmail thread ID for reply tracking
             case.status = 'submitted'
-            case.save()
+            case.gmail_thread_id = result['thread_id']
+            case.gmail_message_id = result['message_id']
+            case.save(update_fields=['status', 'gmail_thread_id', 'gmail_message_id', 'updated_at'])
             
             # Add timeline event
             CaseTimeline.objects.create(

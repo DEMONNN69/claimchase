@@ -191,6 +191,21 @@ class Case(models.Model):
         help_text="Notes on how the case was resolved"
     )
     
+    # Gmail Integration - for tracking email threads
+    gmail_thread_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Gmail thread ID for tracking replies to this case"
+    )
+    gmail_message_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Gmail message ID of the original grievance email"
+    )
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -205,6 +220,7 @@ class Case(models.Model):
             models.Index(fields=['policy_number']),
             models.Index(fields=['is_escalated_to_ombudsman']),
             models.Index(fields=['-created_at']),
+            models.Index(fields=['gmail_thread_id']),
         ]
         ordering = ['-created_at']
     

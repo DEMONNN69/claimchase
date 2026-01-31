@@ -181,15 +181,35 @@ export default function CaseDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/dashboard")}
+            className="h-8 w-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-lg font-semibold text-primary truncate flex-1">
+            {caseData.data.case_number}
+          </h1>
+          <Badge className={`${statusColors[caseData.data.status] || ""} text-xs`}>
+            {caseData.data.status.replace("_", " ")}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
         >
-          {/* Header */}
-          <div className="flex items-center gap-4">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
@@ -197,11 +217,11 @@ export default function CaseDetail() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-slate-900">
                 Case {caseData.data.case_number}
               </h1>
-              <p className="text-slate-500 mt-1">{caseData.data.subject}</p>
+              <p className="text-slate-500 mt-1 truncate">{caseData.data.subject}</p>
             </div>
             
             {/* Send Email Button */}
@@ -221,27 +241,43 @@ export default function CaseDetail() {
             </Badge>
           </div>
 
+          {/* Mobile Subject & Send Button */}
+          <div className="lg:hidden space-y-3">
+            <p className="text-slate-600 text-sm line-clamp-2">{caseData.data.subject}</p>
+            {caseData.data.status === 'draft' && (
+              <Button
+                onClick={handleSendEmail}
+                disabled={isSendingEmail || !user?.gmail_connected}
+                className="gap-2 w-full"
+                size="sm"
+              >
+                <Send className="h-4 w-4" />
+                {isSendingEmail ? "Sending..." : "Send Email"}
+              </Button>
+            )}
+          </div>
+
           {/* Case Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Case Information</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Case Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-slate-400" />
-                  <div>
-                    <p className="text-sm text-slate-500">Insurance Company</p>
-                    <p className="font-medium">
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <Building2 className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-slate-500">Insurance Company</p>
+                    <p className="font-medium text-sm sm:text-base truncate">
                       {caseData.data.insurance_company_name || "Not specified"}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-slate-400" />
-                  <div>
-                    <p className="text-sm text-slate-500">Created</p>
-                    <p className="font-medium">
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <Calendar className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-slate-500">Created</p>
+                    <p className="font-medium text-sm sm:text-base">
                       {new Date(caseData.data.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -249,40 +285,40 @@ export default function CaseDetail() {
               </div>
 
               {caseData.data.description && (
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Description</p>
-                  <p className="text-slate-700">{caseData.data.description}</p>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs sm:text-sm text-slate-500 mb-1">Description</p>
+                  <p className="text-slate-700 text-sm sm:text-base whitespace-pre-wrap break-words">{caseData.data.description}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Documents */}
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Documents</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-base sm:text-lg">Documents</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
                     {documentsData?.documents?.length || 0} documents uploaded
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-4">
               {/* Existing Documents */}
               {documentsData?.documents && documentsData.documents.length > 0 ? (
                 <div className="space-y-2">
                   {documentsData.documents.map((doc: any) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex items-center justify-between p-2 sm:p-3 border rounded-lg hover:bg-slate-50 transition-colors gap-2"
                     >
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="font-medium text-sm">{doc.file_name}</p>
-                          <p className="text-xs text-slate-500">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-xs sm:text-sm truncate">{doc.file_name}</p>
+                          <p className="text-xs text-slate-500 truncate">
                             {doc.document_type?.replace("_", " ")} •{" "}
                             {(doc.file_size / 1024).toFixed(1)} KB
                           </p>
@@ -292,7 +328,7 @@ export default function CaseDetail() {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-blue-600 hover:text-blue-700 p-2 flex-shrink-0"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </a>
@@ -300,26 +336,26 @@ export default function CaseDetail() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-4">
+                <p className="text-slate-500 text-center py-4 text-sm">
                   No documents uploaded yet
                 </p>
               )}
 
               {/* Upload New Documents */}
-              <div className="border-t pt-4 space-y-4">
-                <h4 className="font-medium">Upload Additional Documents</h4>
+              <div className="border-t pt-4 space-y-3 sm:space-y-4">
+                <h4 className="font-medium text-sm sm:text-base">Upload Additional Documents</h4>
 
                 <div className="space-y-3">
                   {/* Document Type */}
-                  <div className="space-y-2">
-                    <Label htmlFor="documentType">Document Type</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="documentType" className="text-xs sm:text-sm">Document Type</Label>
                     <Select value={documentType} onValueChange={setDocumentType}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-9 sm:h-10 text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {documentTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value} value={type.value} className="text-sm">
                             {type.label}
                           </SelectItem>
                         ))}
@@ -328,14 +364,15 @@ export default function CaseDetail() {
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description (Optional)</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="description" className="text-xs sm:text-sm">Description (Optional)</Label>
                     <Textarea
                       id="description"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Add notes about this document..."
                       rows={2}
+                      className="text-sm"
                     />
                   </div>
 
@@ -352,7 +389,7 @@ export default function CaseDetail() {
                     <Button
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full"
+                      className="w-full h-9 sm:h-10 text-sm"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Select Files
@@ -362,16 +399,16 @@ export default function CaseDetail() {
                   {/* Selected Files */}
                   {uploadingFiles.length > 0 && (
                     <div className="space-y-2">
-                      <Label>Selected Files ({uploadingFiles.length})</Label>
+                      <Label className="text-xs sm:text-sm">Selected Files ({uploadingFiles.length})</Label>
                       {uploadingFiles.map((file, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
+                          className="flex items-center justify-between p-2 bg-slate-50 rounded-lg gap-2"
                         >
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-slate-400" />
-                            <span className="text-sm">{file.name}</span>
-                            <span className="text-xs text-slate-500">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <FileText className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm truncate">{file.name}</span>
+                            <span className="text-xs text-slate-500 flex-shrink-0 hidden sm:inline">
                               ({(file.size / 1024).toFixed(1)} KB)
                             </span>
                           </div>
@@ -379,6 +416,7 @@ export default function CaseDetail() {
                             variant="ghost"
                             size="icon"
                             onClick={() => removeFile(index)}
+                            className="h-8 w-8 flex-shrink-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -391,7 +429,7 @@ export default function CaseDetail() {
                   <Button
                     onClick={handleUpload}
                     disabled={uploadingFiles.length === 0 || uploadMutation.isPending}
-                    className="w-full"
+                    className="w-full h-9 sm:h-10 text-sm"
                   >
                     {uploadMutation.isPending ? (
                       <>
