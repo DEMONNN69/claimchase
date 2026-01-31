@@ -7,118 +7,106 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useTranslation } from "react-i18next";
 
-const checklistItems = [
-  {
-    id: "rejection",
-    icon: FileText,
-    title: "Rejection Letter",
-    description: "The official letter from your insurer stating the reason for claim rejection.",
-    tips: [
-      "Request in writing if not received",
-      "Keep both email and physical copies",
-      "Note the date received",
-    ],
-  },
-  {
-    id: "policy",
-    icon: Shield,
-    title: "Policy Copy",
-    description: "Your complete insurance policy document including terms and conditions.",
-    tips: [
-      "Check for latest version",
-      "Highlight relevant clauses",
-      "Keep endorsements attached",
-    ],
-  },
-  {
-    id: "kyc",
-    icon: User,
-    title: "KYC Documents",
-    description: "Identity and address proof required for the Ombudsman complaint.",
-    tips: [
-      "Aadhaar or PAN card copy",
-      "Recent passport photo",
-      "Address proof if different",
-    ],
-  },
-];
+const iconMap = {
+  rejection: FileText,
+  policy: Shield,
+  kyc: User,
+};
 
 export default function Guide() {
+  const { t } = useTranslation('guide');
+  
+  const checklistItems = [
+    { id: "rejection", icon: iconMap.rejection },
+    { id: "policy", icon: iconMap.policy },
+    { id: "kyc", icon: iconMap.kyc },
+  ];
+
   return (
-    <div className="p-5 lg:p-8 animate-fade-in">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Ombudsman Guide</h1>
-        <p className="text-muted-foreground text-sm">
-          Documents needed for your Ombudsman complaint
-        </p>
+    <div className="min-h-screen">
+      {/* Mobile Navbar - Only visible on mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+        </div>
       </div>
 
-      {/* Info Card */}
-      <Card className="mb-6 border-2 border-primary/20 bg-primary/5">
-        <CardContent className="p-4 flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium text-sm">Pro Tip</p>
-            <p className="text-xs text-muted-foreground">Keep all documents in PDF format for easy submission.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="p-5 lg:p-8 animate-fade-in">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm">
+            {t('subtitle')}
+          </p>
+        </div>
 
-      {/* Checklist */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Required Documents</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Accordion type="single" collapsible className="space-y-2">
-            {checklistItems.map((item) => (
-              <AccordionItem 
-                key={item.id} 
-                value={item.id}
-                className="border rounded-lg px-4"
-              >
-                <AccordionTrigger className="hover:no-underline py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <item.icon className="h-4 w-4 text-primary" />
+        {/* Info Card */}
+        <Card className="mb-6 border-2 border-primary/20 bg-primary/5">
+          <CardContent className="p-4 flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-sm">{t('pro_tip')}</p>
+              <p className="text-xs text-muted-foreground">{t('pro_tip_text')}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Checklist */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('required_documents')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <Accordion type="single" collapsible className="space-y-2">
+              {checklistItems.map((item) => (
+                <AccordionItem
+                  key={item.id}
+                  value={item.id}
+                  className="border rounded-lg px-4"
+                >
+                  <AccordionTrigger className="hover:no-underline py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <item.icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium text-sm text-left">{t(`documents.${item.id}.title`)}</span>
                     </div>
-                    <span className="font-medium text-sm text-left">{item.title}</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-4">
-                  <p className="text-muted-foreground text-sm mb-3">
-                    {item.description}
-                  </p>
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Tips</p>
-                    <ul className="space-y-1.5">
-                      {item.tips.map((tip, index) => (
-                        <li key={index} className="text-xs flex items-start gap-2">
-                          <span className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                          {tip}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-4">
+                    <p className="text-muted-foreground text-sm mb-3">
+                      {t(`documents.${item.id}.description`)}
+                    </p>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('tips_label')}</p>
+                      <ul className="space-y-1.5">
+                        {(t(`documents.${item.id}.tips`, { returnObjects: true }) as string[]).map((tip, index) => (
+                          <li key={index} className="text-xs flex items-start gap-2">
+                            <span className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                            {tip}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
 
-      {/* External Link */}
-      <div className="mt-6">
-        <Button 
-          variant="outline" 
-          className="w-full h-11 gap-2"
-          onClick={() => window.open("https://www.cioins.co.in/ombudsman", "_blank")}
-        >
-          <ExternalLink className="h-4 w-4" />
-          Find Ombudsman Address
-        </Button>
+        {/* External Link */}
+        <div className="mt-6">
+          <Button
+            variant="outline"
+            className="w-full h-11 gap-2"
+            onClick={() => window.open("https://www.cioins.co.in/ombudsman", "_blank")}
+          >
+            <ExternalLink className="h-4 w-4" />
+            {t('find_ombudsman')}
+          </Button>
+        </div>
       </div>
     </div>
   );

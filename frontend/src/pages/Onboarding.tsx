@@ -10,9 +10,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes } from "@/hooks/useApi";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import type { InsuranceCompany } from "@/services/types";
 
 export default function Onboarding() {
+  const { t } = useTranslation('onboarding');
   const navigate = useNavigate();
   const { updateProfile } = useAuth();
   const [step, setStep] = useState(1);
@@ -123,11 +125,11 @@ export default function Onboarding() {
           <span className="text-white font-bold text-xl">ClaimChase</span>
         </div>
         <div className="text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Let's set up<br />your profile
+          <h2 className="text-3xl font-bold mb-4 whitespace-pre-line">
+            {t('left_panel.title')}
           </h2>
           <p className="text-white/80">
-            Quick setup to get you started with your insurance grievance.
+            {t('left_panel.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -140,16 +142,21 @@ export default function Onboarding() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 border-b flex items-center gap-4">
-          <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="flex-1 flex gap-2">
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 1 ? "bg-primary" : "bg-muted")} />
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 2 ? "bg-primary" : "bg-muted")} />
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 3 ? "bg-primary" : "bg-muted")} />
+        <div className="lg:hidden p-4 border-b">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+            <span className="text-sm text-muted-foreground">{step}/3</span>
           </div>
-          <span className="text-sm text-muted-foreground">{step}/3</span>
+          <div className="flex items-center gap-4">
+            <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex-1 flex gap-2">
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 1 ? "bg-primary" : "bg-muted")} />
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 2 ? "bg-primary" : "bg-muted")} />
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 3 ? "bg-primary" : "bg-muted")} />
+            </div>
+          </div>
         </div>
 
         {/* Content */}
@@ -166,13 +173,13 @@ export default function Onboarding() {
 
             {step === 1 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Tell us about yourself</h1>
-                <p className="text-muted-foreground mb-8">We need some basic info to get started.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step1.title')}</h1>
+                <p className="text-muted-foreground mb-8">{t('step1.subtitle')}</p>
 
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">{t('step1.first_name')}</Label>
                       <Input 
                         id="firstName"
                         placeholder="Saurabh"
@@ -182,7 +189,7 @@ export default function Onboarding() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">{t('step1.last_name')}</Label>
                       <Input 
                         id="lastName"
                         placeholder="Shukla"
@@ -194,7 +201,7 @@ export default function Onboarding() {
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">{t('step1.phone')}</Label>
                     <Input 
                       id="phone"
                       type="tel"
@@ -224,14 +231,14 @@ export default function Onboarding() {
 
             {step === 2 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Select Insurance Company</h1>
-                <p className="text-muted-foreground mb-6">Choose the company you have a policy with.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step2.title')}</h1>
+                <p className="text-muted-foreground mb-6">{t('step2.subtitle')}</p>
 
                 {/* Search */}
                 <div className="relative mb-6">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search companies..."
+                    placeholder={t('step2.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 h-11"
@@ -239,15 +246,15 @@ export default function Onboarding() {
                 </div>
 
                 {isLoading ? (
-                  <div className="text-center py-12 text-muted-foreground">Loading companies...</div>
+                  <div className="text-center py-12 text-muted-foreground">{t('step2.loading')}</div>
                 ) : filteredCompanies.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">No companies found.</div>
+                  <div className="text-center py-12 text-muted-foreground">{t('step2.no_results')}</div>
                 ) : (
                   <div className="space-y-6 max-h-[450px] overflow-y-auto pr-2">
                     {/* Popular Companies - Cards */}
                     {popularCompanies.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">Popular Companies</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('step2.popular')}</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {popularCompanies.map((company: InsuranceCompany) => (
                             <Card
@@ -277,7 +284,7 @@ export default function Onboarding() {
                     {/* Other Companies - List */}
                     {otherCompanies.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">All Companies</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('step2.all')}</h3>
                         <div className="space-y-2">
                           {otherCompanies.map((company: InsuranceCompany) => (
                             <div
@@ -310,8 +317,8 @@ export default function Onboarding() {
 
             {step === 3 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">What's your problem?</h1>
-                <p className="text-muted-foreground mb-6">Select the type of insurance issue you're facing.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step3.title')}</h1>
+                <p className="text-muted-foreground mb-6">{t('step3.subtitle')}</p>
 
                 <div className="space-y-3">
                   {insuranceTypes.map((problem) => (
@@ -339,10 +346,10 @@ export default function Onboarding() {
                   {/* Other text field */}
                   {selectedProblem === "other" && (
                     <div className="mt-4 animate-fade-in">
-                      <Label htmlFor="otherProblem">Please specify your problem</Label>
+                      <Label htmlFor="otherProblem">{t('step3.title')}</Label>
                       <Textarea
                         id="otherProblem"
-                        placeholder="Describe your insurance issue..."
+                        placeholder={t('step3.other_placeholder')}
                         value={otherProblemText}
                         onChange={(e) => setOtherProblemText(e.target.value)}
                         className="mt-2 min-h-[100px]"
@@ -364,7 +371,7 @@ export default function Onboarding() {
               onClick={handleNext}
               disabled={!canProceed || isSaving}
             >
-              {isSaving ? "Saving..." : step === 3 ? "Complete Setup" : "Continue"}
+              {isSaving ? t('actions.saving') : step === 3 ? t('actions.get_started') : t('actions.continue')}
             </Button>
           </div>
         </div>

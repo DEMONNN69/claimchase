@@ -11,6 +11,7 @@ import { useCreateCase, useInsuranceCompanies } from "@/hooks/useApi";
 import { caseAPI } from "@/services/cases";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Command,
   CommandEmpty,
@@ -55,6 +56,7 @@ Regards,
 [Your Name]`;
 
 export default function Drafter() {
+  const { t } = useTranslation('drafter');
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -187,30 +189,38 @@ export default function Drafter() {
   };
 
   return (
-    <div className="p-5 lg:p-8 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-xl lg:text-2xl font-bold">
-            {caseId ? "Edit Grievance" : "Grievance Drafter"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {caseId ? "Review and send your grievance" : "Draft and send your formal grievance"}
-          </p>
+    <div className="min-h-screen">
+      {/* Mobile Navbar - Only visible on mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
         </div>
       </div>
+
+      <div className="p-5 lg:p-8 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-xl lg:text-2xl font-bold">
+              {caseId ? t('edit_title') : t('title')}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {caseId ? t('edit_subtitle') : t('subtitle')}
+            </p>
+          </div>
+        </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Show loading state while fetching case data */}
         {caseId && loadingCase ? (
           <div className="lg:col-span-3 flex justify-center py-12">
-            <div className="text-muted-foreground">Loading case details...</div>
+            <div className="text-muted-foreground">{t('loading')}</div>
           </div>
         ) : (
           <>
@@ -220,13 +230,13 @@ export default function Drafter() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                Case Details
+                {t('case_details.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Insurance Company */}
               <div>
-                <Label className="text-sm">Insurance Company *</Label>
+                <Label className="text-sm">{t('case_details.insurance_company')} *</Label>
                 <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
                   <PopoverTrigger asChild>
                     <Button
@@ -237,7 +247,7 @@ export default function Drafter() {
                       {selectedCompany ? (
                         <span className="truncate">{selectedCompany.name}</span>
                       ) : (
-                        <span className="text-muted-foreground">Select company...</span>
+                        <span className="text-muted-foreground">{t('case_details.select_company')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -246,7 +256,7 @@ export default function Drafter() {
                       <CommandInput placeholder="Search..." />
                       <CommandList>
                         <CommandEmpty>
-                          {loadingCompanies ? "Loading..." : "No companies found."}
+                          {loadingCompanies ? t('loading') : t('case_details.no_companies')}
                         </CommandEmpty>
                         <CommandGroup>
                           {companies.map((company: InsuranceCompany) => (
@@ -281,9 +291,9 @@ export default function Drafter() {
 
               {/* Policy Number */}
               <div>
-                <Label className="text-sm">Policy Number *</Label>
+                <Label className="text-sm">{t('case_details.policy_number')} *</Label>
                 <Input 
-                  placeholder="POL123456"
+                  placeholder={t('case_details.policy_placeholder')}
                   value={formData.policy_number}
                   onChange={(e) => handleInputChange("policy_number", e.target.value)}
                   className="mt-2 h-11"
@@ -292,7 +302,7 @@ export default function Drafter() {
 
               {/* Date */}
               <div>
-                <Label className="text-sm">Date of Incident</Label>
+                <Label className="text-sm">{t('case_details.incident_date')}</Label>
                 <Input 
                   type="date"
                   value={formData.date_of_incident}
@@ -310,14 +320,14 @@ export default function Drafter() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Email Template
+                {t('email_draft.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Subject */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm">Subject</Label>
+                  <Label className="text-sm">{t('email_draft.subject')}</Label>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -338,7 +348,7 @@ export default function Drafter() {
               {/* Body */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm">Body</Label>
+                  <Label className="text-sm">{t('email_draft.body')}</Label>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -367,9 +377,9 @@ export default function Drafter() {
               disabled={isCreatingCase || isSendingEmail || createCaseMutation.isPending}
             >
               <Send className="h-4 w-4" />
-              {isCreatingCase ? "Creating Case..." : 
-               isSendingEmail ? "Sending Email..." : 
-               caseId ? "Send Grievance Email" : "Create & Send Email"}
+              {isCreatingCase ? t('actions.creating') : 
+               isSendingEmail ? t('actions.sending') : 
+               caseId ? t('actions.send') : t('actions.send')}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
               {!user?.gmail_connected ? 
@@ -382,18 +392,19 @@ export default function Drafter() {
             {user?.gmail_connected ? (
               <div className="flex items-center gap-2 mt-3 text-sm text-green-600">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Gmail connected: {user.gmail_email}
+                Gmail: {user.gmail_email}
               </div>
             ) : (
               <div className="flex items-center gap-2 mt-3 text-sm text-orange-600">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                Gmail not connected - go to Settings
+                {t('gmail.connect_prompt')}
               </div>
             )}
           </div>
         </div>
         </>
         )}
+      </div>
       </div>
     </div>
   );

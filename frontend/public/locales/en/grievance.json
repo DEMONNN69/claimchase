@@ -1,0 +1,60 @@
+{
+  "left_panel": {
+    "title": "File Your\nGrievance",
+    "subtitle": "Organize your case details and supporting documents in one place.",
+    "features": {
+      "simple": {
+        "title": "Simple Process",
+        "subtitle": "3 easy steps to file"
+      },
+      "secure": {
+        "title": "Secure Upload",
+        "subtitle": "All documents encrypted"
+      },
+      "professional": {
+        "title": "Professional Letters",
+        "subtitle": "Auto-generated templates"
+      }
+    }
+  },
+  "step1": {
+    "title": "Incident Details",
+    "subtitle": "Tell us about the incident and your policy.",
+    "incident_date": "Date of Incident",
+    "policy_number": "Policy Number",
+    "claim_amount": "Claim Amount (Optional)",
+    "description": "Describe what happened",
+    "description_placeholder": "Explain the incident and why you believe your claim should be approved..."
+  },
+  "step2": {
+    "title": "Upload Documents",
+    "subtitle": "Add supporting documents for your case.",
+    "upload_area": {
+      "title": "Upload Documents",
+      "subtitle": "Drag and drop or click to upload",
+      "formats": "PDF, JPG, PNG up to 10MB"
+    },
+    "uploaded": "Uploaded Documents"
+  },
+  "step3": {
+    "title": "Review & Submit",
+    "subtitle": "Review your grievance details before submitting.",
+    "incident_details": "Incident Details",
+    "documents": "Documents",
+    "documents_count": "{{count}} document(s) attached"
+  },
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "submit": "Submit Grievance",
+    "submitting": "Submitting..."
+  },
+  "messages": {
+    "creating": "Creating your grievance...",
+    "uploading": "Uploading {{count}} document(s)...",
+    "success": "Grievance created successfully!",
+    "success_with_docs": "Case created with {{count}} document(s)!",
+    "upload_warning": "Case created, but some documents failed to upload",
+    "error": "Failed to create grievance. Please try again."
+  }
+}

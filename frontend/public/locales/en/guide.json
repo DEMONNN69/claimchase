@@ -1,0 +1,38 @@
+{
+  "title": "Ombudsman Guide",
+  "subtitle": "Documents needed for your Ombudsman complaint",
+  "pro_tip": "Pro Tip",
+  "pro_tip_text": "Keep all documents in PDF format for easy submission.",
+  "required_documents": "Required Documents",
+  "tips_label": "Tips",
+  "find_ombudsman": "Find Ombudsman Address",
+  "documents": {
+    "rejection": {
+      "title": "Rejection Letter",
+      "description": "The official letter from your insurer stating the reason for claim rejection.",
+      "tips": [
+        "Request in writing if not received",
+        "Keep both email and physical copies",
+        "Note the date received"
+      ]
+    },
+    "policy": {
+      "title": "Policy Copy",
+      "description": "Your complete insurance policy document including terms and conditions.",
+      "tips": [
+        "Check for latest version",
+        "Highlight relevant clauses",
+        "Keep endorsements attached"
+      ]
+    },
+    "kyc": {
+      "title": "KYC Documents",
+      "description": "Identity and address proof required for the Ombudsman complaint.",
+      "tips": [
+        "Aadhaar or PAN card copy",
+        "Recent passport photo",
+        "Address proof if different"
+      ]
+    }
+  }
+}

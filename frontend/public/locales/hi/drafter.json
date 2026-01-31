@@ -1,0 +1,47 @@
+{
+  "title": "शिकायत ड्राफ्टर",
+  "edit_title": "शिकायत संपादित करें",
+  "subtitle": "अपनी औपचारिक शिकायत लिखें और भेजें",
+  "edit_subtitle": "अपनी शिकायत की समीक्षा करें और भेजें",
+  "loading": "केस विवरण लोड हो रहा है...",
+  "case_details": {
+    "title": "केस विवरण",
+    "insurance_company": "बीमा कंपनी",
+    "select_company": "कंपनी चुनें...",
+    "no_companies": "कोई कंपनी नहीं मिली।",
+    "policy_number": "पॉलिसी नंबर",
+    "policy_placeholder": "जैसे, POL123456",
+    "insurance_type": "बीमा प्रकार",
+    "incident_date": "घटना की तारीख"
+  },
+  "email_draft": {
+    "title": "ईमेल ड्राफ्ट",
+    "subject": "विषय",
+    "body": "मुख्य भाग",
+    "copy_subject": "विषय कॉपी करें",
+    "copy_body": "मुख्य भाग कॉपी करें",
+    "copied": "कॉपी हो गया!"
+  },
+  "actions": {
+    "back": "वापस",
+    "send": "शिकायत ईमेल भेजें",
+    "sending": "भेजा जा रहा है...",
+    "creating": "केस बन रहा है..."
+  },
+  "gmail": {
+    "not_connected": "ईमेल भेजने के लिए कृपया अपना Gmail खाता कनेक्ट करें",
+    "connect_prompt": "सेटिंग्स में Gmail कनेक्ट करें"
+  },
+  "messages": {
+    "fill_required": "कृपया सभी आवश्यक फ़ील्ड भरें",
+    "case_created": "केस सफलतापूर्वक बनाया गया!",
+    "email_sent": "शिकायत ईमेल सफलतापूर्वक भेजी गई!",
+    "email_failed": "ईमेल भेजने में विफल",
+    "error": "केस प्रोसेस करने और ईमेल भेजने में विफल"
+  },
+  "insurance_types": {
+    "health": "स्वास्थ्य",
+    "life": "जीवन",
+    "general": "सामान्य"
+  }
+}

@@ -26,7 +26,7 @@ i18n
 
     supportedLngs: ['en', 'hi', 'mr', 'gu'],
     
-    ns: ['common', 'settings', 'dashboard', 'auth', 'cases', 'landing'],
+    ns: ['common', 'settings', 'dashboard', 'auth', 'cases', 'landing', 'guide', 'onboarding', 'grievance', 'drafter'],
     defaultNS: 'common',
   });
 

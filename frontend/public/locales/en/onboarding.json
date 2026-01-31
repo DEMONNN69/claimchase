@@ -1,0 +1,33 @@
+{
+  "left_panel": {
+    "title": "Let's set up\nyour profile",
+    "subtitle": "Quick setup to get you started with your insurance grievance."
+  },
+  "step1": {
+    "title": "Tell us about yourself",
+    "subtitle": "We need some basic info to get started.",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "phone": "Phone Number"
+  },
+  "step2": {
+    "title": "Select Insurance Company",
+    "subtitle": "Choose the company you have a policy with.",
+    "search_placeholder": "Search companies...",
+    "loading": "Loading companies...",
+    "no_results": "No companies found.",
+    "popular": "Popular Companies",
+    "all": "All Companies"
+  },
+  "step3": {
+    "title": "What's your problem?",
+    "subtitle": "Select the type of issue you're facing.",
+    "other_placeholder": "Please describe your issue..."
+  },
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "get_started": "Get Started",
+    "saving": "Saving..."
+  }
+}

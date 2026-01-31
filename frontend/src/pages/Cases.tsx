@@ -84,6 +84,13 @@ export default function Cases() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Mobile Navbar - Only visible on mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">

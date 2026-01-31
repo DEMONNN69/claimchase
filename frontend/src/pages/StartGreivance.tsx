@@ -10,8 +10,10 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { caseAPI } from "@/services/cases";
+import { useTranslation } from "react-i18next";
 
 export default function StartGreivance() {
+  const { t } = useTranslation('grievance');
   const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
@@ -134,32 +136,32 @@ export default function StartGreivance() {
           <span className="text-white font-bold text-xl">ClaimChase</span>
         </div>
         <div className="text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            File Your<br />Grievance
+          <h2 className="text-3xl font-bold mb-4 whitespace-pre-line">
+            {t('left_panel.title')}
           </h2>
           <p className="text-white/80 mb-8">
-            Organize your case details and supporting documents in one place.
+            {t('left_panel.subtitle')}
           </p>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-white/80 flex-shrink-0 mt-1" />
               <div>
-                <p className="font-medium">Simple Process</p>
-                <p className="text-sm text-white/70">3 easy steps to file</p>
+                <p className="font-medium">{t('left_panel.features.simple.title')}</p>
+                <p className="text-sm text-white/70">{t('left_panel.features.simple.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-white/80 flex-shrink-0 mt-1" />
               <div>
-                <p className="font-medium">Secure Upload</p>
-                <p className="text-sm text-white/70">All documents encrypted</p>
+                <p className="font-medium">{t('left_panel.features.secure.title')}</p>
+                <p className="text-sm text-white/70">{t('left_panel.features.secure.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-white/80 flex-shrink-0 mt-1" />
               <div>
-                <p className="font-medium">Professional Letters</p>
-                <p className="text-sm text-white/70">Auto-generated templates</p>
+                <p className="font-medium">{t('left_panel.features.professional.title')}</p>
+                <p className="text-sm text-white/70">{t('left_panel.features.professional.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -174,16 +176,21 @@ export default function StartGreivance() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 border-b flex items-center gap-4">
-          <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="flex-1 flex gap-2">
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 1 ? "bg-primary" : "bg-muted")} />
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 2 ? "bg-primary" : "bg-muted")} />
-            <div className={cn("h-1.5 flex-1 rounded-full", step >= 3 ? "bg-primary" : "bg-muted")} />
+        <div className="lg:hidden p-4 border-b">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+            <span className="text-sm text-muted-foreground">Step {step}/3</span>
           </div>
-          <span className="text-sm text-muted-foreground">{step}/3</span>
+          <div className="flex items-center gap-4">
+            <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex-1 flex gap-2">
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 1 ? "bg-primary" : "bg-muted")} />
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 2 ? "bg-primary" : "bg-muted")} />
+              <div className={cn("h-1.5 flex-1 rounded-full", step >= 3 ? "bg-primary" : "bg-muted")} />
+            </div>
+          </div>
         </div>
 
         {/* Content */}
@@ -195,18 +202,18 @@ export default function StartGreivance() {
               className="hidden lg:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="text-sm">Back</span>
+              <span className="text-sm">{t('actions.back')}</span>
             </button>
 
             {/* Step 1: Incident Details */}
             {step === 1 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Incident Details</h1>
-                <p className="text-muted-foreground mb-8">Tell us about the incident and your policy.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step1.title')}</h1>
+                <p className="text-muted-foreground mb-8">{t('step1.subtitle')}</p>
 
                 <div className="space-y-5">
                   <div>
-                    <Label htmlFor="incident_date">Date of Incident</Label>
+                    <Label htmlFor="incident_date">{t('step1.incident_date')}</Label>
                     <Input 
                       id="incident_date"
                       type="date"
@@ -217,7 +224,7 @@ export default function StartGreivance() {
                   </div>
 
                   <div>
-                    <Label htmlFor="policy_number">Policy Number</Label>
+                    <Label htmlFor="policy_number">{t('step1.policy_number')}</Label>
                     <Input 
                       id="policy_number"
                       placeholder="e.g., POL123456789"
@@ -228,7 +235,7 @@ export default function StartGreivance() {
                   </div>
 
                   <div>
-                    <Label htmlFor="claim_amount">Claim Amount (Optional)</Label>
+                    <Label htmlFor="claim_amount">{t('step1.claim_amount')}</Label>
                     <div className="relative mt-2">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
                       <Input 
@@ -243,10 +250,10 @@ export default function StartGreivance() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">What Happened?</Label>
+                    <Label htmlFor="description">{t('step1.description')}</Label>
                     <Textarea 
                       id="description"
-                      placeholder="Describe the incident in detail..."
+                      placeholder={t('step1.description_placeholder')}
                       value={incidentData.description}
                       onChange={(e) => setIncidentData(prev => ({ ...prev, description: e.target.value }))}
                       className="mt-2 min-h-[120px]"
@@ -259,8 +266,8 @@ export default function StartGreivance() {
             {/* Step 2: Upload Documents */}
             {step === 2 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Supporting Documents</h1>
-                <p className="text-muted-foreground mb-8">Upload receipts, policy copy, rejection letters, etc.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step2.title')}</h1>
+                <p className="text-muted-foreground mb-8">{t('step2.subtitle')}</p>
 
                 <div className="space-y-5">
                   {/* Upload Area */}
@@ -278,15 +285,15 @@ export default function StartGreivance() {
                           <Upload className="h-6 w-6 text-primary" />
                         </div>
                       </div>
-                      <p className="font-semibold mb-1">Click to upload or drag and drop</p>
-                      <p className="text-sm text-muted-foreground">PDF, images, up to 10MB each</p>
+                      <p className="font-semibold mb-1">{t('step2.upload_area.subtitle')}</p>
+                      <p className="text-sm text-muted-foreground">{t('step2.upload_area.formats')}</p>
                     </label>
                   </div>
 
                   {/* Uploaded Documents */}
                   {documents.length > 0 && (
                     <div className="space-y-2">
-                      <p className="font-medium text-sm">Uploaded Documents ({documents.length})</p>
+                      <p className="font-medium text-sm">{t('step2.uploaded')} ({documents.length})</p>
                       <div className="space-y-2">
                         {documentNames.map((name, index) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -316,26 +323,26 @@ export default function StartGreivance() {
             {/* Step 3: Review */}
             {step === 3 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Review Your Details</h1>
-                <p className="text-muted-foreground mb-8">Please review before creating your grievance.</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step3.title')}</h1>
+                <p className="text-muted-foreground mb-8">{t('step3.subtitle')}</p>
 
                 <div className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Incident Information</CardTitle>
+                      <CardTitle className="text-base">{t('step3.incident_details')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">Date of Incident</p>
+                        <p className="text-sm text-muted-foreground">{t('step1.incident_date')}</p>
                         <p className="font-medium">{incidentData.incident_date}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Policy Number</p>
+                        <p className="text-sm text-muted-foreground">{t('step1.policy_number')}</p>
                         <p className="font-medium">{incidentData.policy_number}</p>
                       </div>
                       {incidentData.claim_amount && (
                         <div>
-                          <p className="text-sm text-muted-foreground">Claim Amount</p>
+                          <p className="text-sm text-muted-foreground">{t('step1.claim_amount')}</p>
                           <p className="font-medium">₹{incidentData.claim_amount}</p>
                         </div>
                       )}
@@ -348,7 +355,7 @@ export default function StartGreivance() {
 
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Documents Attached</CardTitle>
+                      <CardTitle className="text-base">{t('step3.documents')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
@@ -358,7 +365,7 @@ export default function StartGreivance() {
                             <span>{name}</span>
                           </div>
                         ))}
-                        <p className="text-xs text-muted-foreground pt-2">{documents.length} file(s) uploaded</p>
+                        <p className="text-xs text-muted-foreground pt-2">{t('step3.documents_count', { count: documents.length })}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -389,7 +396,7 @@ export default function StartGreivance() {
                 isSaving
               }
             >
-              {isSaving ? "Creating..." : step === 3 ? "Create Grievance" : "Next"}
+              {isSaving ? t('actions.submitting') : step === 3 ? t('actions.submit') : t('actions.continue')}
             </Button>
           </div>
         </div>

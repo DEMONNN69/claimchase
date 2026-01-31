@@ -1,0 +1,47 @@
+{
+  "title": "Grievance Drafter",
+  "edit_title": "Edit Grievance",
+  "subtitle": "Draft and send your formal grievance",
+  "edit_subtitle": "Review and send your grievance",
+  "loading": "Loading case details...",
+  "case_details": {
+    "title": "Case Details",
+    "insurance_company": "Insurance Company",
+    "select_company": "Select company...",
+    "no_companies": "No companies found.",
+    "policy_number": "Policy Number",
+    "policy_placeholder": "e.g., POL123456",
+    "insurance_type": "Insurance Type",
+    "incident_date": "Date of Incident"
+  },
+  "email_draft": {
+    "title": "Email Draft",
+    "subject": "Subject",
+    "body": "Body",
+    "copy_subject": "Copy Subject",
+    "copy_body": "Copy Body",
+    "copied": "Copied!"
+  },
+  "actions": {
+    "back": "Back",
+    "send": "Send Grievance Email",
+    "sending": "Sending...",
+    "creating": "Creating Case..."
+  },
+  "gmail": {
+    "not_connected": "Please connect your Gmail account to send emails",
+    "connect_prompt": "Connect Gmail in Settings"
+  },
+  "messages": {
+    "fill_required": "Please fill in all required fields",
+    "case_created": "Case created successfully!",
+    "email_sent": "Grievance email sent successfully!",
+    "email_failed": "Failed to send email",
+    "error": "Failed to process case and send email"
+  },
+  "insurance_types": {
+    "health": "Health",
+    "life": "Life",
+    "general": "General"
+  }
+}
