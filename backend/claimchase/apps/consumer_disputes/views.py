@@ -40,7 +40,12 @@ class DisputeCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         """Filter to show only top-level categories by default"""
-        queryset = super().get_queryset()
+        # Optimize with select_related for parent and prefetch for subcategories
+        queryset = DisputeCategory.objects.filter(is_active=True).select_related(
+            'parent'
+        ).prefetch_related(
+            'subcategories'
+        )
         
         # Option to filter by parent
         parent = self.request.query_params.get('parent', None)
@@ -96,7 +101,11 @@ class EntityViewSet(viewsets.ReadOnlyModelViewSet):
         return EntitySerializer
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # Optimize with prefetch_related for M2M categories relationship
+        queryset = Entity.objects.filter(is_active=True).prefetch_related(
+            'categories',
+            'categories__parent'
+        )
         
         # Filter by category
         category_id = self.request.query_params.get('category', None)
@@ -124,11 +133,20 @@ class ConsumerDisputeViewSet(viewsets.ModelViewSet):
         """Users can only see their own disputes"""
         user = self.request.user
         
+        # Optimize with select_related and prefetch_related
+        queryset = ConsumerDispute.objects.select_related(
+            'user',
+            'category',
+            'category__parent',
+            'entity'
+        ).prefetch_related(
+            'documents',
+            'documents__uploaded_by'
+        )
+        
         # Staff can see all disputes
-        if user.is_staff:
-            queryset = ConsumerDispute.objects.all()
-        else:
-            queryset = ConsumerDispute.objects.filter(user=user)
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
         
         # Filter by status
         status_filter = self.request.query_params.get('status', None)

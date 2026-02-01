@@ -62,9 +62,23 @@ class CaseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filter cases to show only user's cases (unless admin)."""
         user = self.request.user
+        
+        # Base queryset with optimized queries
+        queryset = Case.objects.select_related(
+            'user',
+            'insurance_company'
+        ).prefetch_related(
+            'timeline_events',
+            'timeline_events__created_by',
+            'emails',
+            'emails__created_by',
+            'documents',
+            'documents__uploaded_by'
+        )
+        
         if user.is_staff:
-            return Case.objects.all()
-        return Case.objects.filter(user=user)
+            return queryset
+        return queryset.filter(user=user)
     
     def get_serializer_class(self):
         """Use different serializers for list, detail, and create views."""
@@ -552,9 +566,18 @@ class CaseTimelineViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Filter timeline events to show only for user's cases."""
         user = self.request.user
+        
+        # Optimize with select_related for case and user relationships
+        queryset = CaseTimeline.objects.select_related(
+            'case',
+            'case__user',
+            'case__insurance_company',
+            'created_by'
+        )
+        
         if user.is_staff:
-            return CaseTimeline.objects.all()
-        return CaseTimeline.objects.filter(case__user=user).order_by('-created_at')
+            return queryset.order_by('-created_at')
+        return queryset.filter(case__user=user).order_by('-created_at')
 
 
 class EmailTrackingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -569,9 +592,18 @@ class EmailTrackingViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Filter emails to show only for user's cases."""
         user = self.request.user
+        
+        # Optimize with select_related for case and user relationships
+        queryset = EmailTracking.objects.select_related(
+            'case',
+            'case__user',
+            'case__insurance_company',
+            'created_by'
+        )
+        
         if user.is_staff:
-            return EmailTracking.objects.all()
-        return EmailTracking.objects.filter(case__user=user).order_by('-created_at')
+            return queryset.order_by('-created_at')
+        return queryset.filter(case__user=user).order_by('-created_at')
 
 
 class CaseStatusView:
@@ -731,7 +763,10 @@ def get_notifications(request):
     unread_only = request.query_params.get('unread_only', 'false').lower() == 'true'
     limit = int(request.query_params.get('limit', 20))
     
-    notifications = Notification.objects.filter(user=request.user)
+    # Optimize with select_related for case and user relationships
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).select_related('case', 'case__insurance_company')
     
     if unread_only:
         notifications = notifications.filter(is_read=False)
