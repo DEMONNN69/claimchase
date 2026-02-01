@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from "@/components/NotificationBell";
+import { DashboardSkeleton } from "@/components/LoadingSkeletons";
 import {
   Dialog,                                                             
   DialogContent,
@@ -93,6 +94,11 @@ export default function Dashboard() {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  // Show skeleton while loading
+  if (casesLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="min-h-screen">
@@ -190,13 +196,7 @@ export default function Dashboard() {
         </div>
 
       {/* Active Cases Summary */}
-      {casesLoading ? (
-        <Card className="mb-6">
-          <CardContent className="p-8 text-center">
-            <p className="text-muted-foreground">{t('dashboard:loading_cases')}</p>
-          </CardContent>
-        </Card>
-      ) : activeCase ? (
+      {activeCase ? (
           <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
             <CardContent className="p-4 lg:p-6">
               <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">

@@ -29,7 +29,24 @@ import CaseDetail from "./pages/CaseDetail";
 import Cases from "./pages/Cases";
 import DisputeDetail from "./pages/DisputeDetail";
 
-const queryClient = new QueryClient();
+// Optimized React Query configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Global defaults for all queries
+      staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh
+      gcTime: 10 * 60 * 1000, // 10 minutes - cached data lifetime (formerly cacheTime)
+      retry: 1, // Retry failed requests once
+      refetchOnWindowFocus: false, // Don't refetch when user returns to tab
+      refetchOnReconnect: true, // Refetch when internet reconnects
+      refetchOnMount: true, // Refetch when component mounts if data is stale
+    },
+    mutations: {
+      // Global defaults for mutations
+      retry: 0, // Don't retry mutations
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -1,6 +1,12 @@
 /**
  * React Query Hooks for ClaimChase API
  * Handles data fetching, caching, and mutations
+ * 
+ * StaleTime Strategy:
+ * - Static data (insurance companies, types): 1 hour
+ * - Semi-static data (categories, entities): 30 minutes  
+ * - User data (cases, disputes): 5 minutes
+ * - Frequently changing (case status, notifications): 1-2 minutes
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

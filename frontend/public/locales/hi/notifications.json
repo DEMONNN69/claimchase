@@ -1,0 +1,11 @@
+{
+  "title": "सूचनाएं",
+  "mark_all_read": "सभी को पढ़ा हुआ चिह्नित करें",
+  "no_notifications": "अभी तक कोई सूचना नहीं",
+  "time_ago": {
+    "just_now": "अभी",
+    "minutes": "{{count}} मिनट पहले",
+    "hours": "{{count}} घंटे पहले",
+    "days": "{{count}} दिन पहले"
+  }
+}

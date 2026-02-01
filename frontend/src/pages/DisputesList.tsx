@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConsumerDisputes, useDisputeStats } from "@/hooks/useApi";
+import { DisputesListSkeleton } from "@/components/LoadingSkeletons";
 import {
   Select,
   SelectContent,
@@ -154,9 +155,7 @@ export default function DisputesList() {
 
       {/* Disputes List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
-        </div>
+        <DisputesListSkeleton />
       ) : filteredDisputes && filteredDisputes.length > 0 ? (
         <div className="space-y-2">
           {filteredDisputes.map((dispute) => {

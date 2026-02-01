@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   getNotifications,
@@ -18,6 +19,7 @@ import {
 } from "@/services/notifications";
 
 export function NotificationBell() {
+  const { t } = useTranslation("notifications");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -36,11 +38,22 @@ export function NotificationBell() {
   useEffect(() => {
     fetchNotifications();
     
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
+    // Optimized polling: only poll when dropdown is open
+    const interval = setInterval(() => {
+      if (isOpen) {
+        fetchNotifications(); // Fetch every 10s when open
+      }
+    }, 10000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isOpen]);
+
+  // Fetch when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen]);
 
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read
@@ -85,10 +98,10 @@ export function NotificationBell() {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) return "Just now";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    if (seconds < 60) return t("time_ago.just_now");
+    if (seconds < 3600) return t("time_ago.minutes", { count: Math.floor(seconds / 60) });
+    if (seconds < 86400) return t("time_ago.hours", { count: Math.floor(seconds / 3600) });
+    if (seconds < 604800) return t("time_ago.days", { count: Math.floor(seconds / 86400) });
     return date.toLocaleDateString();
   };
 
@@ -109,13 +122,13 @@ export function NotificationBell() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Notifications</h3>
+          <h3 className="font-semibold">{t("title")}</h3>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllAsRead}
               className="text-xs text-primary hover:underline"
             >
-              Mark all read
+              {t("mark_all_read")}
             </button>
           )}
         </div>
@@ -124,7 +137,7 @@ export function NotificationBell() {
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
-              <p className="text-sm">No notifications yet</p>
+              <p className="text-sm">{t("no_notifications")}</p>
             </div>
           ) : (
             <div className="divide-y">

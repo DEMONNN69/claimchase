@@ -24,6 +24,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { caseAPI } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { CaseDetailSkeleton } from "@/components/LoadingSkeletons";
 import {
   Select,
   SelectContent,
@@ -152,11 +153,7 @@ export default function CaseDetail() {
     }
   };
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-      </div>
-    );
+    return <CaseDetailSkeleton />;
   }
 
   if (!caseData) {
