@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   Dialog,                                                             
   DialogContent,
@@ -99,8 +100,11 @@ export default function Dashboard() {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-6">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold text-primary">{t('common:app_name')}</h1>
-          <div className="text-sm text-muted-foreground">
-            {user?.first_name}
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <div className="text-sm text-muted-foreground">
+              {user?.first_name}
+            </div>
           </div>
         </div>
       </div>

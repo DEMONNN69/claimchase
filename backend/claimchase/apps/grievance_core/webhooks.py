@@ -173,9 +173,119 @@ def process_gmail_notification(user: CustomUser, new_history_id: str):
         logger.error(f"Error processing Gmail notification for {user.email}: {e}")
 
 
+def smart_match_email_to_case(user: CustomUser, msg_details: dict):
+    """
+    Attempt to match an email to a case using smart matching heuristics.
+    
+    Matching strategies:
+    1. Extract sender domain and match to insurance company
+    2. Find policy number in subject/body
+    3. Find case number in subject/body
+    
+    Args:
+        user: The user who received the email
+        msg_details: Dict with keys: from_email, subject, body, etc.
+    
+    Returns:
+        tuple: (Case object, match_type) or (None, None) if no match
+    """
+    import re
+    
+    from_email = msg_details['from_email']
+    subject = msg_details.get('subject', '')
+    body = msg_details.get('body', '')
+    
+    # Combine subject and body for searching
+    combined_text = f"{subject} {body}".lower()
+    
+    # Extract sender domain (e.g., "agent@insurance.com" -> "insurance.com")
+    sender_domain = None
+    if '@' in from_email:
+        sender_domain = from_email.split('@')[-1].lower().strip()
+    
+    # Get all active/pending cases for this user
+    from .models import Case
+    user_cases = Case.objects.filter(
+        user=user,
+        status__in=['pending', 'in_progress', 'awaiting_response']
+    ).select_related('insurance_company')
+    
+    matched_cases = []
+    
+    # Strategy 1: Match by case number (most specific)
+    # Look for patterns like "Case #123", "Case: 123", "Ref: 123"
+    case_number_patterns = [
+        r'case[:\s#]*([A-Z0-9\-]+)',
+        r'reference[:\s#]*([A-Z0-9\-]+)',
+        r'ref[:\s#]*([A-Z0-9\-]+)',
+    ]
+    
+    for pattern in case_number_patterns:
+        matches = re.findall(pattern, combined_text, re.IGNORECASE)
+        for potential_case_num in matches:
+            potential_case_num = potential_case_num.strip().upper()
+            case = user_cases.filter(case_number__iexact=potential_case_num).first()
+            if case:
+                return case, 'case_number'
+    
+    # Strategy 2: Match by policy number + sender domain
+    # Look for patterns like "Policy #123", "Policy: 123", numbers with dashes/slashes
+    policy_patterns = [
+        r'policy[:\s#]*([A-Z0-9\-/]+)',
+        r'policy number[:\s#]*([A-Z0-9\-/]+)',
+        r'\b([A-Z0-9]{5,20})\b',  # Generic alphanumeric (5-20 chars)
+    ]
+    
+    potential_policies = set()
+    for pattern in policy_patterns:
+        matches = re.findall(pattern, combined_text, re.IGNORECASE)
+        potential_policies.update([m.strip().upper() for m in matches])
+    
+    if sender_domain and potential_policies:
+        for policy_num in potential_policies:
+            # Try to find cases with this policy number where the insurance company's
+            # email domain matches the sender domain
+            for case in user_cases:
+                if case.policy_number and policy_num in case.policy_number.upper():
+                    # Check if insurance company domain matches
+                    if case.insurance_company and case.insurance_company.grievance_email:
+                        company_email = case.insurance_company.grievance_email.lower()
+                        if '@' in company_email:
+                            company_domain = company_email.split('@')[-1].strip()
+                            if sender_domain == company_domain or sender_domain.endswith(company_domain):
+                                matched_cases.append((case, 'policy_domain'))
+    
+    # Strategy 3: Match by sender domain only (least specific, multiple matches possible)
+    if sender_domain and not matched_cases:
+        for case in user_cases:
+            if case.insurance_company and case.insurance_company.grievance_email:
+                company_email = case.insurance_company.grievance_email.lower()
+                if '@' in company_email:
+                    company_domain = company_email.split('@')[-1].strip()
+                    if sender_domain == company_domain or sender_domain.endswith(company_domain):
+                        matched_cases.append((case, 'domain_only'))
+    
+    # If we have exactly one match, use it
+    if len(matched_cases) == 1:
+        return matched_cases[0]
+    
+    # If multiple matches, prefer the most recent case
+    if len(matched_cases) > 1:
+        most_recent = max(matched_cases, key=lambda x: x[0].updated_at)
+        logger.warning(f"Multiple cases matched for email from {from_email}, using most recent: {most_recent[0].case_number}")
+        return most_recent
+    
+    # No match found
+    return None, None
+
+
 def process_new_message(user: CustomUser, access_token: str, message_id: str, thread_to_case: dict):
     """
     Process a single new message and match it to a case if applicable.
+    
+    Uses smart matching:
+    1. First try thread_id match (direct reply)
+    2. If no match, try smart matching by insurance domain + policy number
     
     Args:
         user: The user who received the email
@@ -192,13 +302,6 @@ def process_new_message(user: CustomUser, access_token: str, message_id: str, th
             return
         
         thread_id = msg_details['thread_id']
-        
-        # Check if this thread belongs to one of our cases
-        if thread_id not in thread_to_case:
-            logger.debug(f"Message {message_id} not in a tracked thread")
-            return
-        
-        case = thread_to_case[thread_id]
         from_email = msg_details['from_email']
         
         # Skip if this is an email FROM the user (their own sent email)
@@ -211,17 +314,37 @@ def process_new_message(user: CustomUser, access_token: str, message_id: str, th
             logger.debug(f"Message {message_id} already tracked")
             return
         
-        # This is a reply to one of our cases!
-        logger.info(f"Reply detected for case {case.case_number} from {from_email}")
+        # Try to find matching case
+        case = None
+        match_type = None
         
-        # Create EmailTracking record
+        # Method 1: Direct thread match (reply to our email)
+        if thread_id in thread_to_case:
+            case = thread_to_case[thread_id]
+            match_type = 'thread_id'
+            logger.info(f"Thread match: Message {message_id} matched to case {case.case_number}")
+        
+        # Method 2: Smart matching (new email from insurance company)
+        if not case:
+            case, match_type = smart_match_email_to_case(user, msg_details)
+            if case:
+                logger.info(f"Smart match ({match_type}): Message {message_id} matched to case {case.case_number}")
+        
+        if not case:
+            logger.debug(f"Message {message_id} could not be matched to any case")
+            return
+        
+        # This is a reply or related email to one of our cases!
+        logger.info(f"Email detected for case {case.case_number} from {from_email} (match: {match_type})")
+        
+        # Create EmailTracking record (without storing email body for privacy)
         email_tracking = EmailTracking.objects.create(
             case=case,
             email_type='inbound',
             from_email=from_email,
             to_email=msg_details['to_email'] or user.gmail_email,
-            subject=msg_details['subject'],
-            body=msg_details['body'][:5000] if msg_details['body'] else '',  # Truncate to 5000 chars
+            subject=msg_details['subject'][:200] if msg_details['subject'] else 'Reply received',  # Only subject line
+            body='[Email content not stored for privacy compliance]',  # Don't store actual content
             status='delivered',
             sent_at=msg_details['date'] or timezone.now(),
             delivered_at=timezone.now(),
@@ -240,7 +363,7 @@ def process_new_message(user: CustomUser, access_token: str, message_id: str, th
         CaseTimeline.objects.create(
             case=case,
             event_type='email_received',
-            description=f'Reply received: {msg_details["subject"]}',
+            description=f'Reply received from {case.insurance_company_name}',
             old_value=old_status,
             new_value=case.status,
         )
@@ -254,109 +377,30 @@ def process_new_message(user: CustomUser, access_token: str, message_id: str, th
 
 def send_reply_notification(user: CustomUser, case: Case, email_details: dict):
     """
-    Send email notification to user about the reply received.
+    Create in-app notification about the reply received.
     
     Args:
         user: The user to notify
         case: The case that received a reply
-        email_details: Details of the received email
+        email_details: Details of the received email (not used for privacy)
     """
     try:
-        subject = f"📬 Reply Received - Case {case.case_number}"
+        from .models import Notification
         
-        # Create email body
-        message_html = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 20px; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">📬 New Reply Received!</h1>
-            </div>
-            
-            <div style="background: #f8fafc; padding: 20px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
-                <p style="color: #374151; font-size: 16px;">
-                    Hi {user.first_name or user.username},
-                </p>
-                
-                <p style="color: #374151; font-size: 16px;">
-                    Great news! You've received a reply on your grievance case.
-                </p>
-                
-                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0;">
-                    <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
-                        <strong>Case Number:</strong> {case.case_number}
-                    </p>
-                    <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
-                        <strong>Insurance Company:</strong> {case.insurance_company_name}
-                    </p>
-                    <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
-                        <strong>From:</strong> {email_details.get('from_email', 'Unknown')}
-                    </p>
-                    <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">
-                        <strong>Subject:</strong> {email_details.get('subject', 'No Subject')}
-                    </p>
-                </div>
-                
-                <p style="color: #374151; font-size: 16px;">
-                    <strong>Preview:</strong><br>
-                    <span style="color: #6b7280; font-style: italic;">
-                        "{email_details.get('snippet', 'No preview available')[:200]}..."
-                    </span>
-                </p>
-                
-                <div style="text-align: center; margin-top: 25px;">
-                    <a href="{settings.FRONTEND_URL}/cases/{case.id}" 
-                       style="background: #2563eb; color: white; padding: 12px 30px; 
-                              text-decoration: none; border-radius: 8px; font-weight: bold;
-                              display: inline-block;">
-                        View Full Reply
-                    </a>
-                </div>
-                
-                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-                
-                <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                    This is an automated notification from ClaimChase.<br>
-                    You're receiving this because you filed a grievance case.
-                </p>
-            </div>
-        </body>
-        </html>
-        """
-        
-        message_plain = f"""
-        New Reply Received - Case {case.case_number}
-        
-        Hi {user.first_name or user.username},
-        
-        Great news! You've received a reply on your grievance case.
-        
-        Case Number: {case.case_number}
-        Insurance Company: {case.insurance_company_name}
-        From: {email_details.get('from_email', 'Unknown')}
-        Subject: {email_details.get('subject', 'No Subject')}
-        
-        Preview:
-        "{email_details.get('snippet', 'No preview available')[:200]}..."
-        
-        View the full reply at: {settings.FRONTEND_URL}/cases/{case.id}
-        
-        --
-        This is an automated notification from ClaimChase.
-        """
-        
-        send_mail(
-            subject=subject,
-            message=message_plain,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=message_html,
-            fail_silently=True,
+        # Create in-app notification
+        Notification.objects.create(
+            user=user,
+            case=case,
+            type='email_reply',
+            title=f'Reply Received - {case.case_number}',
+            message=f'You have received a reply from {case.insurance_company_name} on your case.',
+            action_url=f'/cases/{case.id}',
         )
         
-        logger.info(f"Reply notification sent to {user.email} for case {case.case_number}")
+        logger.info(f"In-app notification created for {user.email} for case {case.case_number}")
         
     except Exception as e:
-        logger.error(f"Failed to send reply notification: {e}")
+        logger.error(f"Failed to create notification: {e}")
 
 
 def renew_gmail_watches():

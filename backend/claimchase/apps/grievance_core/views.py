@@ -715,3 +715,74 @@ def document_proxy(request, document_id):
         status=status.HTTP_404_NOT_FOUND
     )
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    """
+    Get all notifications for the authenticated user.
+    Query params:
+    - unread_only: true/false (default: false)
+    - limit: number of notifications to return (default: 20)
+    """
+    from .models import Notification
+    from django.core.paginator import Paginator
+    
+    unread_only = request.query_params.get('unread_only', 'false').lower() == 'true'
+    limit = int(request.query_params.get('limit', 20))
+    
+    notifications = Notification.objects.filter(user=request.user)
+    
+    if unread_only:
+        notifications = notifications.filter(is_read=False)
+    
+    # Paginate
+    paginator = Paginator(notifications, limit)
+    page_number = request.query_params.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    data = [{
+        'id': n.id,
+        'type': n.type,
+        'title': n.title,
+        'message': n.message,
+        'is_read': n.is_read,
+        'action_url': n.action_url,
+        'created_at': n.created_at.isoformat(),
+        'case_id': n.case_id if n.case else None,
+    } for n in page_obj]
+    
+    return Response({
+        'notifications': data,
+        'unread_count': Notification.objects.filter(user=request.user, is_read=False).count(),
+        'total_count': paginator.count,
+        'has_next': page_obj.has_next(),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, notification_id):
+    """Mark a specific notification as read."""
+    from .models import Notification
+    
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.mark_as_read()
+    
+    return Response({'success': True, 'message': 'Notification marked as read'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_all_notifications_read(request):
+    """Mark all notifications as read for the authenticated user."""
+    from .models import Notification
+    
+    updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    
+    return Response({
+        'success': True,
+        'message': f'{updated} notifications marked as read',
+        'updated_count': updated
+    })
+

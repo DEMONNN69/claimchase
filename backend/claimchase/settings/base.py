@@ -210,10 +210,12 @@ GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET', default='')
 GOOGLE_OAUTH_REDIRECT_URI = config('GOOGLE_OAUTH_REDIRECT_URI', default='http://localhost:8000/api/auth/gmail/callback/')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
+# Gmail OAuth Scopes - Minimal permissions for privacy compliance
+# gmail.send: Send emails on behalf of user
+# gmail.metadata: Read email headers/metadata only (NO body content)
 GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',
-    'https://www.googleapis.com/auth/gmail.readonly',
-    'https://www.googleapis.com/auth/gmail.modify',
+    'https://www.googleapis.com/auth/gmail.metadata',  # Metadata only, not readonly
 ]
 
 # Gmail Pub/Sub Configuration for incoming email notifications

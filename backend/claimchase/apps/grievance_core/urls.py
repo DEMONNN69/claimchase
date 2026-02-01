@@ -11,6 +11,9 @@ from .views import (
     EmailTrackingViewSet,
     get_insurance_types,
     document_proxy,
+    get_notifications,
+    mark_notification_read,
+    mark_all_notifications_read,
 )
 
 # Create router and register viewsets
@@ -25,5 +28,8 @@ app_name = 'grievance_core'
 urlpatterns = [
     path('insurance-types/', get_insurance_types, name='insurance-types'),
     path('documents/<int:document_id>/file/', document_proxy, name='document-proxy'),
+    path('notifications/', get_notifications, name='notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark-notification-read'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark-all-notifications-read'),
     path('', include(router.urls)),
 ]

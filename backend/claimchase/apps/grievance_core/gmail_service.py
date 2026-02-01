@@ -481,36 +481,20 @@ class GmailWatchService:
             creds = Credentials(token=access_token)
             service = build('gmail', 'v1', credentials=creds)
             
+            # Use metadata format for privacy compliance - only fetches headers, not body
             result = service.users().messages().get(
                 userId='me',
                 id=message_id,
-                format='full'
+                format='metadata',  # Only metadata, no body content
+                metadataHeaders=['From', 'To', 'Subject', 'Date']  # Specific headers only
             ).execute()
             
             # Parse headers
             headers = result.get('payload', {}).get('headers', [])
             header_dict = {h['name'].lower(): h['value'] for h in headers}
             
-            # Parse body
-            body = ''
-            payload = result.get('payload', {})
-            
-            # Check for simple body
-            if 'body' in payload and payload['body'].get('data'):
-                body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8', errors='ignore')
-            
-            # Check for multipart body
-            elif 'parts' in payload:
-                for part in payload['parts']:
-                    if part.get('mimeType') == 'text/plain':
-                        data = part.get('body', {}).get('data', '')
-                        if data:
-                            body = base64.urlsafe_b64decode(data).decode('utf-8', errors='ignore')
-                            break
-                    elif part.get('mimeType') == 'text/html' and not body:
-                        data = part.get('body', {}).get('data', '')
-                        if data:
-                            body = base64.urlsafe_b64decode(data).decode('utf-8', errors='ignore')
+            # Note: Body content is NOT fetched for privacy compliance (metadata format only)
+            # Only metadata (from, to, subject, date) is retrieved
             
             # Parse date
             date_str = header_dict.get('date', '')
@@ -527,8 +511,8 @@ class GmailWatchService:
                 'from_email': header_dict.get('from', ''),
                 'to_email': header_dict.get('to', ''),
                 'subject': header_dict.get('subject', '(No Subject)'),
-                'snippet': result.get('snippet', ''),
-                'body': body,
+                'snippet': result.get('snippet', ''),  # Gmail-generated snippet (safe)
+                'body': '',  # Not fetched for privacy compliance
                 'date': email_date,
                 'error': None,
             }

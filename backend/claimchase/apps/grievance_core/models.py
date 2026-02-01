@@ -449,6 +449,10 @@ class EmailTracking(models.Model):
     """
     Track emails sent and received related to a case.
     Records metadata: sender, recipient, subject, timestamps.
+    
+    PRIVACY NOTE: For inbound emails, body content is NOT stored for privacy compliance.
+    Users can view email content directly in their Gmail inbox.
+    Only outbound emails (sent by user) have body stored for reference.
     """
     
     EMAIL_TYPE_CHOICES = [
@@ -486,7 +490,9 @@ class EmailTracking(models.Model):
     )
     
     subject = models.CharField(max_length=255, help_text="Email subject")
-    body = models.TextField(help_text="Email body content")
+    body = models.TextField(
+        help_text="Email body content. For inbound emails, this is not stored for privacy compliance."
+    )
     
     status = models.CharField(
         max_length=20,
@@ -779,3 +785,40 @@ class Document(models.Model):
         self.verified_by = verified_by
         self.verified_at = timezone.now()
         self.save()
+
+
+class Notification(models.Model):
+    """
+    In-app notifications for users about case updates.
+    """
+    NOTIFICATION_TYPES = [
+        ('email_reply', 'Email Reply Received'),
+        ('status_change', 'Case Status Changed'),
+        ('document_uploaded', 'Document Uploaded'),
+        ('reminder', 'Reminder'),
+    ]
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications')
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    action_url = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
+    
+    def __str__(self):
+        return f"{self.type} - {self.user.username} - {self.title}"
+    
+    def mark_as_read(self):
+        """Mark notification as read."""
+        if not self.is_read:
+            self.is_read = True
+            self.save(update_fields=['is_read'])
