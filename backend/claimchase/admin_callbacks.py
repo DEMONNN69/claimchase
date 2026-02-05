@@ -40,6 +40,16 @@ def badge_callback_pending_reviews(request):
         return None
 
 
+def badge_callback_pending_expert_assignments(request):
+    """Return count of pending expert assignments."""
+    try:
+        from claimchase.apps.consumer_disputes.expert_models import DisputeAssignment
+        count = DisputeAssignment.objects.filter(status='pending').count()
+        return count if count > 0 else None
+    except Exception:
+        return None
+
+
 def badge_callback_documents(request):
     """Return count of documents pending review."""
     try:

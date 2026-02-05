@@ -17,9 +17,12 @@ import {
   CheckCircle,
   AlertCircle,
   FileEdit,
-  Eye
+  Eye,
+  Settings
 } from "lucide-react";
 import { useCases } from "@/hooks/useApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/NotificationBell";
 import { CasesListSkeleton } from "@/components/LoadingSkeletons";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +42,7 @@ const getProgressSteps = (status: string, t: any) => {
 export default function Cases() {
   const navigate = useNavigate();
   const { t } = useTranslation('cases');
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   
@@ -82,6 +86,16 @@ export default function Cases() {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => navigate("/settings")}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </div>
 

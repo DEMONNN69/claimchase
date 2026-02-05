@@ -20,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     full_name = serializers.CharField(required=False, allow_blank=True)
     is_ombudsman_eligible = serializers.BooleanField(read_only=True)
+    is_expert = serializers.SerializerMethodField()
     insurance_company = InsuranceCompanySimpleSerializer(read_only=True)
     insurance_company_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
@@ -42,6 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
             'is_verified',
             'is_ombudsman_eligible',
+            'is_expert',
             'document_count',
             'case_count',
             'insurance_company',
@@ -58,9 +60,14 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at',
             'is_verified',
             'is_ombudsman_eligible',
+            'is_expert',
             'gmail_connected',
             'gmail_email',
         )
+    
+    def get_is_expert(self, obj):
+        """Return whether user is a dispute expert."""
+        return obj.is_dispute_expert
     
     def to_representation(self, instance):
         """Add computed full_name to response."""

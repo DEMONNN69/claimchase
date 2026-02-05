@@ -442,6 +442,33 @@ UNFOLD = {
                 ],
             },
             # ══════════════════════════════════════════════════════════════
+            # EXPERT REVIEW
+            # ══════════════════════════════════════════════════════════════
+            {
+                "title": "🎓 Expert Review",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Assignments",
+                        "icon": "assignment",
+                        "link": "/admin/consumer_disputes/disputeassignment/",
+                        "badge": "claimchase.admin_callbacks.badge_callback_pending_expert_assignments",
+                        "badge_class": "bg-purple-600 text-white",
+                    },
+                    {
+                        "title": "Document Reviews",
+                        "icon": "rate_review",
+                        "link": "/admin/consumer_disputes/disputedocumentreview/",
+                    },
+                    {
+                        "title": "Expert Profiles",
+                        "icon": "school",
+                        "link": "/admin/consumer_disputes/expertprofile/",
+                    },
+                ],
+            },
+            # ══════════════════════════════════════════════════════════════
             # USER MANAGEMENT
             # ══════════════════════════════════════════════════════════════
             {

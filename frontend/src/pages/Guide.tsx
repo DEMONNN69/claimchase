@@ -1,4 +1,4 @@
-import { ExternalLink, FileText, Shield, User, CheckCircle2 } from "lucide-react";
+import { ExternalLink, FileText, Shield, User, CheckCircle2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -7,8 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useTranslation } from "react-i18next";
-
+import { useTranslation } from "react-i18next";import { useNavigate } from "react-router-dom";
+import { NotificationBell } from "@/components/NotificationBell";
 const iconMap = {
   rejection: FileText,
   policy: Shield,
@@ -17,6 +17,7 @@ const iconMap = {
 
 export default function Guide() {
   const { t } = useTranslation('guide');
+  const navigate = useNavigate();
   
   const checklistItems = [
     { id: "rejection", icon: iconMap.rejection },
@@ -30,6 +31,16 @@ export default function Guide() {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => navigate("/settings")}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </div>
 

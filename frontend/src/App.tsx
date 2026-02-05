@@ -25,6 +25,8 @@ import ReviewerOnboarding from "./pages/ReviewerOnboarding";
 import ReviewerDashboard from "./pages/ReviewerDashboard";
 import ReviewerSettings from "./pages/ReviewerSettings";
 import AssignmentReview from "./pages/AssignmentReview";
+import ExpertDashboard from "./pages/ExpertDashboard";
+import ExpertOnboarding from "./pages/ExpertOnboarding";
 import CaseDetail from "./pages/CaseDetail";
 import Cases from "./pages/Cases";
 import DisputeDetail from "./pages/DisputeDetail";
@@ -138,10 +140,27 @@ const App = () => (
               <Route path="/reviewer/assignment/:id" element={<AssignmentReview />} />
             </Route>
             
+            {/* Expert Routes - Same Layout as Medical Reviewer */}
+            <Route element={
+              <ProtectedRoute>
+                <ReviewerLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="/expert" element={<ExpertDashboard />} />
+              <Route path="/expert/settings" element={<ReviewerSettings />} />
+            </Route>
+            
             {/* Reviewer Onboarding - No layout (full page) */}
             <Route path="/reviewer/onboarding" element={
               <ProtectedRoute>
                 <ReviewerOnboarding />
+              </ProtectedRoute>
+            } />
+            
+            {/* Expert Onboarding - No layout (full page) */}
+            <Route path="/expert/onboarding" element={
+              <ProtectedRoute>
+                <ExpertOnboarding />
               </ProtectedRoute>
             } />
           </Routes>

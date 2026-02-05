@@ -9,8 +9,8 @@ export function BottomNavigation() {
   const navItems = [
     { to: "/dashboard", icon: Home, label: t('navigation.home') },
     { to: "/cases", icon: FileText, label: t('navigation.cases') },
+    { to: "/disputes", icon: AlertTriangle, label: "Consumer\nDisputes" },
     { to: "/guide", icon: BookOpen, label: t('navigation.guide') },
-    { to: "/settings", icon: Settings, label: t('navigation.settings') },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
@@ -29,7 +29,7 @@ export function BottomNavigation() {
             }
           >
             <item.icon className="h-5 w-5" />
-            <span className="text-xs font-medium">{item.label}</span>
+            <span className="text-xs font-medium text-center whitespace-pre-line">{item.label}</span>
           </NavLink>
         ))}
       </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Scale, Users, CheckCircle, Plus, FileText, Edit2 , FileEdit } from "lucide-react";
+import { Scale, Users, CheckCircle, Plus, FileText, Edit2 , FileEdit, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
@@ -108,6 +108,13 @@ export default function Dashboard() {
           <h1 className="text-lg font-semibold text-primary">{t('common:app_name')}</h1>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            <button
+              onClick={() => navigate("/settings")}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-muted-foreground" />
+            </button>
             <div className="text-sm text-muted-foreground">
               {user?.first_name}
             </div>

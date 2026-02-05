@@ -15,6 +15,8 @@ export interface User {
   problem_type?: string;
   gmail_email?: string;
   gmail_connected?: boolean;
+  is_expert?: boolean;
+  expert_profile?: ExpertProfile;
 }
 
 export interface InsuranceCompany {
@@ -378,4 +380,112 @@ export interface EmailSendResponse {
 export interface EmailSendRequest {
   email_body: string;
   cc_emails?: string[];
+}
+
+// Expert Types (similar to Medical Reviewer)
+export interface ExpertProfile {
+  id: number;
+  user: number;
+  license_number: string;
+  years_of_experience: number;
+  bio: string;
+  is_active: boolean;
+  is_verified: boolean;
+  verification_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DisputeAssignment {
+  id: number;
+  dispute: number;
+  dispute_data: ConsumerDispute;
+  expert: number;
+  expert_data: {
+    id: number;
+    user: User;
+    license_number: string;
+    years_of_experience: number;
+  };
+  status: 'pending' | 'in_review' | 'completed' | 'rejected';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  assigned_date: string;
+  review_started_at: string | null;
+  completed_at: string | null;
+  expert_comments: string;
+  recommendation: string;
+  created_at: string;
+  updated_at: string;
+  documents: DisputeAssignmentDocument[];
+}
+
+export interface DisputeAssignmentDocument {
+  id: number;
+  assignment: number;
+  document: number;
+  document_data: DisputeDocument;
+  is_required: boolean;
+  status: 'pending' | 'reviewed';
+  created_at: string;
+  updated_at: string;
+  review: DisputeDocumentReview | null;
+}
+
+export interface DisputeDocumentReview {
+  id: number;
+  assignment_document: number;
+  reviewed_by: number;
+  outcome: 'approved' | 'rejected' | 'needs_more_info';
+  comments: string;
+  additional_info_requested: string;
+  reviewed_at: string;
+}
+
+export interface CreateDisputeAssignmentData {
+  dispute: number;
+  expert: number;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  document_ids?: number[];
+}
+
+export interface UpdateDisputeAssignmentData {
+  status?: 'pending' | 'in_review' | 'completed' | 'rejected';
+  expert_comments?: string;
+  recommendation?: string;
+}
+
+export interface CreateDisputeDocumentReviewData {
+  assignment_document: number;
+  outcome: 'approved' | 'rejected' | 'needs_more_info';
+  comments: string;
+  additional_info_requested?: string;
+}
+
+export interface ExpertDashboardSummary {
+  pending_count: number;
+  in_progress_count: number;
+  completed_count: number;
+  needs_info_count: number;
+  disputes: DisputeGroup[];
+}
+
+export interface DisputeGroup {
+  dispute_id: number;
+  dispute_number: string;
+  category: string;
+  assignments: DisputeAssignment[];
+}
+
+export interface ExpertStats {
+  expert: number;
+  expert_name: string;
+  total_assignments: number;
+  pending_assignments: number;
+  completed_assignments: number;
+  total_documents_reviewed: number;
+  approved_count: number;
+  rejected_count: number;
+  needs_info_count: number;
+  avg_review_time_hours: number;
+  last_updated: string;
 }

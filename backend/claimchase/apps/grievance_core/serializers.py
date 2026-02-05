@@ -105,19 +105,9 @@ class DocumentBriefSerializer(serializers.ModelSerializer):
         read_only_fields = fields
     
     def get_file_url(self, obj):
-        """Get the proxy URL for secure document access with auth token."""
-        request = self.context.get('request')
-        if obj.id and request:
-            # Get user's auth token
-            from rest_framework.authtoken.models import Token
-            try:
-                token = Token.objects.get(user=request.user)
-                # Use the proxy endpoint with token parameter
-                proxy_path = f"/api/documents/{obj.id}/file/?token={token.key}"
-                return request.build_absolute_uri(proxy_path)
-            except Token.DoesNotExist:
-                pass
-        # Fallback to direct Cloudinary URL if no token available
+        """Get the document URL - direct Cloudinary URL for raw files."""
+        # For raw files (PDFs, docs, etc.), use direct Cloudinary URL
+        # These are public by default and work correctly
         if obj.file:
             return obj.file.url
         return None

@@ -688,8 +688,10 @@ class Document(models.Model):
     
     file = CloudinaryField(
         'document',
-        resource_type='auto',
+        resource_type='raw',
         folder='claimchase/documents',
+        use_filename=True,
+        unique_filename=True,
         help_text="File upload to Cloudinary"
     )
     

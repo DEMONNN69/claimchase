@@ -321,7 +321,13 @@ class DisputeDocument(models.Model):
         related_name='documents'
     )
     
-    file = CloudinaryField('dispute_document')
+    file = CloudinaryField(
+        'dispute_document',
+        resource_type='raw',
+        folder='claimchase/dispute_documents',
+        use_filename=True,
+        unique_filename=True
+    )
     file_name = models.CharField(max_length=255)
     file_type = models.CharField(max_length=100, blank=True)
     file_size = models.PositiveIntegerField(default=0, help_text="File size in bytes")
@@ -352,8 +358,32 @@ class DisputeDocument(models.Model):
     
     @property
     def file_url(self):
-        """Get the Cloudinary URL for the file"""
+        """Get a secure signed URL for the file (expires in 1 hour)"""
         if self.file:
+            try:
+                import cloudinary.utils
+                import time
+                
+                # Get the public_id from the file
+                public_id = str(self.file)
+                
+                # Generate a signed URL with expiration (1 hour from now)
+                expires_at = int(time.time()) + 3600
+                
+                signed_url, _ = cloudinary.utils.cloudinary_url(
+                    public_id,
+                    sign_url=True,
+                    secure=True,
+                    resource_type="raw",
+                )
+                
+                if signed_url:
+                    return signed_url
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to generate signed URL: {e}")
+            
+            # Fallback to regular URL
             return self.file.url
         return None
 

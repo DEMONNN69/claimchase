@@ -34,6 +34,8 @@ export default function Login() {
       // Redirect based on role
       if (userData?.role === 'medical_reviewer') {
         navigate("/reviewer");
+      } else if (userData?.is_expert) {
+        navigate("/expert");
       } else {
         navigate("/dashboard");
       }

@@ -290,7 +290,7 @@ class CaseViewSet(viewsets.ModelViewSet):
         # GET request - list documents
         documents = case.documents.all().order_by('-created_at')
         
-        serializer = DocumentBriefSerializer(documents, many=True)
+        serializer = DocumentBriefSerializer(documents, many=True, context={'request': request})
         return Response({
             'case_number': case.case_number,
             'document_count': documents.count(),
@@ -723,24 +723,21 @@ def document_proxy(request, document_id):
     # Get the file URL
     if document.file:
         try:
-            # For Cloudinary, generate a signed URL
-            import cloudinary.utils
+            # For Cloudinary raw files, use the direct URL which includes extension
+            # The file.url already has the correct format
+            file_url = document.file.url
             
-            public_id = str(document.file)
+            # Log for debugging
+            logger.info(f"Document URL: {file_url}")
             
-            # Generate a signed URL
-            signed_url, _ = cloudinary.utils.cloudinary_url(
-                public_id,
-                sign_url=True,
-                secure=True,
-            )
-            
-            # Redirect to the signed URL
-            return HttpResponseRedirect(signed_url)
+            # Redirect to the direct Cloudinary URL
+            return HttpResponseRedirect(file_url)
         except Exception as e:
-            logger.error(f"Error generating signed URL: {e}")
-            # Fallback to direct URL
-            return HttpResponseRedirect(document.file.url)
+            logger.error(f"Error getting document URL: {e}")
+            return Response(
+                {'error': f'Failed to get document URL: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     return Response(
         {'error': 'Document file not found'},

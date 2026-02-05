@@ -22,6 +22,7 @@ class CustomUser(AbstractUser):
         ('insurance_agent', 'Insurance Company Agent'),
         ('support_staff', 'Support Staff'),
         ('medical_reviewer', 'Medical Reviewer'),
+        ('dispute_expert', 'Dispute Review Expert'),
     ]
     
     # Custom fields
@@ -155,6 +156,11 @@ class CustomUser(AbstractUser):
     def is_medical_reviewer(self) -> bool:
         """Check if user is a medical reviewer."""
         return self.role == 'medical_reviewer'
+    
+    @property
+    def is_dispute_expert(self) -> bool:
+        """Check if user is a dispute review expert."""
+        return self.role == 'dispute_expert'
     
     def get_full_name(self) -> str:
         """Return full name or username."""

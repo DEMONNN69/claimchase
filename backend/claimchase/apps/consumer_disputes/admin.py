@@ -16,6 +16,11 @@ from .models import (
     DisputeDocument,
     DisputeTimeline
 )
+from .expert_models import (
+    ExpertProfile,
+    DisputeAssignment,
+    DisputeDocumentReview,
+)
 
 
 @admin.register(DisputeCategory)
@@ -289,3 +294,188 @@ class DisputeTimelineAdmin(ModelAdmin):
     def description_truncated(self, obj):
         return obj.description[:100] + '...' if len(obj.description) > 100 else obj.description
     description_truncated.short_description = 'Description'
+
+
+# ========== Expert Review System Admin ==========
+
+@admin.register(ExpertProfile)
+class ExpertProfileAdmin(ModelAdmin):
+    """Admin for Expert Profiles"""
+    
+    list_display = ['expert_name', 'email', 'years_of_experience', 'active_assignments', 'completed_assignments', 'display_active', 'created_at']
+    list_filter = ['is_active', 'years_of_experience']
+    list_filter_submit = True
+    search_fields = ['user__first_name', 'user__last_name', 'user__email', 'license_number']
+    raw_id_fields = ['user']
+    
+    fieldsets = (
+        ('👤 Expert Information', {
+            'fields': ('user', 'license_number', 'years_of_experience'),
+            'classes': ['tab'],
+        }),
+        ('📝 Bio & Status', {
+            'fields': ('bio', 'is_active'),
+            'classes': ['tab'],
+        }),
+    )
+    
+    tabs = [
+        ('Expert Information', ['👤 Expert Information']),
+        ('Bio & Status', ['📝 Bio & Status']),
+    ]
+    
+    def expert_name(self, obj):
+        return obj.user.get_full_name()
+    expert_name.short_description = 'Name'
+    expert_name.admin_order_field = 'user__first_name'
+    
+    def email(self, obj):
+        return obj.user.email
+    email.short_description = 'Email'
+    email.admin_order_field = 'user__email'
+    
+    def active_assignments(self, obj):
+        count = obj.get_active_assignments_count()
+        return format_html('<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">{}</span>', count)
+    active_assignments.short_description = 'Active'
+    
+    def completed_assignments(self, obj):
+        count = obj.get_completed_assignments_count()
+        return format_html('<span class="px-2 py-1 bg-green-100 text-green-800 rounded">{}</span>', count)
+    completed_assignments.short_description = 'Completed'
+    
+    def display_active(self, obj):
+        if obj.is_active:
+            return format_html('<span class="px-2 py-1 bg-green-100 text-green-800 rounded">✓ Active</span>')
+        return format_html('<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded">○ Inactive</span>')
+    display_active.short_description = 'Status'
+
+
+@admin.register(DisputeAssignment)
+class DisputeAssignmentAdmin(ModelAdmin):
+    """Admin for Dispute Assignments"""
+    
+    list_display = ['dispute_link', 'expert_name', 'status_badge', 'priority_badge', 'assigned_at', 'completed_at']
+    list_filter = ['status', 'priority', 'assigned_at']
+    list_filter_submit = True
+    search_fields = ['dispute__dispute_id', 'dispute__title', 'expert__user__first_name', 'expert__user__last_name']
+    raw_id_fields = ['dispute', 'expert', 'assigned_by']
+    
+    fieldsets = (
+        ('📋 Assignment Details', {
+            'fields': ('dispute', 'expert', 'assigned_by'),
+            'classes': ['tab'],
+        }),
+        ('⚡ Status & Priority', {
+            'fields': ('status', 'priority', 'notes'),
+            'classes': ['tab'],
+        }),
+        ('✅ Review Results', {
+            'fields': ('review_summary', 'recommendation'),
+            'classes': ['tab'],
+        }),
+        ('📅 Timestamps', {
+            'fields': ('assigned_at', 'started_at', 'completed_at'),
+            'classes': ['tab'],
+        }),
+    )
+    
+    tabs = [
+        ('Details', ['📋 Assignment Details', '⚡ Status & Priority']),
+        ('Review', ['✅ Review Results']),
+        ('Timeline', ['📅 Timestamps']),
+    ]
+    
+    readonly_fields = ['assigned_at', 'started_at', 'completed_at']
+    
+    def dispute_link(self, obj):
+        if obj.dispute:
+            return mark_safe(f'<a href="/admin/consumer_disputes/consumerdispute/{obj.dispute.id}/change/" class="text-primary-600 hover:underline">{obj.dispute.dispute_id}</a>')
+        return '-'
+    dispute_link.short_description = 'Dispute'
+    
+    def expert_name(self, obj):
+        return obj.expert.user.get_full_name()
+    expert_name.short_description = 'Expert'
+    expert_name.admin_order_field = 'expert__user__first_name'
+    
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'in_review': 'bg-blue-100 text-blue-800',
+            'completed': 'bg-green-100 text-green-800',
+            'cancelled': 'bg-gray-100 text-gray-800',
+        }
+        color = colors.get(obj.status, 'bg-gray-100 text-gray-800')
+        return format_html('<span class="px-2 py-1 {} rounded">{}</span>', color, obj.get_status_display())
+    status_badge.short_description = 'Status'
+    
+    def priority_badge(self, obj):
+        colors = {
+            'low': 'bg-gray-100 text-gray-800',
+            'medium': 'bg-blue-100 text-blue-800',
+            'high': 'bg-orange-100 text-orange-800',
+            'urgent': 'bg-red-100 text-red-800',
+        }
+        color = colors.get(obj.priority, 'bg-gray-100 text-gray-800')
+        return format_html('<span class="px-2 py-1 {} rounded">{}</span>', color, obj.priority.upper())
+    priority_badge.short_description = 'Priority'
+
+
+@admin.register(DisputeDocumentReview)
+class DisputeDocumentReviewAdmin(ModelAdmin):
+    """Admin for Document Reviews"""
+    
+    list_display = ['document_name', 'assignment_info', 'status_badge', 'is_authentic', 'confidence', 'reviewed_at']
+    list_filter = ['status', 'is_authentic', 'confidence_level', 'reviewed_at']
+    list_filter_submit = True
+    search_fields = ['document__file_name', 'assignment__dispute__dispute_id', 'comments']
+    raw_id_fields = ['assignment', 'document']
+    
+    fieldsets = (
+        ('📄 Document & Assignment', {
+            'fields': ('assignment', 'document'),
+            'classes': ['tab'],
+        }),
+        ('✅ Review Status', {
+            'fields': ('status', 'is_authentic', 'confidence_level'),
+            'classes': ['tab'],
+        }),
+        ('💬 Comments', {
+            'fields': ('comments',),
+            'classes': ['tab'],
+        }),
+    )
+    
+    tabs = [
+        ('Details', ['📄 Document & Assignment', '✅ Review Status']),
+        ('Comments', ['💬 Comments']),
+    ]
+    
+    readonly_fields = ['reviewed_at', 'created_at']
+    
+    def document_name(self, obj):
+        return obj.document.file_name
+    document_name.short_description = 'Document'
+    
+    def assignment_info(self, obj):
+        return f"{obj.assignment.dispute.dispute_id} - {obj.assignment.expert.user.get_full_name()}"
+    assignment_info.short_description = 'Assignment'
+    
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'verified': 'bg-green-100 text-green-800',
+            'rejected': 'bg-red-100 text-red-800',
+            'needs_clarification': 'bg-orange-100 text-orange-800',
+        }
+        color = colors.get(obj.status, 'bg-gray-100 text-gray-800')
+        return format_html('<span class="px-2 py-1 {} rounded">{}</span>', color, obj.get_status_display())
+    status_badge.short_description = 'Status'
+    
+    def confidence(self, obj):
+        if obj.confidence_level:
+            return obj.confidence_level.title()
+        return '-'
+    confidence.short_description = 'Confidence'
+
