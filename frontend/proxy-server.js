@@ -11,7 +11,7 @@ const PORT = process.env.PROXY_PORT || 3001;
 
 // Environment variables
 const BACKEND_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8000';
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8080'];
 
 // CORS for frontend
 app.use(cors({
@@ -42,9 +42,15 @@ app.get('/proxy/documents/:type/:disputeId/:docId', async (req, res) => {
 
   try {
     // Fetch from backend (server-to-server, backend URL hidden from client)
-    const response = await fetch(backendUrl);
+    const response = await fetch(backendUrl, {
+      headers: {
+        'Origin': 'http://localhost:3001',
+        'Referer': 'http://localhost:3001/',
+      }
+    });
 
     if (!response.ok) {
+      console.error(`Backend error: ${response.status} for ${backendUrl}`);
       return res.status(response.status).json({ 
         error: response.status === 404 ? 'Document not found' : 'Access denied' 
       });

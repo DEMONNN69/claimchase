@@ -323,8 +323,6 @@ export default function CaseDetail() {
                       </div>
                       <a
                         href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-700 p-2 flex-shrink-0"
                       >
                         <ExternalLink className="h-4 w-4" />

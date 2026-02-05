@@ -226,8 +226,6 @@ export default function AssignmentReview() {
                 <div className="flex items-center gap-2">
                   <a
                     href={selectedDoc.document_details.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
                   >
                     Open <ExternalLink className="h-3.5 w-3.5" />
@@ -270,8 +268,6 @@ export default function AssignmentReview() {
                       </p>
                       <a
                         href={selectedDoc.document_details.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="text-blue-600 hover:underline mt-2 inline-block"
                       >
                         Download to view

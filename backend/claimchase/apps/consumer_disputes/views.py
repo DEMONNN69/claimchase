@@ -230,13 +230,18 @@ class ConsumerDisputeViewSet(viewsets.ModelViewSet):
         Validates origin to prevent direct access.
         """
         from django.conf import settings
+        import logging
+        logger = logging.getLogger(__name__)
         
         # SECURITY: Only allow requests from frontend proxy
         origin = request.META.get('HTTP_ORIGIN', '')
         referer = request.META.get('HTTP_REFERER', '')
         allowed = getattr(settings, 'ALLOWED_DOCUMENT_ORIGINS', [])
         
+        logger.info(f"Origin: {origin}, Referer: {referer}, Allowed: {allowed}")
+        
         if not any(origin.startswith(o) or referer.startswith(o) for o in allowed):
+            logger.error(f"Origin validation failed. Origin: {origin}, Referer: {referer}, Allowed: {allowed}")
             raise Http404("Direct access not allowed")
         
         from .document_access import DocumentAccessToken
@@ -245,16 +250,21 @@ class ConsumerDisputeViewSet(viewsets.ModelViewSet):
         temp_token = request.GET.get('access')
         
         if not temp_token:
+            logger.error("No access token provided")
             raise Http404("Access token required")
         
         # Validate temporary token
         token_data = DocumentAccessToken.validate(temp_token)
         
         if not token_data:
+            logger.error(f"Invalid or expired token: {temp_token[:20]}...")
             raise Http404("Invalid or expired access token")
+        
+        logger.info(f"Token validated: {token_data}")
         
         # Verify token is for this document
         if token_data['document_id'] != int(doc_id) or token_data['document_type'] != 'dispute':
+            logger.error(f"Token mismatch. Expected doc_id={doc_id}, got {token_data['document_id']}")
             raise Http404("Token mismatch")
         
         try:

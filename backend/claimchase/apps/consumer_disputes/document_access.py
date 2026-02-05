@@ -8,11 +8,11 @@ from django.core.cache import cache
 
 class DocumentAccessToken:
     """
-    Generate and validate temporary single-use tokens for document access.
-    Tokens expire after 5 minutes and can only be used once.
+    Generate and validate temporary multi-use tokens for document access.
+    Tokens expire after 15 minutes and can be used multiple times within that window.
     """
     
-    TOKEN_EXPIRY = 300  # 5 minutes
+    TOKEN_EXPIRY = 900  # 15 minutes (increased from 5 minutes)
     CACHE_PREFIX = 'doc_access_'
     
     @classmethod
@@ -37,7 +37,6 @@ class DocumentAccessToken:
             'document_id': document_id,
             'document_type': document_type,
             'created_at': time.time(),
-            'used': False
         }
         
         cache.set(cache_key, cache_data, timeout=cls.TOKEN_EXPIRY)
@@ -47,7 +46,7 @@ class DocumentAccessToken:
     @classmethod
     def validate(cls, token: str) -> dict:
         """
-        Validate and consume a temporary access token.
+        Validate a temporary access token (multi-use).
         
         Args:
             token: Token to validate
@@ -62,16 +61,9 @@ class DocumentAccessToken:
         if not cache_data:
             return None
         
-        # Check if already used (single-use token)
-        if cache_data.get('used'):
-            return None
-        
-        # Mark as used
-        cache_data['used'] = True
-        cache.set(cache_key, cache_data, timeout=cls.TOKEN_EXPIRY)
-        
+        # No longer checking 'used' status - tokens are multi-use within expiry window
         return {
             'user_id': cache_data['user_id'],
             'document_id': cache_data['document_id'],
-            'document_type': cache_data['document_type']
+            'document_type': cache_data['document_type'],
         }

@@ -460,7 +460,7 @@ export default function DisputeDetail() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => window.open(doc.file_url, '_blank')}
+                            onClick={() => window.location.href = doc.file_url}
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>
