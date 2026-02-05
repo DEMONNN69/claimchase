@@ -7,6 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models import Q
+from django.http import HttpResponse, Http404
+import requests
 
 from .models import (
     DisputeCategory,
@@ -210,7 +212,7 @@ class ConsumerDisputeViewSet(viewsets.ModelViewSet):
             performed_by=request.user
         )
         
-        serializer = DisputeDocumentSerializer(document)
+        serializer = DisputeDocumentSerializer(document, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['get'])
@@ -218,8 +220,81 @@ class ConsumerDisputeViewSet(viewsets.ModelViewSet):
         """Get all documents for a dispute"""
         dispute = self.get_object()
         documents = dispute.documents.all()
-        serializer = DisputeDocumentSerializer(documents, many=True)
+        serializer = DisputeDocumentSerializer(documents, many=True, context={'request': request})
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], url_path='documents/(?P<doc_id>[^/.]+)/download', permission_classes=[])
+    def download_document(self, request, pk=None, doc_id=None):
+        """
+        Proxy endpoint - ONLY accessible from frontend proxy server.
+        Validates origin to prevent direct access.
+        """
+        from django.conf import settings
+        
+        # SECURITY: Only allow requests from frontend proxy
+        origin = request.META.get('HTTP_ORIGIN', '')
+        referer = request.META.get('HTTP_REFERER', '')
+        allowed = getattr(settings, 'ALLOWED_DOCUMENT_ORIGINS', [])
+        
+        if not any(origin.startswith(o) or referer.startswith(o) for o in allowed):
+            raise Http404("Direct access not allowed")
+        
+        from .document_access import DocumentAccessToken
+        
+        # Get temporary access token from query parameter
+        temp_token = request.GET.get('access')
+        
+        if not temp_token:
+            raise Http404("Access token required")
+        
+        # Validate temporary token
+        token_data = DocumentAccessToken.validate(temp_token)
+        
+        if not token_data:
+            raise Http404("Invalid or expired access token")
+        
+        # Verify token is for this document
+        if token_data['document_id'] != int(doc_id) or token_data['document_type'] != 'dispute':
+            raise Http404("Token mismatch")
+        
+        try:
+            dispute = ConsumerDispute.objects.get(id=pk)
+        except ConsumerDispute.DoesNotExist:
+            raise Http404("Dispute not found")
+        
+        # Verify user from token has access
+        from claimchase.apps.users.models import CustomUser
+        try:
+            user = CustomUser.objects.get(id=token_data['user_id'])
+        except CustomUser.DoesNotExist:
+            raise Http404("User not found")
+        
+        if dispute.user != user and not user.is_staff:
+            raise Http404("Access denied")
+        
+        try:
+            document = DisputeDocument.objects.get(id=doc_id, dispute=dispute)
+        except DisputeDocument.DoesNotExist:
+            raise Http404("Document not found")
+        
+        # Get the actual Cloudinary URL (or signed URL)
+        if document.file:
+            file_url = document.file.url
+            
+            # Fetch file from Cloudinary
+            response = requests.get(file_url, stream=True)
+            
+            if response.status_code == 200:
+                # Create HTTP response with file content
+                http_response = HttpResponse(
+                    response.content,
+                    content_type=document.file_type or 'application/octet-stream'
+                )
+                http_response['Content-Disposition'] = f'inline; filename="{document.file_name}"'
+                http_response['Content-Length'] = document.file_size
+                return http_response
+        
+        raise Http404("File not found")
     
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):

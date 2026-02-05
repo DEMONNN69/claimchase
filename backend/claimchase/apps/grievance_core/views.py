@@ -8,8 +8,10 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, Http404
 from django.utils import timezone
 import logging
+import requests
 
 from .models import InsuranceCompany, Case, CaseTimeline, EmailTracking, Document
 from .serializers import (
@@ -297,6 +299,80 @@ class CaseViewSet(viewsets.ModelViewSet):
             'verified_count': documents.filter(is_verified=True).count(),
             'documents': serializer.data,
         })
+    
+    @action(detail=True, methods=['get'], url_path='documents/(?P<doc_id>[^/.]+)/download', permission_classes=[])
+    def download_document(self, request, pk=None, doc_id=None):
+        """
+        Proxy endpoint - ONLY accessible from frontend proxy server.
+        Validates origin to prevent direct access.
+        """
+        from django.conf import settings
+        
+        # SECURITY: Only allow requests from frontend proxy
+        origin = request.META.get('HTTP_ORIGIN', '')
+        referer = request.META.get('HTTP_REFERER', '')
+        allowed = getattr(settings, 'ALLOWED_DOCUMENT_ORIGINS', [])
+        
+        if not any(origin.startswith(o) or referer.startswith(o) for o in allowed):
+            raise Http404("Direct access not allowed")
+        
+        from claimchase.apps.consumer_disputes.document_access import DocumentAccessToken
+        
+        # Get temporary access token from query parameter
+        temp_token = request.GET.get('access')
+        
+        if not temp_token:
+            raise Http404("Access token required")
+        
+        # Validate temporary token
+        token_data = DocumentAccessToken.validate(temp_token)
+        
+        if not token_data:
+            raise Http404("Invalid or expired access token")
+        
+        # Verify token is for this document
+        if token_data['document_id'] != int(doc_id) or token_data['document_type'] != 'case':
+            raise Http404("Token mismatch")
+        
+        try:
+            case = Case.objects.get(id=pk)
+        except Case.DoesNotExist:
+            raise Http404("Case not found")
+        
+        # Verify user from token has access
+        from claimchase.apps.users.models import CustomUser
+        try:
+            user = CustomUser.objects.get(id=token_data['user_id'])
+        except CustomUser.DoesNotExist:
+            raise Http404("User not found")
+        
+        if case.user != user and not user.is_staff:
+            raise Http404("Access denied")
+        
+        try:
+            document = Document.objects.get(id=doc_id, case=case)
+        except Document.DoesNotExist:
+            raise Http404("Document not found")
+        
+        # Get the actual Cloudinary URL
+        if document.file:
+            file_url = document.file.url
+            
+            # Fetch file from Cloudinary
+            response = requests.get(file_url, stream=True)
+            
+            if response.status_code == 200:
+                # Create HTTP response with file content
+                http_response = HttpResponse(
+                    response.content,
+                    content_type=document.file_type or 'application/octet-stream'
+                )
+                http_response['Content-Disposition'] = f'inline; filename="{document.file_name}"'
+                http_response['Content-Length'] = document.file_size
+                return http_response
+        
+        raise Http404("File not found")
+    
     
     @action(detail=True, methods=['get'])
     def ombudsman_eligibility(self, request, pk=None):

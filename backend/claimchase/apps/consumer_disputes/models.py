@@ -358,23 +358,21 @@ class DisputeDocument(models.Model):
     
     @property
     def file_url(self):
-        """Get a secure signed URL for the file (expires in 1 hour)"""
+        """Get a secure signed URL for the file (works with authenticated/restricted resources)"""
         if self.file:
             try:
+                import cloudinary
                 import cloudinary.utils
-                import time
                 
                 # Get the public_id from the file
                 public_id = str(self.file)
                 
-                # Generate a signed URL with expiration (1 hour from now)
-                expires_at = int(time.time()) + 3600
-                
-                signed_url, _ = cloudinary.utils.cloudinary_url(
-                    public_id,
+                # For authenticated/restricted files, use CloudinaryResource.build_url with authentication
+                # This generates a signed URL that works with restricted access control
+                signed_url = cloudinary.CloudinaryResource(public_id, resource_type='raw').build_url(
                     sign_url=True,
                     secure=True,
-                    resource_type="raw",
+                    type='authenticated'  # Critical: tells Cloudinary this is an authenticated resource
                 )
                 
                 if signed_url:
@@ -383,7 +381,7 @@ class DisputeDocument(models.Model):
                 import logging
                 logging.getLogger(__name__).warning(f"Failed to generate signed URL: {e}")
             
-            # Fallback to regular URL
+            # Fallback to regular URL (may not work for restricted files)
             return self.file.url
         return None
 

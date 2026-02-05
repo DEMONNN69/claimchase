@@ -1,2 +1,2 @@
-# Signals for consumer_disputes app
-# No signals currently implemented - documents use signed URLs for secure access
+# Signals disabled - using signed URLs with public access for now
+# To make files private, manually change access control in Cloudinary console

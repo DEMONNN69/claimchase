@@ -105,8 +105,29 @@ class DisputeDocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'file_url', 'uploaded_by_name', 'uploaded_at']
     
     def get_file_url(self, obj):
-        if obj.file:
-            return obj.file.url
+        """Return frontend proxy URL (hides backend API URL)"""
+        request = self.context.get('request')
+        if not request:
+            return None
+            
+        # Check if user is authorized
+        user = request.user
+        dispute = obj.dispute
+        
+        if user == dispute.user or user.is_staff:
+            # Generate temporary access token
+            from .document_access import DocumentAccessToken
+            temp_token = DocumentAccessToken.generate(
+                user_id=user.id,
+                document_id=obj.id,
+                document_type='dispute'
+            )
+            
+            # Return FRONTEND proxy URL (backend URL completely hidden)
+            from django.conf import settings
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return f"{frontend_url}/proxy/documents/dispute/{dispute.id}/{obj.id}?access={temp_token}"
+        
         return None
     
     def get_uploaded_by_name(self, obj):

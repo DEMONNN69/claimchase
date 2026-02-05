@@ -23,3 +23,5 @@ static/
 # OS-specific files
 .DS_Store
 .env
+
+DOCUMENT_SECURITY.md

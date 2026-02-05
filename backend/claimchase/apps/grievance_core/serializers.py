@@ -105,11 +105,29 @@ class DocumentBriefSerializer(serializers.ModelSerializer):
         read_only_fields = fields
     
     def get_file_url(self, obj):
-        """Get the document URL - direct Cloudinary URL for raw files."""
-        # For raw files (PDFs, docs, etc.), use direct Cloudinary URL
-        # These are public by default and work correctly
-        if obj.file:
-            return obj.file.url
+        """Return frontend proxy URL (hides backend API URL)"""
+        request = self.context.get('request')
+        if not request:
+            return None
+            
+        # Check if user is authorized
+        user = request.user
+        case = obj.case
+        
+        if user == obj.uploaded_by or user == case.user or user.is_staff:
+            # Generate temporary access token
+            from claimchase.apps.consumer_disputes.document_access import DocumentAccessToken
+            temp_token = DocumentAccessToken.generate(
+                user_id=user.id,
+                document_id=obj.id,
+                document_type='case'
+            )
+            
+            # Return FRONTEND proxy URL (backend URL completely hidden)
+            from django.conf import settings
+            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+            return f"{frontend_url}/proxy/documents/case/{case.id}/{obj.id}?access={temp_token}"
+        
         return None
     
     def get_file_size_mb(self, obj):

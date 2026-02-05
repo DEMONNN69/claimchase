@@ -161,6 +161,12 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
+# Frontend URL for document proxying (hides backend API URL)
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3001')
+
+# Allowed origins for document downloads (security)
+ALLOWED_DOCUMENT_ORIGINS = CORS_ALLOWED_ORIGINS + [FRONTEND_URL]
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -19,6 +19,7 @@ router = DefaultRouter()
 router.register(r'dispute-categories', DisputeCategoryViewSet, basename='dispute-category')
 router.register(r'entities', EntityViewSet, basename='entity')
 router.register(r'consumer-disputes', ConsumerDisputeViewSet, basename='consumer-dispute')
+router.register(r'disputes', ConsumerDisputeViewSet, basename='dispute')  # Alias for shorter URL
 
 # Expert review endpoints
 router.register(r'experts', ExpertProfileViewSet, basename='expert')
