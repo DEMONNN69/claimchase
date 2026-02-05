@@ -63,8 +63,6 @@ export default function PDFViewer({ url, fileName, className }: PDFViewerProps) 
         <p className="text-slate-600 text-center mb-4">{error}</p>
         <a
           href={url}
-          target="_blank"
-          rel="noopener noreferrer"
           className="text-blue-600 hover:underline flex items-center gap-2"
         >
           <Download className="h-4 w-4" />
@@ -150,8 +148,6 @@ export default function PDFViewer({ url, fileName, className }: PDFViewerProps) 
           {/* Download */}
           <a
             href={url}
-            target="_blank"
-            rel="noopener noreferrer"
             className="ml-2"
           >
             <Button
