@@ -1,257 +1,590 @@
 # ClaimChase Deployment Guide
 
+## 📋 Quick Start for Testing (10 minutes)
+
+**What you'll deploy:**
+1. ☁️ **PostgreSQL Database** → Render (Free)
+2. 🐍 **Django Backend API** → Render/Railway (Free)
+3. ⚛️ **React Frontend + Proxy Server** → Render/Railway (Free)
+4. 📦 **Cloudinary** → Already external (no deployment needed)
+
+**Cache:** Using Django's default local memory cache (no Redis needed for testing)
+
+**Result:** 
+- Frontend URL: `https://claimchase-test.onrender.com` (PUBLIC)
+- Backend URL: `https://claimchase-api-test.onrender.com` (HIDDEN)
+- Database: Internal connection (secured)
+
+**Total Cost: $0/month** (Free tier with limitations)
+
+**→ Jump to:** [Step-by-Step Testing Deployment](#-testing-environment-free)
+
+---
+
 ## 🏗️ Architecture Overview
 
+### Development (Local)
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      User Browser                        │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ↓
+│                   User Browser                          │
+│                  localhost:8080                         │
+└─────────────┬───────────────────────────────────────────┘
+              │
+              ↓
 ┌─────────────────────────────────────────────────────────┐
-│  Frontend Domain: claimchase.com                        │
-│  ├─ Vite React App (Port 5173)                          │
-│  └─ Proxy Server (Port 3001) ← User sees this URL only  │
-└────────────────────────┬────────────────────────────────┘
-                         │ (Internal Server-to-Server)
-                         ↓
+│  Frontend (Vite Dev Server)                              │
+│  localhost:8080                                         │
+│  ├─ Routes /proxy/documents/* → localhost:3001         │
+│  └─ Serves React app                                    │
+└─────────────┬───────────────────────────────────────────┘
+              │
+              ↓
 ┌─────────────────────────────────────────────────────────┐
-│  Backend Domain: api.claimchase.com (HIDDEN)            │
-│  └─ Django REST API (Port 8000)                         │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ↓
+│  Proxy Server (Node.js/Express)                          │
+│  localhost:3001                                         │
+│  └─ Fetches docs from backend, hides backend URL        │
+└─────────────┬───────────────────────────────────────────┘
+              │ (Server-to-Server)
+              ↓
+┌─────────────────────────────────────────────────────────┐
+│  Backend (Django)                                        │
+│  localhost:8000 (HIDDEN from browser)                   │
+│  └─ Validates origin, checks tokens, fetches from cloud │
+└─────────────┬───────────────────────────────────────────┘
+              │
+              ↓
 ┌─────────────────────────────────────────────────────────┐
 │  External Services                                       │
-│  ├─ PostgreSQL Database                                 │
-│  ├─ Redis Cache (for temporary tokens)                  │
-│  └─ Cloudinary (file storage)                           │
+│  ├─ PostgreSQL (localhost:5432)                         │
+│  └─ Cloudinary (cloud storage)                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Key Points:**
-- Frontend and Backend can be on same or separate servers
-- Users NEVER see backend URL (hidden by proxy)
-- Proxy server runs alongside frontend
-- Backend validates requests from proxy only
+**Note:** Redis removed - using Django's local memory cache for development
+
+### Production/Testing (Deployed)
+```
+┌─────────────────────────────────────────────────────────┐
+│                   User Browser                          │
+│              claimchase-test.onrender.com               │
+└─────────────┬───────────────────────────────────────────┘
+              │ HTTPS
+              ↓
+┌─────────────────────────────────────────────────────────┐
+│  Frontend Server (Single Deployment)                     │
+│  claimchase-test.onrender.com                           │
+│  ├─ Serves static React build (dist/)                   │
+│  └─ Proxy endpoint: /proxy/documents/*                  │
+│     (Node.js server.js handles both)                    │
+└─────────────┬───────────────────────────────────────────┘
+              │ Internal HTTPS (Server-to-Server)
+              ↓
+┌─────────────────────────────────────────────────────────┐
+│  Backend Server (Separate Deployment)                    │
+│  claimchase-api-test.onrender.com (HIDDEN)              │
+│  └─ Django API + Origin validation                      │
+└─────────────┬───────────────────────────────────────────┘
+              │ Internal Network
+              ↓
+┌─────────────────────────────────────────────────────────┐
+│  └─ PostgreSQL: claimchase-db-test (internal URL only)  │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│  Cloudinary (External SaaS)                              │
+│  └─ File storage (already configured)                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Cache:** Django's local memory cache (sufficient for single-server deployment)───────────────────────────────────────────────────────┘
+```
+
+**Key Security Points:**
+- ✅ Backend URL NEVER exposed to browser
+- ✅ Proxy runs on same server as frontend (single deployment)
+- ✅ Origin validation blocks direct backend access
+- ✅ Temporary tokens stored in local cache (15-minute expiry)deployment)
+- ✅ Origin validation blocks direct backend access
 
 ---
 
 ## 🆓 Testing Environment (FREE)
+3 services**
+1. **PostgreSQL Database** (Render - Free tier)
+2. **Backend API** (Render - Free tier)
+3. **Frontend + Proxy** (Render - Free tier) ← **Single deployment**
 
-### Option 1: Render (Recommended - Easiest)
+**Cache:** Django's built-in local memory cache (no separate service needed)
 
-#### **Step 1: Backend Deployment (Django + PostgreSQL)**
+**Time Required:** ~10-15
+**Time Required:** ~15-20 minutes  
+**Cost:** $0/month (with limitations)
 
-1. **Create account** at [render.com](https://render.com)
+### Step-by-Step Deployment Guide
 
-2. **Create PostgreSQL Database** (Free tier)
-   - Dashboard → New → PostgreSQL
-   - Name: `claimchase-db-test`
-   - Plan: Free
-   - Copy `Internal Database URL` (starts with `postgresql://`)
+---
 
-3. **Create Redis Instance** (Free tier)
-   - Dashboard → New → Redis
-   - Name: `claimchase-cache-test`
-   - Plan: Free
-   - Copy `Internal Redis URL`
+#### **STEP 1: Setup Cloudinary (Skip if already done)**
 
-4. **Prepare Backend for Deployment**
-   ```bash
-   cd backend
-   
-   # Create requirements.txt if not exists
-   pip freeze > requirements.txt
-   
-   # Create Procfile
-   echo "web: gunicorn claimchase.wsgi --bind 0.0.0.0:$PORT" > Procfile
-   
-   # Create runtime.txt
-   echo "python-3.11.0" > runtime.txt
-   ```
+1. Go to [cloudinary.com](https://cloudinary.com) and sign up (free)
+2. Dashboard → Settings → Access Keys
+3. Copy:
+   - Cloud Name
+   - API Key
+   - API Secret
+4. Keep these handy for backend environment variables
 
-5. **Create Web Service for Backend**
-   - Dashboard → New → Web Service
-   - Connect your GitHub repo
-   - Settings:
-     - **Name:** `claimchase-api-test`
-     - **Root Directory:** `backend`
-     - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
-     - **Start Command:** `gunicorn claimchase.wsgi --bind 0.0.0.0:$PORT`
-     - **Plan:** Free
+---
 
-6. **Configure Environment Variables** (in Render dashboard)
+#### **STEP 2: Create Render Account**
+
+1. Go to [render.com](https://render.com)
+2. Sign up with GitHub (recommended for auto-deploy)
+3. Authorize Render to access your repository
+4. You'll be on the Render Dashboard
+
+---
+
+#### **STEP 3: Deploy PostgreSQL Database**
+
+1. **Render Dashboard** → **New** → **PostgreSQL**
+2. Configure:
+   - **Name:** `claimchase-db-test`
+   - **Database:** `claimchase`
+   - **User:** `claimchase_user` (auto-generated)
+   - **Region:** Oregon (US West) or closest to you
+   - **Plan:** **Free** ⭐
+3. Click **Create Database**
+4. Wait 2-3 minutes for provisioning
+5. ✅ **COPY THIS:** 
+   - Internal Database URL: `postgresql://claimchase_user:xxxxx@dpg-xxxxx-a/claimchase`
+   - ⚠️ Use **Internal** URL, not External (faster, free)
+6. Save this URL - you'll need it for backend deployment
+
+**What this provides:**
+- PostgreSQL 15 database
+- 256 MB RAM, 1 GB storage
+- Automatic backups
+- Internal network (secure)
+
+---
+
+#### **STEP 5: Prepare Backend Code**
+
+**On your local machine:**
+
+```bash
+# Navigate to backend directory
+cd c:\Users\Harsh tiwari\Desktop\claimchase\backend
+
+# Create requirements.txt (if not exists or update)
+pip freeze > requirements.txt
+
+# Ensure gunicorn is included
+echo "" >> requirements.txt
+echo "gunicorn==21.2.0" >> requirements.txt
+```
+
+**Create `backend/build.sh` for Render build:**
+
+```bash
+#!/usr/bin/env bash
+# Exit on error
+set -o errexit
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Collect static files
+python manage.py collectstatic --no-input
+
+# Run migrations
+python manage.py migrate
+```
+
+Make it executable:
+```bash
+chmod +x build.sh
+```
+
+**Commit and push to GitHub:**
+```bash
+git add requirements.txt build.sh
+git commit -m "Prepare backend for Render deployment"
+git push origin main
+```
+
+---
+
+#### **STEP 6: Deploy Backend API**
+
+1. **Render Dashboard** → **New** → **Web Service**
+2. **Connect Repository:**
+   - Select your GitHub repository
+   - Click **Connect**
+3. **Configure Web Service:**
+   - **Name:** `claimchase-api-test`
+   - **Region:** Same as database (Oregon/US West)
+   - **Branch:** `main`
+   - **Root Directory:** `backend`
+   - **Runtime:** **Python 3**
+   - **Build Command:** `./build.sh`
+   - **Start Command:** `gunicorn claimchase.wsgi:application --bind 0.0.0.0:$PORT`
+   - **Plan:** **Free** ⭐
+
+4. **Environment Variables** (Click "Advanced" → "Add Environment Variable"):
    ```env
    DJANGO_SETTINGS_MODULE=claimchase.settings.production
-   SECRET_KEY=<generate-random-50-char-string>
+   SECRET_KEY=django-insecure-CHANGE_THIS_TO_RANDOM_50_CHARS
    DEBUG=False
-   ALLOWED_HOSTS=claimchase-api-test.onrender.com
+   ALLOWED_HOSTS=.onrender.com
+   5
+   DATABASE_URL=<paste-internal-postgres-url-from-step-3>
+   REDIS_URL=<paste-internal-redis-url-from-step-4>
    
-   DATABASE_URL=<internal-postgres-url-from-step-2>
-   REDIS_URL=<internal-redis-url-from-step-3>
-   
-   CLOUDINARY_CLOUD_NAME=<your-cloudinary-name>
-   CLOUDINARY_API_KEY=<your-api-key>
-   CLOUDINARY_API_SECRET=<your-api-secret>
+   CLOUDINARY_CLOUD_NAME=<your-cloudinary-cloud-name>
+   CLOUDINARY_API_KEY=<your-cloudinary-api-key>
+   CLOUDINARY_API_SECRET=<your-cloudinary-api-secret>
    
    FRONTEND_URL=https://claimchase-test.onrender.com
    CORS_ALLOWED_ORIGINS=https://claimchase-test.onrender.com
    ```
-
-7. **Deploy** - Render will auto-deploy
-   - Backend URL: `https://claimchase-api-test.onrender.com`
-   - ⚠️ **Keep this URL private** (don't share publicly)
-
-#### **Step 2: Frontend Deployment (Vite + Proxy)**
-
-1. **Prepare Frontend**
+   
+   **Generate SECRET_KEY:**
    ```bash
-   cd frontend
-   
-   # Update package.json - add build script for proxy
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
    ```
 
-2. **Add to package.json scripts:**
-   ```json
-   {
-     "scripts": {
-       "build": "vite build",
-       "start": "node server.js"
-     }
-   }
+5. Click **Create Web Service**
+6. **First deploy takes 5-10 minutes** (installing dependencies, migrations)
+7. Watch logs - should see:
    ```
-
-3. **Create production server** at `frontend/server.js`:
-   ```javascript
-   import express from 'express';
-   import cors from 'cors';
-   import { fileURLToPath } from 'url';
-   import { dirname, join } from 'path';
-   
-   const __filename = fileURLToPath(import.meta.url);
-   const __dirname = dirname(__filename);
-   
-   const app = express();
-   const PORT = process.env.PORT || 3000;
-   const BACKEND_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8000';
-   
-   app.use(cors());
-   
-   // Proxy endpoint
-   app.get('/proxy/documents/:type/:disputeId/:docId', async (req, res) => {
-     try {
-       const { type, disputeId, docId } = req.params;
-       const { access } = req.query;
-       
-       const endpoint = type === 'dispute' ? 'disputes' : 'cases';
-       const backendUrl = `${BACKEND_URL}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
-       
-       const response = await fetch(backendUrl, {
-         headers: {
-           'Origin': req.headers.origin || '',
-           'Referer': req.headers.referer || ''
-         }
-       });
-       
-       if (!response.ok) {
-         return res.status(response.status).send('File not found');
-       }
-       
-       const contentType = response.headers.get('content-type');
-       res.setHeader('Content-Type', contentType);
-       
-       const buffer = await response.arrayBuffer();
-       res.send(Buffer.from(buffer));
-     } catch (error) {
-       console.error('Proxy error:', error);
-       res.status(500).send('Error fetching document');
-     }
-   });
-   
-   // Serve static files
-   app.use(express.static(join(__dirname, 'dist')));
-   
-   // SPA fallback
-   app.get('*', (req, res) => {
-     res.sendFile(join(__dirname, 'dist', 'index.html'));
-   });
-   
-   app.listen(PORT, () => {
-     console.log(`Server running on port ${PORT}`);
-   });
+   Installing dependencies...
+   Collecting static files...
+   Running migrations...
    ```
+8. ✅ **COPY THIS:** Backend URL (e.g., `claimchase-api-test.onrender.com`)
+9. **Test:** Visit `https://claimchase-api-test.onrender.com/admin/`
+   - Should see Django admin login
 
-4. **Create Web Service for Frontend**
-   - Dashboard → New → Static Site
-   - Settings:
-     - **Name:** `claimchase-test`
-     - **Root Directory:** `frontend`
-     - **Build Command:** `npm install && npm run build`
-     - **Start Command:** `node server.js`
-     - **Plan:** Free
+**What this provides:**
+- Django REST API running on Python 3.11
+- Connected to PostgreSQL and Redis
+- Auto-deploys on git push
+- Free SSL certificate
+- ⚠️ Spins down after 15 min inactivity (cold starts ~30s)
 
-5. **Configure Environment Variables**
+---
+
+#### **STEP 7: Prepare Frontend Code**
+
+**Create `frontend/server.js` (production server with proxy):**
+
+```javascript
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+const BACKEND_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+// CORS for all origins (
+- Uses local memory cache for temporary tokens (15 min expiry)
+- Auto-deploys on git push
+- Free SSL certificate
+- ⚠️ Spins down after 15 min inactivity (cold starts ~30s)
+
+---
+
+#### **STEP 6
+// Document proxy endpoint - CRITICAL for security
+app.get('/proxy/documents/:type/:disputeId/:docId', async (req, res) => {
+  try {
+    const { type, disputeId, docId } = req.params;
+    const { access } = req.query;
+
+    if (!access) {
+      return res.status(401).json({ error: 'Access token required' });
+    }
+
+    // Validate type
+    if (!['case', 'dispute'].includes(type)) {
+      return res.status(400).json({ error: 'Invalid document type' });
+    }
+
+    // Construct backend URL
+    const endpoint = type === 'case' ? 'cases' : 'disputes';
+    const backendUrl = `${BACKEND_URL}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
+
+    console.log(`Proxying document request: ${backendUrl}`);
+
+    // Fetch from backend (server-to-server, backend URL hidden from client)
+    const response = await fetch(backendUrl, {
+      headers: {
+        'Origin': `https://${req.hostname}`,
+        'Referer': `https://${req.hostname}/`,
+      }
+    });
+
+    if (!response.ok) {
+      console.error(`Backend returned ${response.status}`);
+      return res.status(response.status).json({ 
+        error: response.status === 404 ? 'Document not found' : 'Access denied' 
+      });
+    }
+
+    // Get headers from backend
+    const contentType = response.headers.get('content-type') || 'application/pdf';
+    const contentDisposition = response.headers.get('content-disposition') || 'inline';
+    const contentLength = response.headers.get('content-length');
+
+    // Set response headers
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', contentDisposition);
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    // Stream file content
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
+
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Failed to load document' });
+  }
+});
+
+// Serve static files from dist
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// SPA fallback - serve index.html for all routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Frontend + Proxy server running on port ${PORT}`);
+  console.log(`🔒 Backend URL: ${BACKEND_URL} (hidden from clients)`);
+});
+```
+
+**Update `frontend/package.json` scripts:**
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "dev:proxy": "node proxy-server.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:proxy\"",
+    "build": "vite build",
+    "start": "node server.js",
+    "preview": "vite preview"
+  }
+}
+```
+
+**Ensure `package.json` has required dependencies:**
+
+```json
+{
+  "dependencies": {
+    // ... your existing dependencies
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
+```
+
+**Commit and push:**
+
+```bash
+cd frontend
+git add server.js package.json
+git commit -m "Add production server with proxy"
+git push origin main
+```
+
+---
+
+#### **STEP 8: Deploy Frontend + Proxy Server**
+
+1. **Render Dashboard** → **New** → **Web Service**
+2. **Connect Repository:**
+   - Select your GitHub repository
+   - Click **Connect**
+3. **Configure Web Service:**
+   - **Name:** `claimchase-test`
+   - **Region:** Same as backend (Oregon/US West)
+   - **Branch:** `main`
+   - **Root Directory:** `frontend`
+   - **Runtime:** **Node**
+   - **Build Command:** `npm install && npm run build`
+   - **Start Command:** `npm run start`
+   - **Plan:** **Free** ⭐
+
+4. **Environment Variables:**
    ```env
    NODE_ENV=production
    VITE_API_BASE_URL=https://claimchase-api-test.onrender.com
    ```
 
-6. **Deploy** - Frontend URL: `https://claimchase-test.onrender.com`
+5. Click **Create Web Service**
+6. **First d7ploy takes 3-5 minutes** (npm install, vite build)
+7. Watch logs - should see:
+   ```
+   Installing dependencies...
+   Building Vite app...
+   🚀 Frontend + Proxy server running on port 10000
+   ```
+8. ✅ **YOUR APP IS LIVE:** `https://claimchase-test.onrender.com`
 
-#### **Step 3: Update Backend with Frontend URL**
-
-Go back to backend service → Environment Variables:
-```env
-FRONTEND_URL=https://claimchase-test.onrender.com
-CORS_ALLOWED_ORIGINS=https://claimchase-test.onrender.com
-ALLOWED_DOCUMENT_ORIGINS=https://claimchase-test.onrender.com
-```
-
-**Redeploy backend** to apply changes.
+**What this provides:**
+- React frontend (built with Vite)
+- Proxy server for document downloads
+- Both running in single Node.js process
+- Free SSL certificate
+- Auto-deploys on git push
+- ⚠️ Spins down after 15 min inactivity
 
 ---
 
-### Option 2: Railway (Alternative Free Option)
+#### **STEP 8: Update Backend with Frontend URL**
 
-Similar steps to Render:
+1. Go to **Backend Web Service** (`claimchase-api-test`)
+2. **Environment** tab → Edit variables
+3. **Update these:**
+   ```env
+   FRONTEND_URL=https://claimchase-test.onrender.com
+   CORS_ALLOWED_ORIGINS=https://claimchase-test.onrender.com
+   ```
+4. Click **Save Changes**
+5. **Backend will auto-redeploy** (~2 minutes)
+
+---
+
+#### **STEP 9: Test Your Deployment**
+
+1. **Visit Frontend:** `https://claimchase-test.onrender.com`
+   - Should see login page
+   - First load may be slow (cold start)
+
+2. **Test Login:**
+   - Create superuser via backend shell:
+     ```bash
+     # In Render backend dashboard → Shell tab
+     python manage.py createsuperuser
+     ```
+   - Login with credentials
+
+3. **Test Document Upload:**
+   - Go to consumer disputes
+   - Create a dispute
+   - Upload a document (PDF or image)
+   - Should upload to Cloudinary
+
+4. **Test Document Viewing (CRITICAL):**
+   - Click on uploaded document
+   - Should open in same tab
+   - Check browser Network tab:
+     - ✅ Should see: `claimchase-test.onrender.com/proxy/documents/...`
+     - ❌ Should NOT see: `claimchase-api-test.onrender.com`
+   - PDF should load successfully
+
+5. **Test Backend is Hidden:**
+   - Try accessing: `https://claimchase-api-test.onrender.com/api/disputes/1/documents/1/download/?access=fake-token`
+   - ✅ Should get: 404 "Direct access not allowed"
+
+---
+
+### 🎉 Success! Your Test Deployment is Complete
+
+**You now have:**
+- ✅ Frontend: `https://claimchase-test.onrender.com` (PUBLIC)
+- ✅ Backend: `https://claimchase-api-test.onrender.com` (HIDDEN)
+- ✅ Database: PostgreSQL (internal network)
+- ✅ Cache: Django local memory cache (built-in)
+- ✅ Storage: Cloudinary (external)
+- ✅ Security: Backend URL hidden, origin validation, temporary tokens
+
+**Free Tier Limitations:**
+- ⚠️ Services sleep after 15 min inactivity (30s cold start)
+- ⚠️ 750 hours/month runtime
+- ⚠️ PostgreSQL: 256 MB RAM, 1 GB storage
+- ⚠️ Local cache clears on restart (tokens expire)
+- ⚠️ Bandwidth limits apply
+
+**Deployment URLs to Share:**
+- Share: `https://claimchase-test.onrender.com`  
+- **DO NOT** share: Backend URL (it's hidden anyway)
+
+------
+
+### Alternative: Railway (If Render doesn't work)
+
+**Similar to Render but with $5/month credit:**
+
 1. Sign up at [railway.app](https://railway.app)
-2. Deploy PostgreSQL + Redis from templates
-3. Deploy backend as Web Service
-4. Deploy frontend as Static Site
-5. Configure environment variables
+2. Create PostgreSQL from template
+3. Deploy backend: Connect GitHub → Select backend folder
+4. Deploy frontend: Connect GitHub → Select frontend folder
+5. Configure environment variables (same as above, no Redis needed)
 
-**Free tier limits:**
-- $5/month credit
-- Sleep after inactivity
-- 500 hours/month
+**Free tier:** $5 credit/month, 500 hours runtime
 
 ---
 
-### Option 3: Vercel (Frontend) + Render (Backend)
+### Alternative: Vercel (Frontend) + Render (Backend)
 
-**Frontend on Vercel (Free):**
+**Vercel for frontend (better performance):**
+
 1. Sign up at [vercel.com](https://vercel.com)
-2. Connect GitHub repo
+2. Import GitHub repository
 3. Configure:
    - **Framework:** Vite
    - **Root Directory:** `frontend`
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
-4. Add `vercel.json` for proxy:
+4. Add `vercel.json`:
    ```json
    {
      "rewrites": [
        {
          "source": "/proxy/documents/:type/:disputeId/:docId",
-         "destination": "/api/proxy-document?type=:type&disputeId=:disputeId&docId=:docId"
+         "destination": "/api/proxy"
        }
      ]
    }
    ```
-5. Create `frontend/api/proxy-document.js` (Vercel serverless function)
+5. Create `frontend/api/proxy.js` (Vercel serverless function):
+   ```javascript
+   export default async function handler(req, res) {
+     const { type, disputeId, docId } = req.query;
+     const { access } = req.query;
+     const backend = process.env.VITE_API_BASE_URL;
+     const endpoint = type === 'case' ? 'cases' : 'disputes';
+     const url = `${backend}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
+     
+     const response = await fetch(url, {
+       headers: {
+         'Origin': req.headers.origin,
+         'Referer': req.headers.referer
+       }
+     });
+     
+     const buffer = await response.arrayBuffer();
+     res.setHeader('Content-Type', response.headers.get('content-type'));
+     res.send(Buffer.from(buffer));
+   }
+   ```
 
-**Backend on Render:** Same as Option 1 above
+**Backend still on Render** (steps 1-6 above)
 
 ---
 
