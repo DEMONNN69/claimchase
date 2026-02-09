@@ -11,7 +11,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 # Import webhook handler
 from claimchase.apps.grievance_core.webhooks import gmail_webhook
 
+# Import health check
+from claimchase.health_check import health_check
+
 urlpatterns = [
+    # Health check (for Railway/Render monitoring)
+    path('health/', health_check, name='health-check'),
+    
     # Admin
     path('admin/', admin.site.urls),
     
