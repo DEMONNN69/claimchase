@@ -14,6 +14,7 @@ class CustomUser(AbstractUser):
     Custom user model extending Django's AbstractUser.
     
     Fat Model: Contains validation logic and helper methods for user operations.
+    Uses email as the username field (no separate username required).
     """
     
     ROLE_CHOICES = [
@@ -25,8 +26,14 @@ class CustomUser(AbstractUser):
         ('dispute_expert', 'Dispute Review Expert'),
     ]
     
-    # Custom fields
+    # Use email as username
+    username = None  # Remove username field
     email = models.EmailField(unique=True, db_index=True)
+    
+    USERNAME_FIELD = 'email'  # Use email for authentication
+    REQUIRED_FIELDS = []  # Email is already required by USERNAME_FIELD
+    
+    # Custom fields
     phone = models.CharField(
         max_length=15,
         blank=True,
@@ -163,10 +170,10 @@ class CustomUser(AbstractUser):
         return self.role == 'dispute_expert'
     
     def get_full_name(self) -> str:
-        """Return full name or username."""
+        """Return full name or email."""
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}".strip()
-        return self.username
+        return self.email
     
     def can_escalate_to_ombudsman(self) -> bool:
         """

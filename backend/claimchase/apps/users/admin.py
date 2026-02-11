@@ -65,7 +65,7 @@ class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
         'date_joined',
     )
     list_filter_submit = True
-    search_fields = ('email', 'first_name', 'last_name', 'username')
+    search_fields = ('email', 'first_name', 'last_name')
     ordering = ('-date_joined',)
     date_hierarchy = 'date_joined'
     actions = ['make_active', 'make_inactive', 'promote_to_medical_reviewer']
