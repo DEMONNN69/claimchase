@@ -21,6 +21,7 @@ from .expert_models import (
     DisputeAssignment,
     DisputeDocumentReview,
 )
+from .forms import DisputeAssignmentAdminForm
 
 
 @admin.register(DisputeCategory)
@@ -325,37 +326,45 @@ class ExpertProfileAdmin(ModelAdmin):
     ]
     
     def expert_name(self, obj):
-        return obj.user.get_full_name()
+        if not obj or not obj.user:
+            return '-'
+        return obj.user.get_full_name() or obj.user.email
     expert_name.short_description = 'Name'
     expert_name.admin_order_field = 'user__first_name'
     
     def email(self, obj):
+        if not obj or not obj.user:
+            return '-'
         return obj.user.email
     email.short_description = 'Email'
     email.admin_order_field = 'user__email'
     
     def active_assignments(self, obj):
-        count = obj.get_active_assignments_count()
-        return format_html('<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">{}</span>', count)
+        if not obj or not hasattr(obj, 'get_active_assignments_count'):
+            return 0
+        return obj.get_active_assignments_count()
     active_assignments.short_description = 'Active'
     
     def completed_assignments(self, obj):
-        count = obj.get_completed_assignments_count()
-        return format_html('<span class="px-2 py-1 bg-green-100 text-green-800 rounded">{}</span>', count)
+        if not obj or not hasattr(obj, 'get_completed_assignments_count'):
+            return 0
+        return obj.get_completed_assignments_count()
     completed_assignments.short_description = 'Completed'
     
+    @display(description='Status', boolean=True)
     def display_active(self, obj):
-        if obj.is_active:
-            return format_html('<span class="px-2 py-1 bg-green-100 text-green-800 rounded">✓ Active</span>')
-        return format_html('<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded">○ Inactive</span>')
-    display_active.short_description = 'Status'
+        if not obj:
+            return False
+        return obj.is_active
 
 
 @admin.register(DisputeAssignment)
 class DisputeAssignmentAdmin(ModelAdmin):
     """Admin for Dispute Assignments"""
     
-    list_display = ['dispute_link', 'expert_name', 'status_badge', 'priority_badge', 'assigned_at', 'completed_at']
+    form = DisputeAssignmentAdminForm
+    
+    list_display = ['dispute_link', 'expert_name', 'status_badge', 'priority_badge', 'document_count', 'assigned_at', 'completed_at']
     list_filter = ['status', 'priority', 'assigned_at']
     list_filter_submit = True
     search_fields = ['dispute__dispute_id', 'dispute__title', 'expert__user__first_name', 'expert__user__last_name']
@@ -365,6 +374,11 @@ class DisputeAssignmentAdmin(ModelAdmin):
         ('📋 Assignment Details', {
             'fields': ('dispute', 'expert', 'assigned_by'),
             'classes': ['tab'],
+        }),
+        ('📎 Documents to Review', {
+            'fields': ('documents',),
+            'classes': ['tab'],
+            'description': 'Select documents from the dispute for expert review. Save the assignment first if documents don\'t appear.',
         }),
         ('⚡ Status & Priority', {
             'fields': ('status', 'priority', 'notes'),
@@ -381,13 +395,28 @@ class DisputeAssignmentAdmin(ModelAdmin):
     )
     
     tabs = [
-        ('Details', ['📋 Assignment Details', '⚡ Status & Priority']),
+        ('Details', ['📋 Assignment Details', '📎 Documents to Review', '⚡ Status & Priority']),
         ('Review', ['✅ Review Results']),
         ('Timeline', ['📅 Timestamps']),
     ]
     
     readonly_fields = ['assigned_at', 'started_at', 'completed_at']
     
+    class Media:
+        js = ('admin/js/jquery.init.js',)  # Required for FilteredSelectMultiple
+    
+    def save_related(self, request, form, formsets, change):
+        """Override to ensure documents are saved properly."""
+        super().save_related(request, form, formsets, change)
+        # Call the form's custom document processing
+        if hasattr(form, '_save_documents'):
+            form._save_documents()
+    
+    def document_count(self, obj):
+        """Count of documents in this assignment"""
+        count = obj.document_reviews.count()
+        return f"{count} docs"
+    document_count.short_description = 'Documents'
     def dispute_link(self, obj):
         if obj.dispute:
             return mark_safe(f'<a href="/admin/consumer_disputes/consumerdispute/{obj.dispute.id}/change/" class="text-primary-600 hover:underline">{obj.dispute.dispute_id}</a>')

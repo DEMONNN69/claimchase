@@ -175,6 +175,7 @@ export default function CaseDetail() {
     under_review: "bg-yellow-100 text-yellow-800",
     resolved: "bg-green-100 text-green-800",
     rejected: "bg-red-100 text-red-800",
+    escalated_to_ombudsman: "bg-orange-100 text-orange-800",
   };
 
   return (
@@ -233,6 +234,18 @@ export default function CaseDetail() {
               </Button>
             )}
             
+            {/* Ombudsman Guide Button */}
+            {caseData.data.status === 'escalated_to_ombudsman' && (
+              <Button
+                onClick={() => navigate(`/cases/${caseId}/ombudsman-guide`)}
+                variant="default"
+                className="gap-2 bg-orange-600 hover:bg-orange-700"
+              >
+                <FileText className="h-4 w-4" />
+                Ombudsman Form Guide
+              </Button>
+            )}
+            
             <Badge className={statusColors[caseData.data.status] || ""}>
               {caseData.data.status.replace("_", " ")}
             </Badge>
@@ -250,6 +263,17 @@ export default function CaseDetail() {
               >
                 <Send className="h-4 w-4" />
                 {isSendingEmail ? "Sending..." : "Send Email"}
+              </Button>
+            )}
+            {caseData.data.status === 'escalated_to_ombudsman' && (
+              <Button
+                onClick={() => navigate(`/cases/${caseId}/ombudsman-guide`)}
+                variant="default"
+                className="gap-2 w-full bg-orange-600 hover:bg-orange-700"
+                size="sm"
+              >
+                <FileText className="h-4 w-4" />
+                Ombudsman Form Guide
               </Button>
             )}
           </div>

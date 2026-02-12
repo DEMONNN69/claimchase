@@ -615,6 +615,313 @@ class CaseViewSet(viewsets.ModelViewSet):
                 'error': str(e),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    @action(detail=True, methods=['post'])
+    def submit_manual_reply(self, request, pk=None):
+        """
+        Submit manually entered email reply.
+        
+        Endpoint: POST /api/cases/{id}/submit_manual_reply/
+        Body: {"reply_body": "email content"}
+        
+        Actions:
+        - Find latest inbound EmailTracking for this case
+        - Update reply_body, is_manual_entry=True, manual_entry_submitted_at=now()
+        - Set case.gmail_tracking_stopped=True
+        - Mark related email_reply notifications as read
+        - Return success
+        """
+        from .models import Notification
+        
+        case = self.get_object()
+        reply_body = request.data.get('reply_body', '').strip()
+        
+        if not reply_body:
+            return Response({
+                'success': False,
+                'message': 'Reply body is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Find latest inbound EmailTracking for this case
+            latest_inbound = case.emails.filter(
+                email_type='inbound'
+            ).order_by('-created_at').first()
+            
+            if not latest_inbound:
+                return Response({
+                    'success': False,
+                    'message': 'No inbound email found for this case',
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Update the EmailTracking record with manual entry
+            latest_inbound.reply_body = reply_body
+            latest_inbound.is_manual_entry = True
+            latest_inbound.manual_entry_submitted_at = timezone.now()
+            latest_inbound.save(update_fields=[
+                'reply_body',
+                'is_manual_entry',
+                'manual_entry_submitted_at',
+                'updated_at'
+            ])
+            
+            # Stop Gmail tracking for this case
+            case.gmail_tracking_stopped = True
+            case.save(update_fields=['gmail_tracking_stopped', 'updated_at'])
+            
+            # Mark related email_reply notifications as read
+            notifications_updated = Notification.objects.filter(
+                type='email_reply',
+                case=case,
+                is_read=False
+            ).update(is_read=True)
+            
+            # Create timeline event
+            CaseTimeline.objects.create(
+                case=case,
+                event_type='comment_added',
+                description=f'Manual reply submitted by user. Gmail tracking stopped.',
+                created_by=request.user
+            )
+            
+            logger.info(
+                f"Manual reply submitted for case {case.case_number}. "
+                f"Notifications marked as read: {notifications_updated}"
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Manual reply submitted successfully. Gmail tracking stopped for this case.',
+                'data': {
+                    'case_number': case.case_number,
+                    'notifications_marked_read': notifications_updated,
+                    'gmail_tracking_stopped': True,
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error submitting manual reply for case {case.case_number}: {e}")
+            return Response({
+                'success': False,
+                'message': f'Failed to submit manual reply: {str(e)}',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['post'])
+    def report_false_notification(self, request, pk=None):
+        """
+        Report false email notification.
+        
+        Endpoint: POST /api/cases/{id}/report_false_notification/
+        Body: {"notification_id": 123, "reason": "optional"}
+        
+        Actions:
+        - Mark notification as read
+        - Log the false positive
+        - Don't stop tracking (keep monitoring)
+        - Return success
+        """
+        from .models import Notification
+        
+        case = self.get_object()
+        notification_id = request.data.get('notification_id')
+        reason = request.data.get('reason', 'No reason provided')
+        
+        if not notification_id:
+            return Response({
+                'success': False,
+                'message': 'notification_id is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Find and mark notification as read
+            notification = Notification.objects.get(
+                id=notification_id,
+                case=case,
+                user=request.user
+            )
+            
+            notification.mark_as_read()
+            
+            # Log the false positive
+            logger.warning(
+                f"False notification reported for case {case.case_number}. "
+                f"Notification ID: {notification_id}, Reason: {reason}"
+            )
+            
+            # Create timeline event
+            CaseTimeline.objects.create(
+                case=case,
+                event_type='comment_added',
+                description=f'False notification reported (ID: {notification_id}). Reason: {reason}',
+                created_by=request.user
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'False notification reported successfully. Tracking continues.',
+                'data': {
+                    'case_number': case.case_number,
+                    'notification_id': notification_id,
+                    'gmail_tracking_stopped': case.gmail_tracking_stopped,
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Notification.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Notification not found or does not belong to this case/user',
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error reporting false notification for case {case.case_number}: {e}")
+            return Response({
+                'success': False,
+                'message': f'Failed to report false notification: {str(e)}',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['get'])
+    def admin_decision_status(self, request, pk=None):
+        """
+        Get admin decision status for manual reply entries.
+        
+        Endpoint: GET /api/cases/{id}/admin_decision_status/
+        
+        Returns the latest manual entry with its admin decision details.
+        Useful for showing decision status to users in frontend.
+        """
+        case = self.get_object()
+        
+        # Find latest manual entry for this case
+        manual_entry = EmailTracking.objects.filter(
+            case=case,
+            is_manual_entry=True
+        ).order_by('-manual_entry_submitted_at').first()
+        
+        if not manual_entry:
+            return Response({
+                'success': True,
+                'has_manual_entry': False,
+                'message': 'No manual reply entry found for this case',
+            }, status=status.HTTP_200_OK)
+        
+        return Response({
+            'success': True,
+            'has_manual_entry': True,
+            'data': {
+                'admin_decision': manual_entry.admin_decision,
+                'admin_decision_display': manual_entry.get_admin_decision_display(),
+                'admin_decision_notes': manual_entry.admin_decision_notes,
+                'admin_decision_at': manual_entry.admin_decision_at,
+                'admin_decision_by': manual_entry.admin_decision_by.email if manual_entry.admin_decision_by else None,
+                'manual_entry_submitted_at': manual_entry.manual_entry_submitted_at,
+                'reply_body_preview': manual_entry.reply_body[:200] if manual_entry.reply_body else None,
+            }
+        }, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['get', 'post'])
+    def ombudsman_guide_progress(self, request, pk=None):
+        """
+        Get or update ombudsman guide progress.
+        
+        GET /api/cases/{id}/ombudsman_guide_progress/
+        - Returns current progress (or creates new if doesn't exist)
+        
+        POST /api/cases/{id}/ombudsman_guide_progress/
+        - Updates current_step and/or completed_steps
+        - Body: { "current_step": 5, "completed_steps": [1,2,3,4,5], "is_completed": false }
+        """
+        from .models import OmbudsmanGuideProgress
+        
+        case = self.get_object()
+        
+        # GET: Retrieve progress
+        if request.method == 'GET':
+            # Get or create progress record
+            progress, created = OmbudsmanGuideProgress.objects.get_or_create(
+                case=case,
+                user=request.user,
+                defaults={
+                    'current_step': 1,
+                    'completed_steps': [],
+                    'is_completed': False,
+                }
+            )
+            
+            return Response({
+                'success': True,
+                'data': {
+                    'current_step': progress.current_step,
+                    'completed_steps': progress.completed_steps,
+                    'is_completed': progress.is_completed,
+                    'completed_at': progress.completed_at,
+                    'total_steps': 15,
+                }
+            }, status=status.HTTP_200_OK)
+        
+        # POST: Update progress
+        try:
+            progress, created = OmbudsmanGuideProgress.objects.get_or_create(
+                case=case,
+                user=request.user,
+                defaults={
+                    'current_step': 1,
+                    'completed_steps': [],
+                    'is_completed': False,
+                }
+            )
+            
+            # Update current step if provided
+            if 'current_step' in request.data:
+                current_step = int(request.data['current_step'])
+                if 1 <= current_step <= 15:
+                    progress.current_step = current_step
+                else:
+                    return Response({
+                        'success': False,
+                        'message': 'current_step must be between 1 and 15',
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update completed steps if provided
+            if 'completed_steps' in request.data:
+                completed_steps = request.data['completed_steps']
+                if isinstance(completed_steps, list):
+                    # Validate all steps are in range
+                    if all(1 <= step <= 15 for step in completed_steps):
+                        progress.completed_steps = completed_steps
+                    else:
+                        return Response({
+                            'success': False,
+                            'message': 'All completed_steps must be between 1 and 15',
+                        }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update completion status if provided
+            if 'is_completed' in request.data:
+                is_completed = request.data['is_completed']
+                if is_completed and not progress.is_completed:
+                    progress.mark_completed()
+                elif not is_completed and progress.is_completed:
+                    progress.is_completed = False
+                    progress.completed_at = None
+            
+            progress.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Progress updated successfully',
+                'data': {
+                    'current_step': progress.current_step,
+                    'completed_steps': progress.completed_steps,
+                    'is_completed': progress.is_completed,
+                    'completed_at': progress.completed_at,
+                    'total_steps': 15,
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error updating ombudsman guide progress for case {case.case_number}: {e}")
+            return Response({
+                'success': False,
+                'message': f'Failed to update progress: {str(e)}',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     @staticmethod
     def _get_valid_transitions(case: Case) -> list:
         """Get list of valid next statuses for a case."""

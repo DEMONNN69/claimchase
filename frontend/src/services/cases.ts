@@ -6,6 +6,21 @@
 import apiClient from './client';
 import { Case, CaseList, CaseCreateData, TimelineEvent, EmailTracking, Document, OmbudsmanStatus, EmailSendResponse, EmailSendRequest } from './types';
 
+export interface AdminDecisionStatus {
+  success: boolean;
+  has_manual_entry: boolean;
+  message?: string;
+  data?: {
+    admin_decision: 'pending' | 'claim_accepted' | 'claim_rejected';
+    admin_decision_display: string;
+    admin_decision_notes: string;
+    admin_decision_at: string | null;
+    admin_decision_by: string | null;
+    manual_entry_submitted_at: string;
+    reply_body_preview: string | null;
+  };
+}
+
 export const caseAPI = {
   /**
    * Create a new case
@@ -99,4 +114,46 @@ export const caseAPI = {
     caseId: number,
     data: EmailSendRequest
   ) => apiClient.post<EmailSendResponse>(`/cases/${caseId}/send_email/`, data),
+
+  /**
+   * Submit manually entered email reply
+   */
+  submitManualReply: (caseId: number, replyBody: string) =>
+    apiClient.post(`/cases/${caseId}/submit_manual_reply/`, { reply_body: replyBody }),
+
+  /**
+   * Report false email notification
+   */
+  reportFalseNotification: (caseId: number, notificationId: number, reason?: string) =>
+    apiClient.post(`/cases/${caseId}/report_false_notification/`, {
+      notification_id: notificationId,
+      reason,
+    }),
+
+  /**
+   * Get admin decision status for manual reply
+   */
+  getAdminDecisionStatus: (caseId: number) =>
+    apiClient.get<AdminDecisionStatus>(`/cases/${caseId}/admin_decision_status/`),
+
+  /**
+   * Get ombudsman guide progress
+   */
+  getOmbudsmanGuideProgress: (caseId: number) =>
+    apiClient.get(`/cases/${caseId}/ombudsman_guide_progress/`),
+
+  /**
+   * Update ombudsman guide progress
+   */
+  updateOmbudsmanGuideProgress: (
+    caseId: number,
+    currentStep: number,
+    completedSteps: number[],
+    isCompleted: boolean
+  ) =>
+    apiClient.post(`/cases/${caseId}/ombudsman_guide_progress/`, {
+      current_step: currentStep,
+      completed_steps: completedSteps,
+      is_completed: isCompleted,
+    }),
 };

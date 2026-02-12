@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 from django.contrib import messages
 from unfold.admin import ModelAdmin
 from unfold.decorators import action, display
-from .models import InsuranceCompany, Case, CaseTimeline, EmailTracking, Consent, Document
+from .models import InsuranceCompany, Case, CaseTimeline, EmailTracking, Consent, Document, Notification, OmbudsmanGuideProgress
 
 
 @admin.register(InsuranceCompany)
@@ -79,14 +79,15 @@ class CaseAdmin(ModelAdmin):
         'display_priority',
         'insurance_type',
         'display_ombudsman',
+        'display_gmail_tracking',
         'created_at',
     )
-    list_filter = ('status', 'priority', 'insurance_type', 'is_escalated_to_ombudsman', 'created_at')
+    list_filter = ('status', 'priority', 'insurance_type', 'is_escalated_to_ombudsman', 'gmail_tracking_stopped', 'created_at')
     list_filter_submit = True
     search_fields = ('case_number', 'user__email', 'policy_number', 'subject')
-    readonly_fields = ('case_number', 'created_at', 'updated_at', 'submission_date', 'escalation_date')
+    readonly_fields = ('case_number', 'created_at', 'updated_at', 'submission_date', 'escalation_date', 'gmail_tracking_stopped')
     date_hierarchy = 'created_at'
-    actions = ['mark_under_review', 'escalate_to_ombudsman', 'mark_resolved']
+    actions = ['mark_under_review', 'escalate_to_ombudsman', 'mark_resolved', 're_enable_gmail_tracking']
     
     # Enable horizontal tabs
     warn_unsaved_form = True
@@ -107,6 +108,10 @@ class CaseAdmin(ModelAdmin):
         }),
         ('⚠️ Escalation', {
             'fields': ('is_escalated_to_ombudsman', 'escalation_date'),
+            'classes': ['tab'],
+        }),
+        ('📧 Email Tracking', {
+            'fields': ('gmail_thread_id', 'gmail_message_id', 'gmail_tracking_stopped'),
             'classes': ['tab'],
         }),
         ('📧 Draft', {
@@ -153,6 +158,16 @@ class CaseAdmin(ModelAdmin):
     @display(description='Ombudsman', boolean=True)
     def display_ombudsman(self, obj):
         return obj.is_escalated_to_ombudsman
+    
+    @display(description='Gmail Tracking', label={
+        True: 'danger',
+        False: 'success',
+    })
+    def display_gmail_tracking(self, obj):
+        """Display whether Gmail tracking is stopped or active."""
+        # Note: True means STOPPED, False means ACTIVE
+        # So we reverse the logic for display
+        return 'Stopped' if obj.gmail_tracking_stopped else 'Active'
 
     @action(description='📋 Mark as Under Review')
     def mark_under_review(self, request, queryset):
@@ -177,6 +192,28 @@ class CaseAdmin(ModelAdmin):
             resolution_date=timezone.now().date()
         )
         self.message_user(request, f'{updated} case(s) marked as resolved.', messages.SUCCESS)
+    
+    @action(description='🔄 Re-enable Gmail Tracking')
+    def re_enable_gmail_tracking(self, request, queryset):
+        """Re-enable Gmail tracking for selected cases."""
+        from .models import CaseTimeline
+        
+        updated = queryset.update(gmail_tracking_stopped=False)
+        
+        # Create timeline events for affected cases
+        for case in queryset:
+            CaseTimeline.objects.create(
+                case=case,
+                event_type='comment_added',
+                description='Gmail tracking re-enabled by admin',
+                created_by=request.user
+            )
+        
+        self.message_user(
+            request,
+            f'Gmail tracking re-enabled for {updated} case(s).',
+            messages.SUCCESS
+        )
 
 
 @admin.register(CaseTimeline)
@@ -212,11 +249,12 @@ class CaseTimelineAdmin(ModelAdmin):
 class EmailTrackingAdmin(ModelAdmin):
     """Admin for EmailTracking model."""
     
-    list_display = ('subject', 'case', 'display_email_type', 'display_status', 'from_email', 'to_email', 'created_at')
-    list_filter = ('email_type', 'status', 'created_at')
+    list_display = ('subject', 'case', 'display_email_type', 'display_status', 'from_email', 'to_email', 'display_manual_entry', 'display_admin_decision', 'created_at')
+    list_filter = ('email_type', 'status', 'is_manual_entry', 'admin_decision', 'created_at')
     list_filter_submit = True
     search_fields = ('case__case_number', 'subject', 'from_email', 'to_email')
-    readonly_fields = ('case', 'created_at', 'updated_at', 'sent_at', 'delivered_at')
+    readonly_fields = ('case', 'created_at', 'updated_at', 'sent_at', 'delivered_at', 'reply_body', 'is_manual_entry', 'manual_entry_submitted_at', 'admin_decision_at', 'display_decision_by')
+    actions = ['mark_claim_accepted', 'mark_claim_rejected']
     
     # Enable horizontal tabs
     warn_unsaved_form = True
@@ -233,6 +271,14 @@ class EmailTrackingAdmin(ModelAdmin):
         }),
         ('📤 Status', {
             'fields': ('email_type', 'status', 'sent_at', 'delivered_at'),
+            'classes': ['tab'],
+        }),
+        ('✍️ Manual Entry', {
+            'fields': ('is_manual_entry', 'reply_body', 'manual_entry_submitted_at'),
+            'classes': ['tab'],
+        }),
+        ('⚖️ Admin Decision', {
+            'fields': ('admin_decision', 'admin_decision_notes', 'admin_decision_at', 'display_decision_by'),
             'classes': ['tab'],
         }),
         ('⏰ Metadata', {
@@ -257,6 +303,91 @@ class EmailTrackingAdmin(ModelAdmin):
     })
     def display_status(self, obj):
         return obj.status
+    
+    @display(description='Manual Entry', boolean=True)
+    def display_manual_entry(self, obj):
+        return obj.is_manual_entry
+    
+    @display(description='Admin Decision', label={
+        'pending': 'warning',
+        'claim_accepted': 'success',
+        'claim_rejected': 'danger',
+    })
+    def display_admin_decision(self, obj):
+        if not obj.is_manual_entry:
+            return '-'
+        return obj.admin_decision
+    
+    @display(description='Decision By')
+    def display_decision_by(self, obj):
+        if obj.admin_decision_by:
+            return obj.admin_decision_by.email
+        return '-'
+    
+    @admin.action(description='✅ Mark Claim as Accepted')
+    def mark_claim_accepted(self, request, queryset):
+        from django.utils import timezone
+        
+        # Filter only manual entries
+        manual_entries = queryset.filter(is_manual_entry=True)
+        count = manual_entries.count()
+        
+        if count == 0:
+            self.message_user(request, 'No manual entries selected.', level='warning')
+            return
+        
+        # Update decision for each entry individually
+        from .models import CaseTimeline
+        for entry in manual_entries:
+            entry.admin_decision = 'claim_accepted'
+            entry.admin_decision_at = timezone.now()
+            entry.admin_decision_by = request.user
+            entry.save()
+            
+            # Create timeline event
+            CaseTimeline.objects.create(
+                case=entry.case,
+                event_type='status_change',
+                description=f'Admin marked claim as ACCEPTED based on manual reply',
+                created_by=request.user
+            )
+        
+        self.message_user(request, f'Marked {count} claim(s) as ACCEPTED.', level='success')
+    
+    @admin.action(description='❌ Mark Claim as Rejected')
+    def mark_claim_rejected(self, request, queryset):
+        from django.utils import timezone
+        
+        # Filter only manual entries
+        manual_entries = queryset.filter(is_manual_entry=True)
+        count = manual_entries.count()
+        
+        if count == 0:
+            self.message_user(request, 'No manual entries selected.', level='warning')
+            return
+        
+        # Update decision and auto-escalate for each entry individually
+        from .models import CaseTimeline
+        for entry in manual_entries:
+            # Update decision fields
+            entry.admin_decision = 'claim_rejected'
+            entry.admin_decision_at = timezone.now()
+            entry.admin_decision_by = request.user
+            entry.save()
+            
+            # Change case status to escalated_to_ombudsman
+            entry.case.status = 'escalated_to_ombudsman'
+            entry.case.save()
+            
+            # Create timeline event
+            CaseTimeline.objects.create(
+                case=entry.case,
+                event_type='status_change',
+                description=f'Admin marked claim as REJECTED based on manual reply. Case automatically escalated to Ombudsman.',
+                created_by=request.user
+            )
+        
+        self.message_user(request, f'Marked {count} claim(s) as REJECTED and escalated to Ombudsman.', level='success')
 
 
 @admin.register(Consent)
@@ -385,6 +516,38 @@ class DocumentAdmin(ModelAdmin):
             pass
         return 'N/A'
     file_url.short_description = 'File URL'
+    
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Enhanced search that filters by case when called from assignment popup.
+        When opened from ReviewAssignment inline, only shows documents from that case.
+        """
+        # Check if we're in a popup context from ReviewAssignment
+        referer = request.META.get('HTTP_REFERER', '')
+        
+        # Check if this is a popup from the review assignment page
+        if 'medical_review/reviewassignment' in referer and '/change/' in referer:
+            # Extract assignment ID from referer URL
+            import re
+            match = re.search(r'/reviewassignment/(\d+)/change/', referer)
+            if match:
+                assignment_id = match.group(1)
+                try:
+                    from claimchase.apps.medical_review.models import ReviewAssignment
+                    assignment = ReviewAssignment.objects.get(pk=assignment_id)
+                    
+                    # Filter to ONLY documents from this assignment's case
+                    queryset = queryset.filter(case=assignment.case)
+                    
+                except (ReviewAssignment.DoesNotExist, ValueError, Exception):
+                    pass
+        
+        # Call parent's search to handle the search_term
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        
+        return queryset, use_distinct
+
+    @action(description='✅ Verify selected documents')
 
     @action(description='✅ Verify selected documents')
     def verify_documents(self, request, queryset):
@@ -396,3 +559,36 @@ class DocumentAdmin(ModelAdmin):
     def unverify_documents(self, request, queryset):
         updated = queryset.update(is_verified=False, verified_by=None, verified_at=None)
         self.message_user(request, f'{updated} document(s) unverified.', messages.WARNING)
+# Temporary file - content to be added to admin.py
+
+@admin.register(OmbudsmanGuideProgress)
+class OmbudsmanGuideProgressAdmin(ModelAdmin):
+    """Admin for Ombudsman Guide Progress tracking."""
+    
+    list_display = ('case', 'user', 'current_step', 'display_progress', 'display_completed', 'updated_at')
+    list_filter = ('is_completed', 'created_at', 'updated_at')
+    list_filter_submit = True
+    search_fields = ('case__case_number', 'user__email')
+    readonly_fields = ('created_at', 'updated_at', 'completed_at')
+    
+    fieldsets = (
+        ('📋 Case & User', {
+            'fields': ('case', 'user'),
+        }),
+        ('📊 Progress', {
+            'fields': ('current_step', 'completed_steps', 'is_completed', 'completed_at'),
+        }),
+        ('⏰ Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+        }),
+    )
+    
+    @display(description='Progress')
+    def display_progress(self, obj):
+        completed_count = len(obj.completed_steps) if obj.completed_steps else 0
+        return f"{completed_count}/15 steps"
+    
+    @display(description='Status', boolean=True)
+    def display_completed(self, obj):
+        return obj.is_completed
+

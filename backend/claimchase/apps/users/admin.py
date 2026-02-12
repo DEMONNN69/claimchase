@@ -78,6 +78,7 @@ class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
         ('👤 Account', {
             'fields': ('email', 'password'),
             'classes': ['tab'],
+            'description': 'Raw passwords are not stored, so there is no way to see this user\'s password, but you can change the password using <a href="../password/" style="color: #3b82f6; font-weight: bold; text-decoration: underline; font-size: 14px;">⚠️ CLICK HERE TO CHANGE PASSWORD ⚠️</a>.',
         }),
         ('📋 Profile', {
             'fields': ('first_name', 'last_name', 'phone', 'role'),
@@ -133,7 +134,6 @@ class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
     readonly_fields = (
         'last_login',
         'date_joined',
-        'password',
         'created_at',
         'updated_at',
         'document_count',
@@ -141,14 +141,9 @@ class CustomUserAdmin(BaseUserAdmin, ModelAdmin):
     )
 
     inlines = [MedicalReviewerProfileInline]
-
-    def get_urls(self):
-        """Add password change URL."""
-        from django.urls import path
-        from django.contrib.auth.views import redirect_to_login
-        urls = super().get_urls()
-        # Password change URLs are automatically added by BaseUserAdmin
-        return urls
+    
+    # Enable password change in Unfold
+    change_user_password_template = None  # Use Unfold's template
 
     def full_name(self, obj):
         return obj.get_full_name() or obj.email

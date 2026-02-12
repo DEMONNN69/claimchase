@@ -17,6 +17,7 @@ import {
   markAllNotificationsAsRead,
   type Notification,
 } from "@/services/notifications";
+import ReplyNotificationModal from "@/components/ReplyNotificationModal";
 
 export function NotificationBell() {
   const { t } = useTranslation("notifications");
@@ -24,6 +25,10 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Reply modal state
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
   const fetchNotifications = async () => {
     try {
@@ -56,6 +61,14 @@ export function NotificationBell() {
   }, [isOpen]);
 
   const handleNotificationClick = async (notification: Notification) => {
+    // Check if this is an email reply notification
+    if (notification.type === 'email_reply') {
+      setSelectedNotification(notification);
+      setIsReplyModalOpen(true);
+      setIsOpen(false);
+      return;
+    }
+    
     // Mark as read
     if (!notification.is_read) {
       try {
@@ -106,6 +119,7 @@ export function NotificationBell() {
   };
 
   return (
+    <>
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
@@ -175,5 +189,23 @@ export function NotificationBell() {
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
+    
+    {/* Reply Notification Modal */}
+    {selectedNotification && selectedNotification.case_id && (
+      <ReplyNotificationModal
+        isOpen={isReplyModalOpen}
+        onClose={() => {
+          setIsReplyModalOpen(false);
+          setSelectedNotification(null);
+        }}
+        caseId={selectedNotification.case_id}
+        caseNumber={`#${selectedNotification.case_id}`}
+        notificationId={selectedNotification.id}
+        onSuccess={() => {
+          fetchNotifications();
+        }}
+      />
+    )}
+    </>
   );
 }

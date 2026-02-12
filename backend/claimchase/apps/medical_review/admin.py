@@ -18,6 +18,7 @@ from .models import (
     DocumentReview,
     ReviewerStats,
 )
+from .forms import ReviewAssignmentAdminForm
 
 
 # ==================== Inlines ====================
@@ -29,11 +30,49 @@ class AssignmentDocumentInline(admin.TabularInline):
     raw_id_fields = ['document']
     readonly_fields = ['document_link', 'added_at']
     fields = ['document', 'document_link', 'added_at']
+    verbose_name = "Document to Review"
+    verbose_name_plural = "Documents to Review"
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        """Store the parent assignment in the request for reference"""
+        formset = super().get_formset(request, obj, **kwargs)
+        if obj and obj.case:
+            # Store case info in formset for use in help text
+            formset._case_number = obj.case.case_number
+            formset._case_doc_count = obj.case.documents.count()
+        return formset
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Filter documents based on the parent assignment's case"""
+        if db_field.name == "document":
+            # Get the assignment ID from the URL
+            parent_obj_id = request.resolver_match.kwargs.get('object_id')
+            
+            if parent_obj_id:
+                try:
+                    from .models import ReviewAssignment
+                    from claimchase.apps.grievance_core.models import Document
+                    
+                    assignment = ReviewAssignment.objects.get(pk=parent_obj_id)
+                    
+                    # Filter to only documents from this case
+                    kwargs["queryset"] = Document.objects.filter(
+                        case=assignment.case
+                    )
+                    
+                except ReviewAssignment.DoesNotExist:
+                    from claimchase.apps.grievance_core.models import Document
+                    kwargs["queryset"] = Document.objects.none()
+            else:
+                from claimchase.apps.grievance_core.models import Document
+                kwargs["queryset"] = Document.objects.none()
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def document_link(self, obj):
         if obj.document and obj.document.file:
             return format_html(
-                '<a href="{}" target="_blank" class="text-primary-600 hover:underline">View Document</a>',
+                '<a href="{}" target="_blank" class="text-primary-600 hover:underline">📄 View</a>',
                 obj.document.file.url
             )
         return '-'
@@ -134,6 +173,8 @@ class MedicalReviewerProfileAdmin(ModelAdmin):
 class ReviewAssignmentAdmin(ModelAdmin):
     """Admin for review assignments"""
     
+    form = ReviewAssignmentAdminForm
+    
     list_display = [
         'id', 'case_number', 'reviewer_name', 'display_status',
         'document_count', 'reviewed_count', 'assigned_at'
@@ -143,7 +184,7 @@ class ReviewAssignmentAdmin(ModelAdmin):
     search_fields = ['case__case_number', 'reviewer__email', 'reviewer__first_name']
     readonly_fields = ['assigned_at', 'started_at', 'completed_at', 'document_count', 'reviewed_count']
     raw_id_fields = ['case', 'reviewer', 'assigned_by']
-    inlines = [AssignmentDocumentInline, DocumentReviewInline]
+    inlines = [DocumentReviewInline]
     date_hierarchy = 'assigned_at'
     actions = ['mark_pending', 'mark_in_progress', 'mark_completed']
     
@@ -151,10 +192,18 @@ class ReviewAssignmentAdmin(ModelAdmin):
     warn_unsaved_form = True
     compressed_fields = True
     
+    class Media:
+        js = ('admin/js/jquery.init.js',)  # Required for FilteredSelectMultiple
+    
     fieldsets = (
         ('📋 Assignment', {
             'fields': ('case', 'reviewer', 'assigned_by', 'status'),
             'classes': ['tab'],
+        }),
+        ('📎 Documents to Review', {
+            'fields': ('documents',),
+            'classes': ['tab'],
+            'description': 'Select documents from the case for review. Save the assignment first if no documents appear.',
         }),
         ('📝 Notes', {
             'fields': ('admin_notes',),
@@ -169,6 +218,13 @@ class ReviewAssignmentAdmin(ModelAdmin):
             'classes': ['tab'],
         }),
     )
+    
+    def save_related(self, request, form, formsets, change):
+        """Override to ensure documents are saved properly."""
+        super().save_related(request, form, formsets, change)
+        # Call the form's custom document processing
+        if hasattr(form, '_save_documents'):
+            form._save_documents()
     
     def case_number(self, obj):
         return obj.case.case_number

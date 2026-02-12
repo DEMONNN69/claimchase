@@ -205,6 +205,10 @@ class Case(models.Model):
         blank=True,
         help_text="Gmail message ID of the original grievance email"
     )
+    gmail_tracking_stopped = models.BooleanField(
+        default=False,
+        help_text="Whether to stop Gmail tracking for this case"
+    )
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -481,8 +485,14 @@ class EmailTracking(models.Model):
         help_text="Direction of email (inbound/outbound)"
     )
     
-    from_email = models.EmailField(help_text="Sender email address")
-    to_email = models.EmailField(help_text="Recipient email address")
+    from_email = models.CharField(
+        max_length=255,
+        help_text="Sender email address (can include display name: 'Name <email@example.com>')"
+    )
+    to_email = models.CharField(
+        max_length=255,
+        help_text="Recipient email address (can include display name: 'Name <email@example.com>')"
+    )
     cc_emails = models.CharField(
         max_length=500,
         blank=True,
@@ -538,6 +548,53 @@ class EmailTracking(models.Model):
         blank=True,
         related_name='emails_created',
         help_text="User who sent the email (if manual)"
+    )
+    
+    # Manual entry tracking
+    reply_body = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Manually entered reply body content"
+    )
+    is_manual_entry = models.BooleanField(
+        default=False,
+        help_text="Whether this reply was manually entered by user"
+    )
+    manual_entry_submitted_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When the manual entry was submitted"
+    )
+    
+    # Admin decision tracking
+    ADMIN_DECISION_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('claim_accepted', 'Claim Accepted'),
+        ('claim_rejected', 'Claim Rejected'),
+    ]
+    
+    admin_decision = models.CharField(
+        max_length=20,
+        choices=ADMIN_DECISION_CHOICES,
+        default='pending',
+        help_text="Admin's decision on the manually entered reply"
+    )
+    admin_decision_notes = models.TextField(
+        blank=True,
+        help_text="Admin's notes/reasoning for the decision"
+    )
+    admin_decision_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When admin made the decision"
+    )
+    admin_decision_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='email_decisions',
+        help_text="Admin who made the decision"
     )
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -822,3 +879,61 @@ class Notification(models.Model):
         if not self.is_read:
             self.is_read = True
             self.save(update_fields=['is_read'])
+
+
+class OmbudsmanGuideProgress(models.Model):
+    """
+    Track user's progress through the Ombudsman Guide (15 steps).
+    Saves which step they're on and which steps they've completed.
+    """
+    case = models.OneToOneField(
+        Case,
+        on_delete=models.CASCADE,
+        related_name='ombudsman_guide_progress',
+        help_text="Case this progress is for"
+    )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='ombudsman_guide_progress',
+        help_text="User viewing the guide"
+    )
+    current_step = models.IntegerField(
+        default=1,
+        help_text="Current step number (1-15)"
+    )
+    completed_steps = models.JSONField(
+        default=list,
+        help_text="Array of completed step numbers"
+    )
+    is_completed = models.BooleanField(
+        default=False,
+        help_text="Whether user has completed all steps"
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the guide was completed"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'grievance_core_ombudsman_guide_progress'
+        verbose_name = 'Ombudsman Guide Progress'
+        verbose_name_plural = 'Ombudsman Guide Progress'
+        indexes = [
+            models.Index(fields=['case', 'user']),
+            models.Index(fields=['is_completed']),
+        ]
+        unique_together = [['case', 'user']]
+    
+    def __str__(self):
+        return f"{self.case.case_number} - Step {self.current_step}/15"
+    
+    def mark_completed(self):
+        """Mark the guide as completed."""
+        if not self.is_completed:
+            self.is_completed = True
+            self.completed_at = timezone.now()
+            self.save(update_fields=['is_completed', 'completed_at'])

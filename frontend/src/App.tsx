@@ -30,6 +30,7 @@ import ExpertOnboarding from "./pages/ExpertOnboarding";
 import CaseDetail from "./pages/CaseDetail";
 import Cases from "./pages/Cases";
 import DisputeDetail from "./pages/DisputeDetail";
+import OmbudsmanGuide from "./pages/OmbudsmanGuide";
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -84,6 +85,11 @@ const App = () => (
               <Route path="/cases/:id" element={
                 <ProtectedRoute requireOnboarding>
                   <CaseDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/cases/:caseId/ombudsman-guide" element={
+                <ProtectedRoute requireOnboarding>
+                  <OmbudsmanGuide />
                 </ProtectedRoute>
               } />
               <Route path="/start-grievance" element={

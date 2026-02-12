@@ -334,6 +334,14 @@ def process_new_message(user: CustomUser, access_token: str, message_id: str, th
             logger.debug(f"Message {message_id} could not be matched to any case")
             return
         
+        # Check if Gmail tracking has been stopped for this case
+        if case.gmail_tracking_stopped:
+            logger.info(
+                f"Gmail tracking stopped for case {case.case_number}. "
+                f"Ignoring message {message_id} from {from_email}"
+            )
+            return
+        
         # This is a reply or related email to one of our cases!
         logger.info(f"Email detected for case {case.case_number} from {from_email} (match: {match_type})")
         
