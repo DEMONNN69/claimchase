@@ -6,17 +6,31 @@ Extends base.py with debug, logging, and development-friendly configurations.
 from pathlib import Path
 from .base import *
 from .base import UNFOLD  # Explicitly import UNFOLD
+import dj_database_url
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
-# Use SQLite for development (no PostgreSQL required)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use DATABASE_URL environment variable if set (for Neon DB), otherwise use SQLite
+database_url = config('DATABASE_URL', default='')
+
+if database_url:
+    # Use Neon PostgreSQL from .env
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=database_url,
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
-}
+else:
+    # Use SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Verbose logging for development
 LOGGING['loggers']['claimchase']['level'] = 'DEBUG'
