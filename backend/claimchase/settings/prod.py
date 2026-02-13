@@ -20,7 +20,7 @@ DATABASES = {
 # Allow Railway/Render domains
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='.up.railway.app,.onrender.com',
+    default='.onrender.com,.up.railway.app,localhost,127.0.0.1',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
@@ -97,33 +97,3 @@ LOGGING = {
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# S3 storage (if using AWS)
-if config('USE_S3', default=False, cast=bool):
-    STORAGES = {
-        'default': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-            'OPTIONS': {
-                'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                'region_name': AWS_S3_REGION_NAME,
-            },
-        },
-        'staticfiles': {
-            'BACKEND': 'storages.backends.s3boto3.S3StaticStorage',
-            'OPTIONS': {
-                'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                'region_name': AWS_S3_REGION_NAME,
-            },
-        },
-    }
-
-# Sentry for error tracking (optional)
-if config('USE_SENTRY', default=False, cast=bool):
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        dsn=config('SENTRY_DSN', default=''),
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=0.1,
-        send_default_pii=False,
-    )
