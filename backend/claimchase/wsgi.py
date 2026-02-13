@@ -8,6 +8,6 @@ import os
 from django.core.wsgi import get_wsgi_application
 
 # Set default settings module (override with environment variable in production)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'claimchase.settings.dev')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'claimchase.settings.prod')
 
 application = get_wsgi_application()
