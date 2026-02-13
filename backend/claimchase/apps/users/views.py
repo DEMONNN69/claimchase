@@ -122,7 +122,6 @@ class AuthViewSet(viewsets.ViewSet):
         POST /api/auth/signup/
         {
             "email": "newuser@gmail.com",
-            "username": "newuser",
             "password": "password123",
             "first_name": "Saurabh",
             "last_name": "Shukla",
@@ -130,17 +129,16 @@ class AuthViewSet(viewsets.ViewSet):
         }
         """
         email = request.data.get('email')
-        username = request.data.get('username')
         password = request.data.get('password')
         first_name = request.data.get('first_name', '')
         last_name = request.data.get('last_name', '')
         phone = request.data.get('phone', '')
         
         # Validation
-        if not all([email, username, password]):
+        if not all([email, password]):
             return Response({
                 'success': False,
-                'message': 'Email, username, and password are required',
+                'message': 'Email and password are required',
             }, status=status.HTTP_400_BAD_REQUEST)
         
         # Check if user already exists
@@ -150,17 +148,10 @@ class AuthViewSet(viewsets.ViewSet):
                 'message': 'Email already registered',
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        if CustomUser.objects.filter(username=username).exists():
-            return Response({
-                'success': False,
-                'message': 'Username already taken',
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             # Create user
             user = CustomUser.objects.create_user(
                 email=email,
-                username=username,
                 password=password,
                 first_name=first_name,
                 last_name=last_name,
