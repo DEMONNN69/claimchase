@@ -110,20 +110,244 @@
 ---
 
 ## 🆓 Testing Environment (FREE)
-3 services**
+
+### Deployment Option A: Render (All-in-One)
+**3 services:**
 1. **PostgreSQL Database** (Render - Free tier)
 2. **Backend API** (Render - Free tier)
 3. **Frontend + Proxy** (Render - Free tier) ← **Single deployment**
 
-**Cache:** Django's built-in local memory cache (no separate service needed)
-
-**Time Required:** ~10-15
 **Time Required:** ~15-20 minutes  
 **Cost:** $0/month (with limitations)
+
+### Deployment Option B: Vercel + Render (Recommended) ⭐
+**3 services:**
+1. **PostgreSQL Database** (Neon DB - Free tier) ← **You're using this**
+2. **Backend API** (Render - Free tier) ← **You're using this**
+3. **Frontend** (Vercel - Free tier) ← **You're using this**
+4. **Proxy** (Vercel Serverless Function - Free tier) ← **Same deployment as frontend**
+
+**Time Required:** ~10 minutes (you already have 1-3 deployed)  
+**Cost:** $0/month (with better performance)
+
+**Why Vercel + Render is better:**
+- ✅ Faster frontend (Vercel's global CDN)
+- ✅ Simpler proxy setup (Vercel serverless functions)
+- ✅ Better cold start times
+- ✅ More generous free tier limits
+
+**Cache:** Django's built-in local memory cache (no separate service needed)
 
 ### Step-by-Step Deployment Guide
 
 ---
+
+## 🚀 OPTION B: Vercel + Render Deployment (Recommended)
+
+**Perfect for your current setup! You already have Backend on Render and Database on Neon.**
+
+### Architecture Overview
+
+```
+Browser → Vercel (Frontend + Proxy Serverless Function) → Render (Backend) → Neon (Database)
+          ↑                                                ↑
+          PUBLIC URL                                      HIDDEN URL
+```
+
+**Security Flow:**
+1. Browser loads React app from Vercel (e.g., `claimchase.vercel.app`)
+2. When viewing documents, browser calls Vercel serverless function: `/api/proxy-documents?...`
+3. Serverless function (running on Vercel) fetches from backend on Render
+4. Backend URL NEVER exposed to browser ✅
+
+---
+
+### STEP 1: Setup Vercel Proxy (Document Security)
+
+**1.1 Create Vercel Serverless Function**
+
+The file already exists in your project: `frontend/api/proxy-documents.js`
+
+This serverless function will:
+- Run on Vercel's edge network (fast, globally distributed)
+- Hide your Render backend URL from browsers
+- Proxy document downloads securely
+
+**1.2 Configure Vercel Environment Variables**
+
+Go to your Vercel dashboard → Your Project → Settings → Environment Variables
+
+Add:
+```env
+VITE_API_BASE_URL=https://your-backend.onrender.com
+```
+
+Replace `your-backend.onrender.com` with your actual Render backend URL.
+
+**1.3 Deploy to Vercel**
+
+```bash
+cd c:\Users\Harsh tiwari\Desktop\claimchase
+
+# Commit the serverless function
+git add frontend/api/proxy-documents.js
+git commit -m "Add Vercel serverless proxy for document security"
+git push origin main
+```
+
+Vercel will auto-deploy (takes ~1-2 minutes).
+
+---
+
+### STEP 2: Update Backend CORS Settings
+
+Your backend on Render needs to allow requests from Vercel.
+
+**2.1 Go to Render Dashboard**
+- Navigate to your backend service
+- Go to **Environment** tab
+
+**2.2 Update Environment Variables**
+
+Update or add these:
+```env
+# Frontend URL (your Vercel deployment)
+FRONTEND_URL=https://your-app.vercel.app
+
+# CORS Origins (allow Vercel)
+CORS_ALLOWED_ORIGINS=https://your-app.vercel.app
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS=https://your-app.vercel.app,https://your-backend.onrender.com
+
+# Allowed Hosts
+ALLOWED_HOSTS=.onrender.com,.vercel.app
+
+# Document Origin Validation (important for proxy security)
+ALLOWED_DOCUMENT_ORIGINS=https://your-app.vercel.app
+```
+
+**2.3 Save and Redeploy**
+
+Click **Save Changes**. Render will auto-redeploy (~2-3 minutes).
+
+---
+
+### STEP 3: Test Your Proxy Setup
+
+**3.1 Test Frontend Access**
+
+Visit your Vercel URL: `https://your-app.vercel.app`
+- Should load React app ✅
+- Login should work ✅
+
+**3.2 Test Proxy Function (if using backend documents)**
+
+If you're storing documents in Django backend (not Cloudinary), test the proxy:
+
+```bash
+# Get a temporary access token from your backend
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+     https://your-backend.onrender.com/api/cases/1/documents/1/download-url/
+
+# Response will include a token like: abc123xyz
+
+# Try accessing via Vercel proxy
+curl "https://your-app.vercel.app/api/proxy-documents?type=case&disputeId=1&docId=1&access=abc123xyz"
+# Should return the document ✅
+
+# Try accessing backend directly (should fail)
+curl "https://your-backend.onrender.com/api/cases/1/documents/1/download/?access=abc123xyz"
+# Should return 404 or 403 ✅ (backend blocks direct access)
+```
+
+**3.3 Test in Browser**
+
+1. Login to your app
+2. Create a case/dispute
+3. Upload a document
+4. Click to view document
+5. **Check Network tab in browser:**
+   - ✅ Should see: `your-app.vercel.app/api/proxy-documents?...`
+   - ❌ Should NOT see: `your-backend.onrender.com`
+
+---
+
+### STEP 4: Optional - Custom Domain
+
+**4.1 Add Custom Domain to Vercel**
+
+Vercel Dashboard → Your Project → Settings → Domains
+- Add domain: `claimchase.com` and `www.claimchase.com`
+- Vercel provides DNS instructions
+- SSL certificate auto-provisioned
+
+**4.2 Update Backend CORS**
+
+After adding custom domain, update backend env vars:
+```env
+FRONTEND_URL=https://claimchase.com
+CORS_ALLOWED_ORIGINS=https://claimchase.com,https://www.claimchase.com
+CSRF_TRUSTED_ORIGINS=https://claimchase.com,https://www.claimchase.com
+ALLOWED_DOCUMENT_ORIGINS=https://claimchase.com,https://www.claimchase.com
+```
+
+---
+
+### Configuration Summary
+
+**Vercel (Frontend + Proxy):**
+```env
+VITE_API_BASE_URL=https://your-backend.onrender.com
+NODE_ENV=production
+```
+
+**Render (Backend):**
+```env
+DATABASE_URL=postgresql://... (from Neon)
+FRONTEND_URL=https://your-app.vercel.app
+CORS_ALLOWED_ORIGINS=https://your-app.vercel.app
+CSRF_TRUSTED_ORIGINS=https://your-app.vercel.app,https://your-backend.onrender.com
+ALLOWED_HOSTS=.onrender.com,.vercel.app
+ALLOWED_DOCUMENT_ORIGINS=https://your-app.vercel.app
+SECRET_KEY=your-secret-key-here
+DEBUG=False
+DJANGO_SETTINGS_MODULE=claimchase.settings.prod
+
+# Cloudinary (already configured)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+**Neon DB (Database):**
+- No configuration needed - already connected via DATABASE_URL
+
+---
+
+### 🎉 Done! Your Deployment is Complete
+
+**What you have now:**
+- ✅ **Frontend:** Vercel (fast global CDN)
+- ✅ **Proxy:** Vercel Serverless Function (secure document access)
+- ✅ **Backend:** Render (hidden from browsers)
+- ✅ **Database:** Neon PostgreSQL (free 0.5 GB)
+- ✅ **Storage:** Cloudinary (documents/images)
+
+**URLs to share:**
+- ✅ Share: `https://your-app.vercel.app`
+- ❌ NEVER share: Backend Render URL (it's hidden)
+
+**Cost:** $0/month on free tiers
+
+**Performance:**
+- Frontend: Fast (Vercel CDN)
+- Backend: Cold starts after 15 min inactivity (~30s)
+- Database: Always active (Neon)
+
+---
+
+## 🚀 OPTION A: Render Only Deployment (Alternative)
 
 #### **STEP 1: Setup Cloudinary (Skip if already done)**
 
