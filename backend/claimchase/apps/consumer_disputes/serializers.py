@@ -124,9 +124,10 @@ class DisputeDocumentSerializer(serializers.ModelSerializer):
             )
             
             # Return FRONTEND proxy URL (backend URL completely hidden)
+            # Format for Vercel serverless function: /api/proxy-documents?type=dispute&disputeId=X&docId=Y&access=token
             from django.conf import settings
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-            return f"{frontend_url}/proxy/documents/dispute/{dispute.id}/{obj.id}?access={temp_token}"
+            return f"{frontend_url}/api/proxy-documents?type=dispute&disputeId={dispute.id}&docId={obj.id}&access={temp_token}"
         
         return None
     

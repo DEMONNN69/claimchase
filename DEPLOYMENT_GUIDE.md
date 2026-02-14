@@ -222,10 +222,9 @@ CSRF_TRUSTED_ORIGINS=https://your-app.vercel.app,https://your-backend.onrender.c
 
 # Allowed Hosts
 ALLOWED_HOSTS=.onrender.com,.vercel.app
-
-# Document Origin Validation (important for proxy security)
-ALLOWED_DOCUMENT_ORIGINS=https://your-app.vercel.app
 ```
+
+**Note:** `ALLOWED_DOCUMENT_ORIGINS` is automatically set from `CORS_ALLOWED_ORIGINS` + `FRONTEND_URL`, no need to configure separately.
 
 **2.3 Save and Redeploy**
 
@@ -289,7 +288,6 @@ After adding custom domain, update backend env vars:
 FRONTEND_URL=https://claimchase.com
 CORS_ALLOWED_ORIGINS=https://claimchase.com,https://www.claimchase.com
 CSRF_TRUSTED_ORIGINS=https://claimchase.com,https://www.claimchase.com
-ALLOWED_DOCUMENT_ORIGINS=https://claimchase.com,https://www.claimchase.com
 ```
 
 ---
@@ -309,7 +307,6 @@ FRONTEND_URL=https://your-app.vercel.app
 CORS_ALLOWED_ORIGINS=https://your-app.vercel.app
 CSRF_TRUSTED_ORIGINS=https://your-app.vercel.app,https://your-backend.onrender.com
 ALLOWED_HOSTS=.onrender.com,.vercel.app
-ALLOWED_DOCUMENT_ORIGINS=https://your-app.vercel.app
 SECRET_KEY=your-secret-key-here
 DEBUG=False
 DJANGO_SETTINGS_MODULE=claimchase.settings.prod

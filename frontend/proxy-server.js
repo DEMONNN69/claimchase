@@ -20,15 +20,19 @@ app.use(cors({
 }));
 
 /**
- * Proxy endpoint: GET /proxy/documents/:type/:disputeId/:docId
- * Query params: access (temporary token)
+ * Proxy endpoint: GET /api/proxy-documents
+ * Query params: type, disputeId, docId, access
+ * 
+ * Matches Vercel serverless function format for consistency
  */
-app.get('/proxy/documents/:type/:disputeId/:docId', async (req, res) => {
-  const { type, disputeId, docId } = req.params;
-  const { access } = req.query;
+app.get('/api/proxy-documents', async (req, res) => {
+  const { type, disputeId, docId, access } = req.query;
 
-  if (!access) {
-    return res.status(401).json({ error: 'Access token required' });
+  // Validate required parameters
+  if (!type || !disputeId || !docId || !access) {
+    return res.status(400).json({ 
+      error: 'Missing required parameters: type, disputeId, docId, access' 
+    });
   }
 
   // Validate type
