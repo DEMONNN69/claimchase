@@ -29,10 +29,14 @@ export default async function handler(req, res) {
     }
 
     // Get backend URL from environment variable
-    const backendUrl = process.env.VITE_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+    // Note: Vercel serverless functions use plain env vars, not VITE_ prefixed ones
+    const backendUrl = process.env.API_BASE_URL || 
+                       process.env.VITE_API_BASE_URL || 
+                       process.env.NEXT_PUBLIC_API_URL;
     
     if (!backendUrl) {
-      console.error('Backend URL not configured');
+      console.error('Backend URL not configured. Available env vars:', Object.keys(process.env).filter(k => k.includes('API') || k.includes('URL')));
+      return res.status(500).json({ error: 'Server configuration error' });
       return res.status(500).json({ error: 'Server configuration error' });
     }
 
