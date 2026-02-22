@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { NotificationBell } from './NotificationBell';
+import { BrandLogo } from './BrandLogo';
 
 export function DesktopSidebar() {
   const { t } = useTranslation('common');
@@ -22,10 +23,7 @@ export function DesktopSidebar() {
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <span className="font-bold text-lg">{t('app_name')}</span>
+            <BrandLogo size="md" />
           </div>
           <NotificationBell />
         </div>

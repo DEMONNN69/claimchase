@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -48,10 +49,7 @@ export default function Landing() {
       {/* Header */}
       <header className="w-full px-6 py-4 flex items-center justify-between border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Shield className="h-5 w-5 text-white" />
-          </div>
-          <span className="font-bold text-lg text-primary">ClaimChase</span>
+          <BrandLogo size="md" />
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
@@ -217,7 +215,7 @@ export default function Landing() {
             <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
               <Shield className="h-4 w-4 text-white" />
             </div>
-            <span className="font-semibold text-primary">ClaimChase</span>
+            <BrandLogo size="sm" />
             <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>
           <p className="text-xs text-muted-foreground">

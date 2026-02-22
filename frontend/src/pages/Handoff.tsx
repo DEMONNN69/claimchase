@@ -56,7 +56,7 @@ export default function Handoff() {
             <Crown className="h-8 w-8" />
           </div>
           <h2 className="text-xl lg:text-2xl font-bold mb-2">Grievance Rejected?</h2>
-          <p className="text-white/80 mb-4">Let ClaimChase experts take over your case.</p>
+          <p className="text-white/80 mb-4">Let AmicusClaims experts take over your case.</p>
           <Badge className="bg-white/20 hover:bg-white/20 text-white">
             <Sparkles className="h-3 w-3 mr-1" />
             Premium Service

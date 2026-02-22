@@ -7,7 +7,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useTranslation } from "react-i18next";import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationBell } from "@/components/NotificationBell";
 const iconMap = {
   rejection: FileText,
@@ -30,7 +32,7 @@ export default function Guide() {
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <BrandLogo size="sm" />
           <div className="flex items-center gap-2">
             <NotificationBell />
             <button

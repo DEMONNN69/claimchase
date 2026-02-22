@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { BrandLogo } from "@/components/BrandLogo";
 import { 
   FileText, 
   Plus, 
@@ -85,7 +86,7 @@ export default function Cases() {
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <BrandLogo size="sm" />
           <div className="flex items-center gap-2">
             <NotificationBell />
             <button

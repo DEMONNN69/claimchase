@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Copy, Check, Building2, FileText, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateCase, useInsuranceCompanies } from "@/hooks/useApi";
+import { BrandLogo } from "@/components/BrandLogo";
 import { caseAPI } from "@/services/cases";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -193,7 +194,7 @@ export default function Drafter() {
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+          <BrandLogo size="sm" />
         </div>
       </div>
 

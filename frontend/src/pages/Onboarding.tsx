@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Search, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes } from "@/hooks/useApi";
+import { BrandLogo } from "@/components/BrandLogo";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
@@ -122,7 +123,7 @@ export default function Onboarding() {
           <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
             <Shield className="h-5 w-5 text-white" />
           </div>
-          <span className="text-white font-bold text-xl">ClaimChase</span>
+          <BrandLogo size="md" inverted />
         </div>
         <div className="text-white">
           <h2 className="text-3xl font-bold mb-4 whitespace-pre-line">
@@ -144,7 +145,7 @@ export default function Onboarding() {
         {/* Mobile Header */}
         <div className="lg:hidden p-4 border-b">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+            <BrandLogo size="sm" />
             <span className="text-sm text-muted-foreground">{step}/3</span>
           </div>
           <div className="flex items-center gap-4">

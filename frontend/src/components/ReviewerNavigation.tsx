@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/BrandLogo";
 import {
   LayoutDashboard,
   Settings,
@@ -55,9 +56,7 @@ export function ReviewerHeader() {
               <Stethoscope className="h-5 w-5 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold text-slate-900">
-                ClaimChase
-              </h1>
+              <BrandLogo size="md" />
               <p className="text-xs text-slate-500">Medical Reviewer Portal</p>
             </div>
           </div>

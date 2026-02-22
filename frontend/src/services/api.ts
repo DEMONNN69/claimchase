@@ -1,5 +1,5 @@
 /**
- * API Service for ClaimChase (Legacy)
+ * API Service for AmicusClaims (Legacy)
  * This file maintained for backward compatibility
  * Use individual service files for new code
  */

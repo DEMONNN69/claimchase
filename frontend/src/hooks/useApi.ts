@@ -1,5 +1,5 @@
 /**
- * React Query Hooks for ClaimChase API
+ * React Query Hooks for AmicusClaims API
  * Handles data fetching, caching, and mutations
  * 
  * StaleTime Strategy:

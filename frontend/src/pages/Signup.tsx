@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useTranslation } from 'react-i18next';
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Signup() {
   const { t } = useTranslation(['auth', 'common']);
@@ -59,7 +60,7 @@ export default function Signup() {
       {/* Left Panel - Branding */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-primary to-primary/80 p-6 py-10 lg:p-12 lg:min-h-screen flex flex-col justify-between">
         <div>
-          <h1 className="text-white text-xl lg:text-2xl font-bold">{t('common:app_name')}</h1>
+          <BrandLogo size="lg" inverted />
         </div>
         <div className="text-white my-8 lg:my-0">
           <h2 className="text-2xl lg:text-4xl font-bold mb-2 lg:mb-4">
@@ -67,7 +68,7 @@ export default function Signup() {
           </h2>
           <p className="text-white/80 text-sm lg:text-lg">{t('auth:signup.description')}</p>
         </div>
-        <p className="text-white/60 text-xs hidden lg:block">© 2025 ClaimChase 360 Solutions</p>
+        <p className="text-white/60 text-xs hidden lg:block">© 2026 AmicusClaims</p>
       </div>
 
       {/* Right Panel - Form */}

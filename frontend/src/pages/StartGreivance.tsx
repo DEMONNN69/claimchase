@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, FileText, CheckCircle, Calendar, DollarSign, FileCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { caseAPI } from "@/services/cases";
 import { useTranslation } from "react-i18next";
@@ -207,7 +208,7 @@ export default function StartGreivance() {
           <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
             <FileCheck className="h-5 w-5 text-white" />
           </div>
-          <span className="text-white font-bold text-xl">ClaimChase</span>
+          <BrandLogo size="md" inverted />
         </div>
         <div className="text-white">
           <h2 className="text-3xl font-bold mb-4 whitespace-pre-line">
@@ -252,7 +253,7 @@ export default function StartGreivance() {
         {/* Mobile Header */}
         <div className="lg:hidden p-4 border-b">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-semibold text-primary">ClaimChase</h1>
+            <BrandLogo size="sm" />
             <span className="text-sm text-muted-foreground">Step {step}/3</span>
           </div>
           <div className="flex items-center gap-4">

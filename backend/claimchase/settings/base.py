@@ -255,8 +255,8 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Unfold Admin configuration
 UNFOLD = {
     # Branding
-    "SITE_TITLE": "ClaimChase",
-    "SITE_HEADER": "ClaimChase",
+    "SITE_TITLE": "AmicusClaims",
+    "SITE_HEADER": "AmicusClaims",
     "SITE_SUBHEADER": "Insurance Grievance Management",
     "SITE_URL": "/",
     "SITE_SYMBOL": "gavel",
