@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { BrandLogo } from "@/components/BrandLogo";
+import { Settings } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   Plus,
   Search,
@@ -63,6 +66,24 @@ export default function DisputesList() {
   );
 
   return (
+    <div className="min-h-screen">
+      {/* Mobile Navbar - Only visible on mobile */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <BrandLogo size="sm" />
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => navigate("/settings")}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+      </div>
+
     <div className="p-4 lg:p-6 space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -205,6 +226,7 @@ export default function DisputesList() {
           </CardContent>
         </Card>
       )}
+    </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, FileText, CheckCircle, Calendar, DollarSign, FileCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { caseAPI } from "@/services/cases";
 import { useTranslation } from "react-i18next";
+import { DocumentUploadSection } from "@/components/DocumentUploadSection";
 
 // Helper function to format number in Indian style (lakhs system)
 const formatIndianNumber = (num: number): string => {
@@ -74,27 +76,22 @@ export default function StartGreivance() {
     policy_number: "",
     claim_amount: "",
     description: "",
+    insurance_type: "",
   });
 
   // For formatted display and words
   const [claimAmountDisplay, setClaimAmountDisplay] = useState("");
   const [claimAmountWords, setClaimAmountWords] = useState("");
 
-  const [documents, setDocuments] = useState<File[]>([]);
-  const [documentNames, setDocumentNames] = useState<string[]>([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<any[]>([]);
+  const [areDocumentsValid, setAreDocumentsValid] = useState(false);
 
-  const canProceedStep1 = incidentData.incident_date && incidentData.policy_number && incidentData.description;
-  const canProceedStep2 = documents.length > 0;
+  const canProceedStep1 = incidentData.incident_date && incidentData.policy_number && incidentData.description && incidentData.insurance_type;
+  const canProceedStep2 = areDocumentsValid;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setDocuments([...documents, ...files]);
-    setDocumentNames([...documentNames, ...files.map(f => f.name)]);
-  };
-
-  const removeDocument = (index: number) => {
-    setDocuments(documents.filter((_, i) => i !== index));
-    setDocumentNames(documentNames.filter((_, i) => i !== index));
+  const handleDocumentsChange = (documents: any[], isValid: boolean) => {
+    setUploadedDocuments(documents);
+    setAreDocumentsValid(isValid);
   };
 
   const handleClaimAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +131,7 @@ export default function StartGreivance() {
             ? user.insurance_company.id 
             : undefined,
           policy_number: incidentData.policy_number,
-          insurance_type: user?.problem_type || "",
+          insurance_type: incidentData.insurance_type,
           subject: `Insurance Grievance - ${incidentData.policy_number}`,
           description: incidentData.description,
           date_of_incident: incidentData.incident_date,
@@ -158,20 +155,20 @@ export default function StartGreivance() {
         console.log('Extracted case ID:', caseId);
         
         // Step 2: Upload documents to the created case
-        if (documents.length > 0) {
-          toast.info(`Uploading ${documents.length} document(s)...`);
+        if (uploadedDocuments.length > 0) {
+          toast.info(`Uploading ${uploadedDocuments.length} document(s)...`);
           
-          const uploadPromises = documents.map(file => {
+          const uploadPromises = uploadedDocuments.map(doc => {
             const formData = new FormData();
-            formData.append('file', file);
-            formData.append('document_type', 'support_document');
-            formData.append('description', file.name);
+            formData.append('file', doc.file);
+            formData.append('document_type', doc.isMandatory ? 'policy_document' : 'support_document');
+            formData.append('description', `${doc.requirementLabel} - ${doc.file.name}`);
             return caseAPI.uploadDocument(caseId, formData);
           });
           
           try {
             await Promise.all(uploadPromises);
-            toast.success(`Case created with ${documents.length} document(s)!`);
+            toast.success(`Case created with ${uploadedDocuments.length} document(s)!`);
           } catch (uploadError) {
             console.error('Document upload error:', uploadError);
             toast.warning('Case created, but some documents failed to upload');
@@ -288,6 +285,27 @@ export default function StartGreivance() {
 
                 <div className="space-y-5">
                   <div>
+                    <Label htmlFor="insurance_type">Insurance Type <span className="text-destructive">*</span></Label>
+                    <Select 
+                      value={incidentData.insurance_type}
+                      onValueChange={(value) => setIncidentData(prev => ({ ...prev, insurance_type: value }))}
+                    >
+                      <SelectTrigger className="mt-2 h-11">
+                        <SelectValue placeholder="Select insurance type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="health">Health Insurance</SelectItem>
+                        <SelectItem value="life">Life Insurance</SelectItem>
+                        <SelectItem value="motor">Motor Insurance</SelectItem>
+                        <SelectItem value="home">Home Insurance</SelectItem>
+                        <SelectItem value="travel">Travel Insurance</SelectItem>
+                        <SelectItem value="consumer_dispute">Consumer Dispute</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="incident_date">{t('step1.incident_date')}</Label>
                     <Input 
                       id="incident_date"
@@ -355,57 +373,15 @@ export default function StartGreivance() {
             {/* Step 2: Upload Documents */}
             {step === 2 && (
               <div className="animate-fade-in">
-                <h1 className="text-2xl lg:text-3xl font-bold mb-2">{t('step2.title')}</h1>
-                <p className="text-muted-foreground mb-8">{t('step2.subtitle')}</p>
+                <h1 className="text-2xl lg:text-3xl font-bold mb-2">Upload Required Documents</h1>
+                <p className="text-muted-foreground mb-8">
+                  Please upload all mandatory documents for your {incidentData.insurance_type} insurance claim.
+                </p>
 
-                <div className="space-y-5">
-                  {/* Upload Area */}
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label htmlFor="file-upload" className="cursor-pointer block">
-                      <div className="flex justify-center mb-4">
-                        <div className="p-3 bg-primary/10 rounded-lg">
-                          <Upload className="h-6 w-6 text-primary" />
-                        </div>
-                      </div>
-                      <p className="font-semibold mb-1">{t('step2.upload_area.subtitle')}</p>
-                      <p className="text-sm text-muted-foreground">{t('step2.upload_area.formats')}</p>
-                    </label>
-                  </div>
-
-                  {/* Uploaded Documents */}
-                  {documents.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="font-medium text-sm">{t('step2.uploaded')} ({documents.length})</p>
-                      <div className="space-y-2">
-                        {documentNames.map((name, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <FileText className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm font-medium truncate">{name}</p>
-                            </div>
-                            <button
-                              onClick={() => removeDocument(index)}
-                              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <p className="text-sm text-muted-foreground">
-                    💡 Tip: Include policy document, rejection letter, and any relevant receipts.
-                  </p>
-                </div>
+                <DocumentUploadSection 
+                  insuranceType={incidentData.insurance_type}
+                  onDocumentsChange={handleDocumentsChange}
+                />
               </div>
             )}
 
@@ -421,6 +397,10 @@ export default function StartGreivance() {
                       <CardTitle className="text-base">{t('step3.incident_details')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Insurance Type</p>
+                        <p className="font-medium capitalize">{incidentData.insurance_type.replace('_', ' ')} Insurance</p>
+                      </div>
                       <div>
                         <p className="text-sm text-muted-foreground">{t('step1.incident_date')}</p>
                         <p className="font-medium">{incidentData.incident_date}</p>
@@ -448,13 +428,19 @@ export default function StartGreivance() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {documentNames.map((name, index) => (
+                        {uploadedDocuments.map((doc, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
                             <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span>{name}</span>
+                            <div className="flex-1">
+                              <p className="font-medium">{doc.file.name}</p>
+                              <p className="text-xs text-muted-foreground">{doc.requirementLabel}</p>
+                            </div>
+                            {doc.isMandatory && (
+                              <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">Mandatory</span>
+                            )}
                           </div>
                         ))}
-                        <p className="text-xs text-muted-foreground pt-2">{t('step3.documents_count', { count: documents.length })}</p>
+                        <p className="text-xs text-muted-foreground pt-2">{uploadedDocuments.length} document(s) uploaded</p>
                       </div>
                     </CardContent>
                   </Card>

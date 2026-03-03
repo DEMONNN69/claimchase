@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
@@ -107,9 +108,8 @@ export default function Signup() {
 
               <div>
                 <Label htmlFor="password">{t('auth:signup.password_label')}</Label>
-                <Input 
+                <PasswordInput 
                   id="password" 
-                  type="password" 
                   placeholder="••••••••"
                   className="mt-2 h-11"
                   value={formData.password}
@@ -120,9 +120,8 @@ export default function Signup() {
 
               <div>
                 <Label htmlFor="confirmPassword">{t('auth:signup.confirm_password_label')}</Label>
-                <Input 
+                <PasswordInput 
                   id="confirmPassword" 
-                  type="password" 
                   placeholder="••••••••"
                   className="mt-2 h-11"
                   value={formData.confirmPassword}

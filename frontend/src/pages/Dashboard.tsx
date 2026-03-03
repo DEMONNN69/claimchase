@@ -17,6 +17,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { InsuranceCompany } from "@/services/types";
 
 export default function Dashboard() {
@@ -105,7 +106,7 @@ export default function Dashboard() {
       {/* Mobile Navbar - Only visible on mobile */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-primary">{t('common:app_name')}</h1>
+          <BrandLogo size="sm" />
           <div className="flex items-center gap-2">
             <NotificationBell />
             <button
