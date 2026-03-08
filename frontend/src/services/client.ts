@@ -5,11 +5,8 @@
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -21,6 +18,10 @@ apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Token ${token}`;
+  }
+  // Prepend /api to relative URLs that don't already have it
+  if (config.url && !config.url.startsWith('http') && !config.url.startsWith('/api')) {
+    config.url = '/api' + (config.url.startsWith('/') ? config.url : '/' + config.url);
   }
   return config;
 });
