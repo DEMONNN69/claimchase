@@ -1,0 +1,43 @@
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    expose:
+      - "8000"
+    volumes:
+      - static_files:/app/staticfiles
+    depends_on: []
+
+  proxy:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: proxy
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://backend:8000
+      - ALLOWED_ORIGINS=${FRONTEND_URL}
+      - PROXY_PUBLIC_ORIGIN=${FRONTEND_URL}
+    expose:
+      - "3001"
+    depends_on:
+      - backend
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - proxy
+
+volumes:
+  static_files:

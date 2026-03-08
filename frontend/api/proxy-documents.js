@@ -37,7 +37,6 @@ export default async function handler(req, res) {
     if (!backendUrl) {
       console.error('Backend URL not configured. Available env vars:', Object.keys(process.env).filter(k => k.includes('API') || k.includes('URL')));
       return res.status(500).json({ error: 'Server configuration error' });
-      return res.status(500).json({ error: 'Server configuration error' });
     }
 
     // Construct backend API URL

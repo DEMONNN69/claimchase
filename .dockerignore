@@ -1,0 +1,34 @@
+# Dependencies
+**/node_modules
+**/.pnpm-store
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/env/
+**/.venv/
+
+# Git / editor
+**/.git
+**/.gitignore
+**/.vscode
+**/.DS_Store
+
+# Environment files (never send secrets into image)
+**/.env
+**/.env.*
+
+# Logs
+**/logs/
+**/*.log
+
+# Build outputs (rebuilt inside container)
+**/dist/
+**/build/
+**/staticfiles/
+
+# Docker files themselves
+**/Dockerfile*
+**/docker-compose*
+**/compose.y*ml
