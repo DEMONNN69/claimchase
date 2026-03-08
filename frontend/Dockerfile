@@ -2,6 +2,9 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
