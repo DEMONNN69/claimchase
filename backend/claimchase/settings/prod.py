@@ -8,12 +8,13 @@ import dj_database_url
 
 DEBUG = False
 
-# Parse DATABASE_URL from Railway/Render
+# Parse DATABASE_URL — ssl_require=False so sslmode in the URL controls SSL
+# Use sslmode=require in DATABASE_URL for external DBs, sslmode=disable for local
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL', default=''),
         conn_max_age=600,
-        ssl_require=True
+        ssl_require=False
     )
 }
 
