@@ -4,18 +4,18 @@ Extends base.py with security, performance, and production configurations.
 """
 
 from .base import *
-import dj_database_url
 
 DEBUG = False
 
-# Parse DATABASE_URL — ssl_require=False so sslmode in the URL controls SSL
-# Use sslmode=require in DATABASE_URL for external DBs, sslmode=disable for local
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL', default=''),
-        conn_max_age=600,
-        ssl_require=False
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('POSTGRES_HOST', default='db'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
+    }
 }
 
 # Allow Railway/Render domains
