@@ -218,6 +218,14 @@ export default function Landing() {
             <BrandLogo size="sm" />
             <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <Link to="/privacy-policy" className="hover:underline hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:underline hover:text-foreground transition-colors">
+              Terms &amp; Conditions
+            </Link>
+          </div>
           <p className="text-xs text-muted-foreground">
             {t('footer.copyright')}
           </p>
