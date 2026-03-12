@@ -196,6 +196,25 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Privacy & Data Use Transparency */}
+      <section className="w-full px-6 py-10 bg-white border-y">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-xl lg:text-2xl font-bold mb-3">How we use Google data</h2>
+          <p className="text-sm lg:text-base text-muted-foreground mb-4">
+            AmicusClaims connects to your Gmail only after you authorize access. We use Gmail to send
+            case-related emails on your behalf and to read message metadata (labels, headers, thread IDs,
+            timestamps) so your case dashboard can track communication status.
+          </p>
+          <p className="text-sm lg:text-base text-muted-foreground">
+            We do not use Google user data for advertising or sale.
+            &nbsp;
+            <a href="https://amicusclaims.ai/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>
+            &nbsp;|&nbsp;
+            <a href="https://amicusclaims.ai/terms" className="text-primary hover:underline">Terms &amp; Conditions</a>
+          </p>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="w-full px-6 py-16 lg:py-20">
         <div className="max-w-2xl mx-auto text-center">
@@ -219,12 +238,12 @@ export default function Landing() {
             <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link to="/privacy-policy" className="hover:underline hover:text-foreground transition-colors">
+            <a href="https://amicusclaims.ai/privacy-policy" className="hover:underline hover:text-foreground transition-colors">
               Privacy Policy
-            </Link>
-            <Link to="/terms" className="hover:underline hover:text-foreground transition-colors">
+            </a>
+            <a href="https://amicusclaims.ai/terms" className="hover:underline hover:text-foreground transition-colors">
               Terms &amp; Conditions
-            </Link>
+            </a>
           </div>
           <p className="text-xs text-muted-foreground">
             {t('footer.copyright')}
