@@ -53,6 +53,12 @@ export default function Landing() {
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
+          <a
+            href="https://amicusclaims.ai/privacy-policy"
+            className="hidden md:inline text-sm text-muted-foreground hover:text-foreground hover:underline"
+          >
+            Privacy Policy
+          </a>
           <Button variant="ghost" size="sm" asChild>
             <Link to="/login">{t('header.login')}</Link>
           </Button>
