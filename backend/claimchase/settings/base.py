@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'claimchase.apps.grievance_core.apps.GrievanceCoreConfig',
     'claimchase.apps.consumer_disputes.apps.ConsumerDisputesConfig',
     'claimchase.apps.medical_review.apps.MedicalReviewConfig',
+    'claimchase.apps.legal.apps.LegalConfig',
 ]
 
 MIDDLEWARE = [

@@ -164,7 +164,18 @@ class CustomUser(AbstractUser):
         blank=True,
         help_text="Last known Gmail history ID for incremental sync"
     )
-    
+
+    # Legal acceptance
+    terms_accepted = models.BooleanField(
+        default=False,
+        help_text="Whether the user has accepted the Terms & Conditions"
+    )
+    terms_accepted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp when the user accepted the Terms & Conditions"
+    )
+
     class Meta:
         db_table = 'users_customuser'
         verbose_name = 'User'

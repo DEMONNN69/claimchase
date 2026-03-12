@@ -31,6 +31,8 @@ import CaseDetail from "./pages/CaseDetail";
 import Cases from "./pages/Cases";
 import DisputeDetail from "./pages/DisputeDetail";
 import OmbudsmanGuide from "./pages/OmbudsmanGuide";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -67,6 +69,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/terms" element={<TermsAndConditions />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/onboarding" element={
                 <ProtectedRoute>
                   <Onboarding />

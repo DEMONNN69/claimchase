@@ -125,7 +125,8 @@ class AuthViewSet(viewsets.ViewSet):
             "password": "password123",
             "first_name": "Saurabh",
             "last_name": "Shukla",
-            "phone": "+1234567890"
+            "phone": "+1234567890",
+            "terms_accepted": true
         }
         """
         email = request.data.get('email')
@@ -133,14 +134,21 @@ class AuthViewSet(viewsets.ViewSet):
         first_name = request.data.get('first_name', '')
         last_name = request.data.get('last_name', '')
         phone = request.data.get('phone', '')
-        
+        terms_accepted = request.data.get('terms_accepted', False)
+
         # Validation
         if not all([email, password]):
             return Response({
                 'success': False,
                 'message': 'Email and password are required',
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
+        if not terms_accepted:
+            return Response({
+                'success': False,
+                'message': 'You must accept the Terms & Conditions to create an account.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         # Check if user already exists
         if CustomUser.objects.filter(email=email).exists():
             return Response({
@@ -157,6 +165,8 @@ class AuthViewSet(viewsets.ViewSet):
                 last_name=last_name,
                 phone=phone,
                 is_verified=False,  # Email needs verification
+                terms_accepted=True,
+                terms_accepted_at=timezone.now(),
             )
             
             # Get or create token

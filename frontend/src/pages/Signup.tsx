@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +20,7 @@ export default function Signup() {
     username: "",
     password: "",
     confirmPassword: "",
+    termsAccepted: false,
   });
 
   const handleChange = (field: string, value: string) => {
@@ -43,11 +45,17 @@ export default function Signup() {
       return;
     }
 
+    if (!formData.termsAccepted) {
+      toast.error('You must accept the Terms & Conditions to create an account.');
+      return;
+    }
+
     try {
       await signup({
         email: formData.email,
         username: formData.username,
         password: formData.password,
+        terms_accepted: true,
       });
       toast.success(t('auth:validation.account_created'));
       navigate("/onboarding");
@@ -128,6 +136,27 @@ export default function Signup() {
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
                   disabled={isLoading}
                 />
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="terms"
+                  checked={formData.termsAccepted}
+                  onCheckedChange={(checked) =>
+                    setFormData(prev => ({ ...prev, termsAccepted: checked === true }))
+                  }
+                  disabled={isLoading}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="terms" className="text-sm font-normal leading-relaxed cursor-pointer">
+                  I agree to the{" "}
+                  <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">
+                    Terms &amp; Conditions
+                  </Link>{" "}and{" "}
+                  <Link to="/privacy-policy" target="_blank" className="text-primary hover:underline font-medium">
+                    Privacy Policy
+                  </Link>
+                </Label>
               </div>
 
               {error && (
