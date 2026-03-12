@@ -54,7 +54,7 @@ export default function Landing() {
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
           <a
-            href="https://amicusclaims.ai/privacy-policy"
+            href="https://amicusclaims.ai/privacy-policy.html"
             className="hidden md:inline text-sm text-muted-foreground hover:text-foreground hover:underline"
           >
             Privacy Policy
@@ -214,9 +214,9 @@ export default function Landing() {
           <p className="text-sm lg:text-base text-muted-foreground">
             We do not use Google user data for advertising or sale.
             &nbsp;
-            <a href="https://amicusclaims.ai/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>
+            <a href="https://amicusclaims.ai/privacy-policy.html" className="text-primary hover:underline">Privacy Policy</a>
             &nbsp;|&nbsp;
-            <a href="https://amicusclaims.ai/terms" className="text-primary hover:underline">Terms &amp; Conditions</a>
+            <a href="https://amicusclaims.ai/terms.html" className="text-primary hover:underline">Terms &amp; Conditions</a>
           </p>
         </div>
       </section>
@@ -244,10 +244,10 @@ export default function Landing() {
             <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <a href="https://amicusclaims.ai/privacy-policy" className="hover:underline hover:text-foreground transition-colors">
+            <a href="https://amicusclaims.ai/privacy-policy.html" className="hover:underline hover:text-foreground transition-colors">
               Privacy Policy
             </a>
-            <a href="https://amicusclaims.ai/terms" className="hover:underline hover:text-foreground transition-colors">
+            <a href="https://amicusclaims.ai/terms.html" className="hover:underline hover:text-foreground transition-colors">
               Terms &amp; Conditions
             </a>
           </div>
