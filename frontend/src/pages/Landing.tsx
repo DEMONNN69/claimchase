@@ -54,8 +54,8 @@ export default function Landing() {
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
           <a
-            href="https://amicusclaims.ai/privacy-policy.html"
-            className="hidden md:inline text-sm text-muted-foreground hover:text-foreground hover:underline"
+            href="/privacy-policy.html"
+            className="text-sm text-muted-foreground hover:text-foreground hover:underline"
           >
             Privacy Policy
           </a>
