@@ -28,19 +28,41 @@
   </head>
 
   <body>
-    <!-- Static legal links for crawlers / Google OAuth brand verification.
-         Google's bot does not execute JS, so these must exist in raw HTML.
-         React renders on top of #root and visually hides the noscript footer. -->
-    <noscript>
-      <div style="width:100%;text-align:center;padding:16px;font-family:sans-serif;font-size:13px;">
-        <a href="/privacy-policy.html" style="color:#2563eb;margin-right:16px;text-decoration:none;">Privacy Policy</a>
-        <a href="/terms.html" style="color:#2563eb;text-decoration:none;">Terms &amp; Conditions</a>
-      </div>
-    </noscript>
-    <!-- Crawlable anchor tags visible to all bots regardless of JS support -->
-    <a href="/privacy-policy.html" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">Privacy Policy</a>
-    <a href="/terms.html" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">Terms &amp; Conditions</a>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!--
+      IMPORTANT: This footer is intentionally placed OUTSIDE <div id="root">.
+      React only controls the DOM inside #root, so this footer persists
+      permanently in both raw HTML (for crawlers) and after JS renders.
+      Required for Google OAuth brand verification.
+    -->
+    <footer
+      id="legal-footer"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 99999;
+        width: 100%;
+        text-align: center;
+        padding: 7px 16px;
+        font-size: 11px;
+        font-family: sans-serif;
+        color: #6b7280;
+        border-top: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+      "
+    >
+      <a
+        href="https://amicusclaims.ai/privacy-policy.html"
+        style="color: #2563eb; text-decoration: none; margin-right: 16px;"
+      >Privacy Policy</a>
+      <a
+        href="https://amicusclaims.ai/terms.html"
+        style="color: #2563eb; text-decoration: none;"
+      >Terms &amp; Conditions</a>
+    </footer>
   </body>
 </html>
