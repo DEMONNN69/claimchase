@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { authAPI } from "@/services/auth";
 import { toast } from "sonner";
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from "@/components/BrandLogo";
@@ -14,14 +15,14 @@ import { BrandLogo } from "@/components/BrandLogo";
 export default function Signup() {
   const { t } = useTranslation(['auth', 'common']);
   const navigate = useNavigate();
-  const { signup, isLoading, error } = useAuth();
+  const { signup, googleLogin, isLoading, error } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
-    username: "",
     password: "",
     confirmPassword: "",
     termsAccepted: false,
   });
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -30,7 +31,7 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.username || !formData.password) {
+    if (!formData.email || !formData.password) {
       toast.error(t('auth:validation.fill_all_fields'));
       return;
     }
@@ -53,7 +54,6 @@ export default function Signup() {
     try {
       await signup({
         email: formData.email,
-        username: formData.username,
         password: formData.password,
         terms_accepted: true,
       });
@@ -88,19 +88,6 @@ export default function Signup() {
             <p className="text-muted-foreground text-sm mb-8">{t('auth:signup.subtitle')}</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <Label htmlFor="username">{t('auth:signup.username_label')}</Label>
-                <Input 
-                  id="username" 
-                  type="text" 
-                  placeholder="saurabhshukla"
-                  className="mt-2 h-11"
-                  value={formData.username}
-                  onChange={(e) => handleChange("username", e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-
               <div>
                 <Label htmlFor="email">{t('auth:signup.email_label')}</Label>
                 <Input 
@@ -180,8 +167,39 @@ export default function Signup() {
             <Button 
               variant="outline" 
               className="w-full h-11"
-              onClick={() => toast.info(t('auth:validation.google_coming_soon'))}
-              disabled={isLoading}
+              onClick={async () => {
+                try {
+                  setGoogleLoading(true);
+                  const { data } = await authAPI.googleConnect();
+                  const popup = window.open(
+                    data.authorization_url,
+                    'google-signup',
+                    'width=500,height=620,left=400,top=100'
+                  );
+                  if (!popup) {
+                    toast.error('Please allow popups for this site');
+                    return;
+                  }
+                  const handleMessage = async (event: MessageEvent) => {
+                    if (event.origin !== window.location.origin) return;
+                    if (event.data?.type !== 'google-auth-success') return;
+                    window.removeEventListener('message', handleMessage);
+                    try {
+                      await googleLogin(event.data.code);
+                      toast.success('Account created with Google!');
+                      navigate('/onboarding');
+                    } catch {
+                      toast.error('Google sign-up failed. Please try again.');
+                    }
+                  };
+                  window.addEventListener('message', handleMessage);
+                } catch {
+                  toast.error('Could not start Google sign-in');
+                } finally {
+                  setGoogleLoading(false);
+                }
+              }}
+              disabled={isLoading || googleLoading}
             >
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -191,6 +209,13 @@ export default function Signup() {
               </svg>
               {t('auth:signup.google_signup')}
             </Button>
+
+            <p className="text-center text-xs text-muted-foreground mt-3">
+              By continuing with Google you agree to our{" "}
+              <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms</Link>
+              {" "}&amp;{" "}
+              <Link to="/privacy-policy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link>
+            </p>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
               {t('auth:signup.have_account')}{" "}

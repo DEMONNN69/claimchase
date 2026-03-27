@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { authAPI } from "@/services/auth";
 import { toast } from "sonner";
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from "@/components/BrandLogo";
@@ -13,9 +14,51 @@ import { BrandLogo } from "@/components/BrandLogo";
 export default function Login() {
   const { t } = useTranslation(['auth', 'common']);
   const navigate = useNavigate();
-  const { login, isLoading, error } = useAuth();
+  const { login, googleLogin, isLoading, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      const { data } = await authAPI.googleConnect();
+      const popup = window.open(
+        data.authorization_url,
+        'google-login',
+        'width=500,height=620,left=400,top=100'
+      );
+      if (!popup) {
+        toast.error('Please allow popups for this site');
+        return;
+      }
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type !== 'google-auth-success') return;
+        window.removeEventListener('message', handleMessage);
+        try {
+          await googleLogin(event.data.code);
+          toast.success('Signed in with Google!');
+          const storedUser = localStorage.getItem('user');
+          const userData = storedUser ? JSON.parse(storedUser) : null;
+          if (userData?.role === 'medical_reviewer') {
+            navigate('/reviewer');
+          } else if (userData?.is_expert) {
+            navigate('/expert');
+          } else {
+            navigate('/dashboard');
+          }
+        } catch {
+          toast.error('Google sign-in failed. Please try again.');
+        }
+      };
+      window.addEventListener('message', handleMessage);
+    } catch {
+      toast.error('Could not start Google sign-in');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,8 +164,8 @@ export default function Login() {
             <Button 
               variant="outline" 
               className="w-full h-11"
-              onClick={() => toast.info("Google login coming soon")}
-              disabled={isLoading}
+              onClick={handleGoogleLogin}
+              disabled={isLoading || googleLoading}
             >
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

@@ -12,11 +12,11 @@ export const authAPI = {
    */
   signup: (data: {
     email: string;
-    username: string;
     password: string;
     first_name?: string;
     last_name?: string;
     phone?: string;
+    terms_accepted?: boolean;
   }) => apiClient.post('/auth/signup/', data),
 
   /**
@@ -40,4 +40,15 @@ export const authAPI = {
    */
   updateProfile: (data: Partial<User>) =>
     apiClient.put('/auth/profile/', data),
+
+  /**
+   * Get Google OAuth consent URL
+   */
+  googleConnect: () => apiClient.get<{ authorization_url: string }>('/auth/google/connect/'),
+
+  /**
+   * Exchange Google auth code for a ClaimChase token
+   */
+  googleCallback: (code: string) =>
+    apiClient.post('/auth/google/callback/', { code }),
 };

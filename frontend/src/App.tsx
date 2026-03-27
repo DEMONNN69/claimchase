@@ -19,6 +19,7 @@ import Handoff from "./pages/Handoff";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import GmailCallback from "./pages/GmailCallback";
+import GoogleCallback from "./pages/GoogleCallback";
 import ConsumerDispute from "./pages/ConsumerDispute";
 import DisputesList from "./pages/DisputesList";
 import ReviewerOnboarding from "./pages/ReviewerOnboarding";
@@ -63,6 +64,8 @@ const App = () => (
           <Routes>
             {/* Public Gmail OAuth callback endpoint used by popup redirect */}
             <Route path="/gmail/callback" element={<GmailCallback />} />
+            {/* Public Google Login callback endpoint used by popup redirect */}
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
             
             {/* Consumer/User Routes */}
             <Route element={<AppLayout />}>
