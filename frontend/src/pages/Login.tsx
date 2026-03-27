@@ -15,6 +15,11 @@ export default function Login() {
   const { t } = useTranslation(['auth', 'common']);
   const navigate = useNavigate();
   const { login, googleLogin, isLoading, error } = useAuth();
+  const allowedGoogleMessageOrigins = new Set([
+    window.location.origin,
+    'https://www.amicusclaims.ai',
+    'https://amicusclaims.ai',
+  ]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -33,7 +38,7 @@ export default function Login() {
         return;
       }
       const handleMessage = async (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        if (!allowedGoogleMessageOrigins.has(event.origin)) return;
         if (event.data?.type !== 'google-auth-success') return;
         window.removeEventListener('message', handleMessage);
         try {

@@ -16,6 +16,11 @@ export default function Signup() {
   const { t } = useTranslation(['auth', 'common']);
   const navigate = useNavigate();
   const { signup, googleLogin, isLoading, error } = useAuth();
+  const allowedGoogleMessageOrigins = new Set([
+    window.location.origin,
+    'https://www.amicusclaims.ai',
+    'https://amicusclaims.ai',
+  ]);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -181,7 +186,7 @@ export default function Signup() {
                     return;
                   }
                   const handleMessage = async (event: MessageEvent) => {
-                    if (event.origin !== window.location.origin) return;
+                    if (!allowedGoogleMessageOrigins.has(event.origin)) return;
                     if (event.data?.type !== 'google-auth-success') return;
                     window.removeEventListener('message', handleMessage);
                     try {

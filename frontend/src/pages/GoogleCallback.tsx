@@ -26,7 +26,7 @@ const GoogleCallback = () => {
       if (window.opener && !window.opener.closed) {
         window.opener.postMessage(
           { type: "google-auth-success", code },
-          window.location.origin
+          "*"
         );
         setStatus("done");
         setMessage("Signed in! You can close this tab.");
