@@ -173,22 +173,13 @@ export default function Signup() {
               variant="outline" 
               className="w-full h-11"
               onClick={async () => {
+                let handleMessage: ((event: MessageEvent) => Promise<void>) | null = null;
                 try {
                   setGoogleLoading(true);
-                  const { data } = await authAPI.googleConnect();
-                  const popup = window.open(
-                    data.authorization_url,
-                    'google-signup',
-                    'width=500,height=620,left=400,top=100'
-                  );
-                  if (!popup) {
-                    toast.error('Please allow popups for this site');
-                    return;
-                  }
-                  const handleMessage = async (event: MessageEvent) => {
+                  handleMessage = async (event: MessageEvent) => {
                     if (!allowedGoogleMessageOrigins.has(event.origin)) return;
                     if (event.data?.type !== 'google-auth-success') return;
-                    window.removeEventListener('message', handleMessage);
+                    window.removeEventListener('message', handleMessage as EventListener);
                     try {
                       await googleLogin(event.data.code);
                       toast.success('Account created with Google!');
@@ -197,8 +188,23 @@ export default function Signup() {
                       toast.error('Google sign-up failed. Please try again.');
                     }
                   };
-                  window.addEventListener('message', handleMessage);
+                  window.addEventListener('message', handleMessage as EventListener);
+
+                  const { data } = await authAPI.googleConnect();
+                  const popup = window.open(
+                    data.authorization_url,
+                    'google-signup',
+                    'width=500,height=620,left=400,top=100'
+                  );
+                  if (!popup) {
+                    window.removeEventListener('message', handleMessage as EventListener);
+                    toast.error('Please allow popups for this site');
+                    return;
+                  }
                 } catch {
+                  if (handleMessage) {
+                    window.removeEventListener('message', handleMessage as EventListener);
+                  }
                   toast.error('Could not start Google sign-in');
                 } finally {
                   setGoogleLoading(false);

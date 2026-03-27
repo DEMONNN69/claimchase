@@ -25,22 +25,13 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
+    let handleMessage: ((event: MessageEvent) => Promise<void>) | null = null;
     try {
       setGoogleLoading(true);
-      const { data } = await authAPI.googleConnect();
-      const popup = window.open(
-        data.authorization_url,
-        'google-login',
-        'width=500,height=620,left=400,top=100'
-      );
-      if (!popup) {
-        toast.error('Please allow popups for this site');
-        return;
-      }
-      const handleMessage = async (event: MessageEvent) => {
+      handleMessage = async (event: MessageEvent) => {
         if (!allowedGoogleMessageOrigins.has(event.origin)) return;
         if (event.data?.type !== 'google-auth-success') return;
-        window.removeEventListener('message', handleMessage);
+        window.removeEventListener('message', handleMessage as EventListener);
         try {
           await googleLogin(event.data.code);
           toast.success('Signed in with Google!');
@@ -57,8 +48,23 @@ export default function Login() {
           toast.error('Google sign-in failed. Please try again.');
         }
       };
-      window.addEventListener('message', handleMessage);
+      window.addEventListener('message', handleMessage as EventListener);
+
+      const { data } = await authAPI.googleConnect();
+      const popup = window.open(
+        data.authorization_url,
+        'google-login',
+        'width=500,height=620,left=400,top=100'
+      );
+      if (!popup) {
+        window.removeEventListener('message', handleMessage as EventListener);
+        toast.error('Please allow popups for this site');
+        return;
+      }
     } catch {
+      if (handleMessage) {
+        window.removeEventListener('message', handleMessage as EventListener);
+      }
       toast.error('Could not start Google sign-in');
     } finally {
       setGoogleLoading(false);
