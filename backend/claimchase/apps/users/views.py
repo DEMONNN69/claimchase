@@ -412,11 +412,171 @@ class AuthViewSet(viewsets.ViewSet):
                 'success': True,
                 'message': 'Gmail account disconnected',
             }, status=status.HTTP_200_OK)
-        
+
         except Exception as e:
-            logger.error(f"Error disconnecting Gmail: {e}")
+            logger.error(f"Gmail disconnect error: {e}")
             return Response({
                 'success': False,
                 'message': 'Failed to disconnect Gmail account',
-                'error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------ #
+    #  Google Login / "Continue with Google"                               #
+    # ------------------------------------------------------------------ #
+
+    @action(detail=False, methods=['get'])
+    def google_connect(self, request):
+        """
+        Return the Google OAuth consent URL for login/signup.
+
+        GET /api/auth/google/connect/
+        """
+        try:
+            from claimchase.apps.grievance_core.gmail_service import GoogleAuthService
+            auth_url = GoogleAuthService.get_authorization_url()
+            return Response({
+                'success': True,
+                'authorization_url': auth_url,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error building Google auth URL: {e}")
+            return Response({
+                'success': False,
+                'message': 'Failed to build Google authorization URL',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def google_callback(self, request):
+        """
+        Exchange Google auth code for tokens, then log in or sign up the user.
+
+        POST /api/auth/google/callback/
+        {"code": "4/0A..."}
+
+        - New user  → created with unusable password, gmail auto-connected
+        - Existing user (same email) → logged in, gmail tokens merged/updated
+        """
+        from claimchase.apps.grievance_core.gmail_service import GoogleAuthService, GmailEncryption, GmailWatchService
+
+        auth_code = request.data.get('code')
+        if not auth_code:
+            return Response({
+                'success': False,
+                'message': 'Authorization code is required',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exchange code for identity + Gmail tokens
+        google_data = GoogleAuthService.exchange_code(auth_code)
+        if not google_data:
+            return Response({
+                'success': False,
+                'message': 'Failed to authenticate with Google',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = google_data['email']
+        google_id = google_data['google_id']
+
+        if not email or not google_id:
+            return Response({
+                'success': False,
+                'message': 'Could not retrieve account details from Google',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- Find or create user ---
+        try:
+            user = CustomUser.objects.get(email=email)
+            # Merge: update google_id if not already set
+            if not user.google_id:
+                user.google_id = google_id
+                user.save(update_fields=['google_id'])
+        except CustomUser.DoesNotExist:
+            # New user — create account
+            user = CustomUser.objects.create(
+                email=email,
+                first_name=google_data.get('first_name', ''),
+                last_name=google_data.get('last_name', ''),
+                google_id=google_id,
+                is_verified=True,
+                terms_accepted=True,
+                terms_accepted_at=timezone.now(),
+            )
+            user.set_unusable_password()
+            user.save(update_fields=['password'])
+
+        # --- Link Gmail tokens ---
+        if google_data.get('refresh_token'):
+            user.gmail_refresh_token = GmailEncryption.encrypt(google_data['refresh_token'])
+            user.gmail_email = email
+            user.gmail_connected = True
+            user.gmail_token_expires_at = google_data['expires_at']
+            user.save(update_fields=[
+                'gmail_refresh_token', 'gmail_email',
+                'gmail_connected', 'gmail_token_expires_at',
+            ])
+
+            # Attempt Gmail watch setup (non-fatal if it fails)
+            try:
+                watch_result = GmailWatchService.start_watch(google_data['access_token'])
+                if watch_result['success']:
+                    user.gmail_watch_expiration = watch_result['expiration']
+                    user.gmail_history_id = watch_result['history_id']
+                    user.save(update_fields=['gmail_watch_expiration', 'gmail_history_id'])
+            except Exception as watch_err:
+                logger.warning(f"Gmail watch setup failed for {user.email}: {watch_err}")
+
+        # --- Issue DRF Token ---
+        token, _ = Token.objects.get_or_create(user=user)
+
+        logger.info(f"Google login successful for {user.email}")
+
+        return Response({
+            'success': True,
+            'message': 'Login successful',
+            'token': token.key,
+            'user': UserSerializer(user).data,
+        }, status=status.HTTP_200_OK)
+        
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def google_disconnect(self, request):   
+        """
+        Disconnect Google account from ClaimChase (removes google_id and Gmail tokens).
+        
+        POST /api/auth/google/disconnect/
+        Headers: Authorization: Token <token>
+        
+        Returns:
+        {
+            "success": true,
+            "message": "Google account disconnected"
+        }
+        """
+        try:
+            user = request.user
+            
+            # Clear Google OAuth fields
+            user.google_id = None
+            user.gmail_refresh_token = None
+            user.gmail_email = None
+            user.gmail_connected = False
+            user.gmail_token_expires_at = None
+            user.gmail_watch_expiration = None
+            user.gmail_history_id = None
+            user.save(update_fields=[
+                'google_id', 'gmail_refresh_token', 'gmail_email', 
+                'gmail_connected', 'gmail_token_expires_at', 
+                'gmail_watch_expiration', 'gmail_history_id'
+            ])
+            
+            logger.info(f"User {user.email} disconnected Google account")
+            
+            return Response({
+                'success': True,
+                'message': 'Google account disconnected'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Google disconnect error: {e}")
+            return Response({
+                'success': False,
+                'message': 'Failed to disconnect Google account',
+            }, status=status.HTTP_400_BAD_REQUEST)
+

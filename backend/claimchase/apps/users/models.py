@@ -176,6 +176,15 @@ class CustomUser(AbstractUser):
         help_text="Timestamp when the user accepted the Terms & Conditions"
     )
 
+    # Google OAuth / Social Login
+    google_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        unique=True,
+        help_text="Google account subject ID for Google OAuth login"
+    )
+
     class Meta:
         db_table = 'users_customuser'
         verbose_name = 'User'

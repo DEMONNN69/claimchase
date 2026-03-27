@@ -21,4 +21,8 @@ urlpatterns = [
     path('auth/gmail/connect/', AuthViewSet.as_view({'get': 'gmail_connect'}), name='auth-gmail-connect-custom'),
     path('auth/gmail/callback/', AuthViewSet.as_view({'get': 'gmail_callback', 'post': 'gmail_callback'}), name='auth-gmail-callback-custom'),
     path('auth/gmail/disconnect/', AuthViewSet.as_view({'post': 'gmail_disconnect'}), name='auth-gmail-disconnect-custom'),
+
+    # Google Login (SSO)
+    path('auth/google/connect/', AuthViewSet.as_view({'get': 'google_connect'}), name='auth-google-connect'),
+    path('auth/google/callback/', AuthViewSet.as_view({'post': 'google_callback'}), name='auth-google-callback'),
 ]

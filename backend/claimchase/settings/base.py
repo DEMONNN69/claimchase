@@ -222,6 +222,15 @@ GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',
 ]
 
+# Google Login (SSO) — includes identity + Gmail send in one consent
+GOOGLE_LOGIN_REDIRECT_URI = config('GOOGLE_LOGIN_REDIRECT_URI', default='http://localhost:5173/auth/google/callback')
+GOOGLE_LOGIN_SCOPES = [
+    'openid',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/gmail.send',
+]
+
 # Gmail Pub/Sub Configuration for incoming email notifications
 # Format: projects/{project_id}/topics/{topic_name}
 GMAIL_PUBSUB_TOPIC = config(

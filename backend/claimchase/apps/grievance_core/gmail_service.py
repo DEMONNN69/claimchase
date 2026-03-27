@@ -520,6 +520,98 @@ class GmailWatchService:
         except Exception as e:
             error_msg = f"Error fetching message details: {e}"
             logger.error(error_msg)
+
+
+class GoogleAuthService:
+    """
+    Handle Google OAuth 2.0 for user login/signup (SSO).
+    Requests identity + gmail.send scopes in one consent flow.
+    """
+
+    @staticmethod
+    def get_authorization_url() -> str:
+        """Return the Google consent URL for login/signup."""
+        flow = Flow.from_client_config(
+            {
+                'web': {
+                    'client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+                    'client_secret': settings.GOOGLE_OAUTH_CLIENT_SECRET,
+                    'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+                    'token_uri': 'https://oauth2.googleapis.com/token',
+                    'redirect_uris': [settings.GOOGLE_LOGIN_REDIRECT_URI],
+                }
+            },
+            scopes=settings.GOOGLE_LOGIN_SCOPES,
+        )
+        flow.redirect_uri = settings.GOOGLE_LOGIN_REDIRECT_URI
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            prompt='consent',
+            include_granted_scopes='false',
+        )
+        return auth_url
+
+    @staticmethod
+    def exchange_code(auth_code: str) -> dict | None:
+        """
+        Exchange authorization code for tokens + fetch Google user info.
+
+        Returns dict with keys:
+            google_id, email, first_name, last_name,
+            access_token, refresh_token, expires_at
+        or None on failure.
+        """
+        import requests as http_requests
+
+        try:
+            flow = Flow.from_client_config(
+                {
+                    'web': {
+                        'client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+                        'client_secret': settings.GOOGLE_OAUTH_CLIENT_SECRET,
+                        'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+                        'token_uri': 'https://oauth2.googleapis.com/token',
+                        'redirect_uris': [settings.GOOGLE_LOGIN_REDIRECT_URI],
+                    }
+                },
+                scopes=settings.GOOGLE_LOGIN_SCOPES,
+            )
+            flow.redirect_uri = settings.GOOGLE_LOGIN_REDIRECT_URI
+            token_data = flow.fetch_token(code=auth_code)
+
+            access_token = token_data.get('access_token')
+            refresh_token = token_data.get('refresh_token')
+            expires_in = token_data.get('expires_in', 3600)
+
+            if not access_token:
+                logger.error("Google token exchange returned no access_token")
+                return None
+
+            # Fetch user identity from Google userinfo endpoint
+            userinfo_resp = http_requests.get(
+                'https://www.googleapis.com/oauth2/v3/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=10,
+            )
+            if userinfo_resp.status_code != 200:
+                logger.error(f"Google userinfo fetch failed: {userinfo_resp.status_code}")
+                return None
+
+            userinfo = userinfo_resp.json()
+
+            return {
+                'google_id': userinfo.get('sub'),
+                'email': userinfo.get('email'),
+                'first_name': userinfo.get('given_name', ''),
+                'last_name': userinfo.get('family_name', ''),
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'expires_at': timezone.now() + timedelta(seconds=expires_in),
+            }
+
+        except Exception as e:
+            logger.error(f"Google code exchange error: {e}")
+            return None
             return {
                 'success': False,
                 'message_id': message_id,
