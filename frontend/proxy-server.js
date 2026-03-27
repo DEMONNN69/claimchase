@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PROXY_PORT || 3001;
 
 // Environment variables
-const BACKEND_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BACKEND_URL = 'http://localhost:8000';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8080'];
 // The public origin this proxy is reachable from — sent as Origin/Referer to Django's
 // ALLOWED_DOCUMENT_ORIGINS check. In dev this is http://localhost:8080 (Vite). In

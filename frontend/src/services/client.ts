@@ -5,8 +5,11 @@
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
+const developmentBaseURL = import.meta.env.DEV ? 'http://localhost:8000' : undefined;
+
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
+  baseURL: developmentBaseURL,
   headers: {
     'Content-Type': 'application/json',
   },

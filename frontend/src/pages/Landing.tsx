@@ -45,7 +45,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen w-full" style={{ paddingBottom: "36px" }}>
+    <div className="min-h-screen w-full">
       {/* Header */}
       <header className="w-full px-6 py-4 flex items-center justify-between border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
@@ -256,27 +256,6 @@ export default function Landing() {
           </p>
         </div>
       </footer>
-      {/* Fixed legal bar — always visible in viewport for Google OAuth verification */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 9999,
-          width: "100%",
-          textAlign: "center",
-          padding: "8px 16px",
-          fontSize: "11px",
-          color: "#9ca3af",
-          borderTop: "1px solid #e5e7eb",
-          backgroundColor: "rgba(249,250,251,0.97)",
-          backdropFilter: "blur(4px)",
-        }}
-      >
-        <a href="/privacy-policy.html" style={{ color: "#2563eb", textDecoration: "none", marginRight: "16px" }}>Privacy Policy</a>
-        <a href="/terms.html" style={{ color: "#2563eb", textDecoration: "none" }}>Terms &amp; Conditions</a>
-      </div>
     </div>
   );
 }

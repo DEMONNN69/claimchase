@@ -218,10 +218,8 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
 # Gmail OAuth Scopes - Minimal permissions for privacy compliance
 # gmail.send: Send emails on behalf of user
-# gmail.metadata: Read email headers/metadata only (NO body content)
 GMAIL_SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',
-    'https://www.googleapis.com/auth/gmail.metadata',  # Metadata only, not readonly
 ]
 
 # Gmail Pub/Sub Configuration for incoming email notifications

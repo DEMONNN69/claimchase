@@ -8,19 +8,13 @@ function LegalFooter() {
   return (
     <div
       style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
         width: "100%",
         textAlign: "center",
-        padding: "8px 16px",
-        fontSize: "11px",
-        color: "#9ca3af",
+        padding: "12px 16px",
+        fontSize: "12px",
+        color: "#6b7280",
         borderTop: "1px solid #e5e7eb",
-        backgroundColor: "rgba(249,250,251,0.97)",
-        backdropFilter: "blur(4px)",
+        backgroundColor: "#f9fafb",
       }}
     >
       <a

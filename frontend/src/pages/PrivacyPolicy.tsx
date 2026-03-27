@@ -26,7 +26,6 @@ const FALLBACK_PRIVACY_DOC: LegalDoc = {
     <p>When you connect Gmail, we request only the scopes required for product functionality:</p>
     <ul>
       <li><strong>gmail.send</strong>: to send case-related emails from your connected Gmail account.</li>
-      <li><strong>gmail.metadata</strong>: to read message metadata (labels, headers, thread IDs, timestamps) for status tracking.</li>
     </ul>
     <p>We do not use Gmail data for advertising or data sale.</p>
 
