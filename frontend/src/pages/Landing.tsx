@@ -208,8 +208,7 @@ export default function Landing() {
           <h2 className="text-xl lg:text-2xl font-bold mb-3">How we use Google data</h2>
           <p className="text-sm lg:text-base text-muted-foreground mb-4">
             AmicusClaims connects to your Gmail only after you authorize access. We use Gmail to send
-            case-related emails on your behalf and to read message metadata (labels, headers, thread IDs,
-            timestamps) so your case dashboard can track communication status.
+            case-related emails on your behalf so your case dashboard can track communication status.
           </p>
           <p className="text-sm lg:text-base text-muted-foreground">
             We do not use Google user data for advertising or sale.
