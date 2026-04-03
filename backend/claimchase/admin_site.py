@@ -13,5 +13,5 @@ class ClaimChaseAdminSite(UnfoldAdminSite):
     site_header = "🛡️ ClaimChase Admin"
     site_title = "ClaimChase Administration"
     index_title = "Welcome to ClaimChase"
-    index_template = "admin/index.html"
+    index_template = "admin/index.html"                                         
 

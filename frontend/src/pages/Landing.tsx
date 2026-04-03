@@ -221,6 +221,26 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* AI Transparency */}
+      <section id="ai-transparency" className="w-full px-6 py-10 bg-muted/20 border-b">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="text-xl lg:text-2xl font-bold">AI Transparency</h2>
+          </div>
+          <p className="text-sm lg:text-base text-muted-foreground mb-4">
+            AmicusClaims uses AI-powered services to help you draft insurance grievance letters and consumer
+            complaints. These features are powered by third-party large language model providers, including
+            <strong> OpenAI</strong> and <strong>Google Gemini</strong>, depending on the task.
+          </p>
+          <p className="text-sm lg:text-base text-muted-foreground">
+            AI-generated content is provided as a draft for your review. You remain in full control — nothing
+            is submitted on your behalf without your explicit confirmation. AI services do not have access to
+            your Gmail account or personal documents.
+          </p>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="w-full px-6 py-16 lg:py-20">
         <div className="max-w-2xl mx-auto text-center">
@@ -249,6 +269,9 @@ export default function Landing() {
             </a>
             <a href="https://amicusclaims.ai/terms.html" className="hover:underline hover:text-foreground transition-colors">
               Terms &amp; Conditions
+            </a>
+            <a href="#ai-transparency" className="hover:underline hover:text-foreground transition-colors">
+              AI Transparency
             </a>
           </div>
           <p className="text-xs text-muted-foreground">
