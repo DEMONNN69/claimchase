@@ -87,9 +87,7 @@ export default function CaseDetail() {
       refetchDocuments();
       refetch();
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to upload document");
-    },
+    onError: () => {},
   });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,7 +104,12 @@ export default function CaseDetail() {
     }
 
     for (const file of uploadingFiles) {
-      await uploadMutation.mutateAsync(file);
+      try {
+        await uploadMutation.mutateAsync(file);
+      } catch (error: any) {
+        const msg = error.response?.data?.message || "Upload failed";
+        toast.error(`"${file.name}": ${msg}`);
+      }
     }
 
     // Reset form
@@ -171,7 +174,7 @@ export default function CaseDetail() {
 
   const statusColors: Record<string, string> = {
     draft: "bg-slate-100 text-slate-800",
-    submitted: "bg-blue-100 text-blue-800",
+    submitted: "bg-green-100 text-green-800",
     under_review: "bg-yellow-100 text-yellow-800",
     resolved: "bg-green-100 text-green-800",
     rejected: "bg-red-100 text-red-800",
@@ -336,7 +339,7 @@ export default function CaseDetail() {
                       className="flex items-center justify-between p-2 sm:p-3 border rounded-lg hover:bg-slate-50 transition-colors gap-2"
                     >
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-xs sm:text-sm truncate">{doc.file_name}</p>
                           <p className="text-xs text-slate-500 truncate">
@@ -347,7 +350,7 @@ export default function CaseDetail() {
                       </div>
                       <a
                         href={doc.file_url}
-                        className="text-blue-600 hover:text-blue-700 p-2 flex-shrink-0"
+                        className="text-green-600 hover:text-green-700 p-2 flex-shrink-0"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </a>

@@ -52,7 +52,7 @@ export function ReviewerHeader() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-green-600 p-2 rounded-lg">
               <Stethoscope className="h-5 w-5 text-white" />
             </div>
             <div className="hidden sm:block">
@@ -72,7 +72,7 @@ export function ReviewerHeader() {
                   cn(
                     "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-blue-50 text-blue-700"
+                      ? "bg-green-50 text-green-700"
                       : "text-slate-600 hover:bg-slate-100"
                   )
                 }
@@ -92,7 +92,7 @@ export function ReviewerHeader() {
                   className="relative h-10 w-10 rounded-full"
                 >
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-blue-100 text-blue-700">
+                    <AvatarFallback className="bg-green-100 text-green-700">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -150,7 +150,7 @@ export function ReviewerHeader() {
                     cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-blue-50 text-blue-700"
+                        ? "bg-green-50 text-green-700"
                         : "text-slate-600 hover:bg-slate-100"
                     )
                   }
@@ -196,32 +196,34 @@ export function ReviewerBottomNav() {
           className={({ isActive }) =>
             cn(
               "flex flex-col items-center gap-1 py-2 px-6 rounded-lg transition-colors",
-              isActive ? "text-blue-600" : "text-slate-400"
+              isActive ? "text-green-600" : "text-slate-400"
             )
           }
         >
-          <LayoutDashboard className="h-5 w-5" />
+          <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
           <span className="text-xs font-medium">Dashboard</span>
         </NavLink>
 
         <NavLink
           to="/reviewer/settings"
+          aria-label="Settings"
           className={({ isActive }) =>
             cn(
               "flex flex-col items-center gap-1 py-2 px-6 rounded-lg transition-colors",
-              isActive ? "text-blue-600" : "text-slate-400"
+              isActive ? "text-green-600" : "text-slate-400"
             )
           }
         >
-          <Settings className="h-5 w-5" />
+          <Settings className="h-5 w-5" aria-hidden="true" />
           <span className="text-xs font-medium">Settings</span>
         </NavLink>
 
         <button
           onClick={handleLogout}
+          aria-label="Logout"
           className="flex flex-col items-center gap-1 py-2 px-6 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5" aria-hidden="true" />
           <span className="text-xs font-medium">Logout</span>
         </button>
       </div>

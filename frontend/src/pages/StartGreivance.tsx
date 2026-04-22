@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, FileText, CheckCircle, Calendar, DollarSign, FileCheck } from "lucide-react";
+import { ArrowLeft, Upload, FileText, CheckCircle, Calendar, DollarSign, FileCheck, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -251,7 +251,9 @@ export default function StartGreivance() {
         <div className="lg:hidden p-4 border-b">
           <div className="flex items-center justify-between mb-3">
             <BrandLogo size="sm" />
-            <span className="text-sm text-muted-foreground">Step {step}/3</span>
+            <span className="text-sm text-muted-foreground">
+              Step {step}/3 · {step === 1 ? "Incident Details" : step === 2 ? "Upload Documents" : "Review & Submit"}
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
@@ -393,8 +395,11 @@ export default function StartGreivance() {
 
                 <div className="space-y-4">
                   <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-base">{t('step3.incident_details')}</CardTitle>
+                      <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground">
+                        <Pencil className="h-3 w-3 mr-1" />Edit
+                      </Button>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div>
@@ -423,8 +428,11 @@ export default function StartGreivance() {
                   </Card>
 
                   <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-base">{t('step3.documents')}</CardTitle>
+                      <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground">
+                        <Pencil className="h-3 w-3 mr-1" />Edit
+                      </Button>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">

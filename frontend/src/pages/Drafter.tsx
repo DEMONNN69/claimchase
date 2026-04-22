@@ -183,7 +183,7 @@ export default function Drafter() {
   const getCategoryBadgeColor = (category: string) => {
     switch (category) {
       case 'life': return 'bg-green-500/10 text-green-600 border-green-200';
-      case 'health': return 'bg-blue-500/10 text-blue-600 border-blue-200';
+      case 'health': return 'bg-green-500/10 text-green-600 border-green-200';
       case 'general': return 'bg-orange-500/10 text-orange-600 border-orange-200';
       default: return 'bg-gray-500/10 text-gray-600 border-gray-200';
     }
@@ -202,7 +202,7 @@ export default function Drafter() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/cases")}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -378,9 +378,9 @@ export default function Drafter() {
               disabled={isCreatingCase || isSendingEmail || createCaseMutation.isPending}
             >
               <Send className="h-4 w-4" />
-              {isCreatingCase ? t('actions.creating') : 
-               isSendingEmail ? t('actions.sending') : 
-               caseId ? t('actions.send') : t('actions.send')}
+              {isCreatingCase ? "Creating case…" :
+               isSendingEmail ? "Sending email…" :
+               caseId ? "Send Email" : "Create Case & Send Email"}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
               {!user?.gmail_connected ? 

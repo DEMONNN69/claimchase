@@ -188,7 +188,7 @@ export default function OmbudsmanGuide() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading guide...</p>
         </div>
       </div>
@@ -314,7 +314,7 @@ export default function OmbudsmanGuide() {
               onClick={() => setCurrentStep(step)}
               className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${
                 step === currentStep
-                  ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                  ? 'bg-green-600 text-white ring-4 ring-green-100'
                   : completedSteps.includes(step)
                   ? 'bg-green-100 text-green-700 hover:bg-green-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

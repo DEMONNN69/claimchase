@@ -71,7 +71,7 @@ export default function ExpertDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 text-purple-500 animate-spin mx-auto" />
+          <Loader2 className="h-8 w-8 text-green-700 animate-spin mx-auto" />
           <p className="text-slate-500 mt-3">Loading your dashboard...</p>
         </div>
       </div>
@@ -261,7 +261,7 @@ function DisputeCard({
         };
       case "in_review":
         return {
-          color: "bg-blue-100 text-blue-700 border-blue-200",
+          color: "bg-green-100 text-green-700 border-green-200",
           icon: FileText,
         };
       case "completed":

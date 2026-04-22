@@ -76,8 +76,8 @@ export default function ReviewerSettings() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <User className="h-6 w-6 text-blue-600" />
+                <div className="bg-green-100 p-3 rounded-full">
+                  <User className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
                   <CardTitle>Profile Information</CardTitle>

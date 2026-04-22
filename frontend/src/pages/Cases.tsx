@@ -52,8 +52,8 @@ export default function Cases() {
   // Status config that uses translations
   const statusConfig = {
     draft: { label: t('status.draft'), color: 'bg-orange-500/10 text-orange-600 border-orange-200', icon: FileEdit },
-    submitted: { label: t('status.submitted'), color: 'bg-blue-500/10 text-blue-600 border-blue-200', icon: Clock },
-    in_review: { label: t('status.in_review'), color: 'bg-purple-500/10 text-purple-600 border-purple-200', icon: Clock },
+    submitted: { label: t('status.submitted'), color: 'bg-green-500/10 text-green-600 border-green-200', icon: Clock },
+    in_review: { label: t('status.in_review'), color: 'bg-green-100/10 text-green-700 border-purple-200', icon: Clock },
     resolved: { label: t('status.resolved'), color: 'bg-green-500/10 text-green-600 border-green-200', icon: CheckCircle },
     rejected: { label: t('status.rejected'), color: 'bg-red-500/10 text-red-600 border-red-200', icon: AlertCircle },
   };
@@ -124,7 +124,7 @@ export default function Cases() {
             <CardContent className="p-3 sm:p-6">
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-bold text-slate-900">{cases.length}</p>
-                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.total_cases')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-tight">{t('stats.total_cases')}</p>
               </div>
             </CardContent>
           </Card>
@@ -134,17 +134,17 @@ export default function Cases() {
                 <p className="text-xl sm:text-2xl font-bold text-orange-600">
                   {cases.filter((c: any) => c.status === 'draft').length}
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.draft')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-tight">{t('stats.draft')}</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-blue-600">
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {cases.filter((c: any) => ['submitted', 'in_review'].includes(c.status)).length}
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.active')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-tight">{t('stats.active')}</p>
               </div>
             </CardContent>
           </Card>
@@ -154,7 +154,7 @@ export default function Cases() {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {cases.filter((c: any) => c.status === 'resolved').length}
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 truncate">{t('stats.resolved')}</p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-tight">{t('stats.resolved')}</p>
               </div>
             </CardContent>
           </Card>

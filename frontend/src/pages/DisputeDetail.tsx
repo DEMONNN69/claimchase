@@ -59,34 +59,11 @@ export default function DisputeDetail() {
   } = useQuery({
     queryKey: ["dispute", id],
     queryFn: async () => {
-      console.log("Fetching dispute with ID:", id);
       const result = await disputeAPI.get(Number(id!));
-      console.log("Dispute API response:", result);
       return result.data; // Extract data from Axios response
     },
     enabled: !!id,
   });
-
-  // Debug logging
-  console.log("Current dispute data:", dispute);
-
-  // Log specific fields to see their structure
-  if (dispute) {
-    console.log("Dispute fields:", {
-      id: dispute.id,
-      dispute_id: dispute.dispute_id,
-      status: dispute.status,
-      entity_data: dispute.entity_data,
-      category_data: dispute.category_data,
-      subcategory_data: dispute.subcategory_data,
-      transaction_date: dispute.transaction_date,
-      amount_involved: dispute.amount_involved,
-      description: dispute.description,
-      documents: dispute.documents,
-      timeline: dispute.timeline,
-      created_at: dispute.created_at,
-    });
-  }
 
   // Upload document mutation
   const uploadDocumentMutation = useMutation({
@@ -133,9 +110,9 @@ export default function DisputeDetail() {
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      'new': { label: 'New', className: 'bg-blue-500' },
+      'new': { label: 'New', className: 'bg-green-500' },
       'draft': { label: 'Draft', className: 'bg-gray-500' },
-      'submitted': { label: 'Submitted', className: 'bg-blue-500' },
+      'submitted': { label: 'Submitted', className: 'bg-green-500' },
       'under_review': { label: 'Under Review', className: 'bg-yellow-500' },
       'resolved': { label: 'Resolved', className: 'bg-green-500' },
       'rejected': { label: 'Rejected', className: 'bg-red-500' },

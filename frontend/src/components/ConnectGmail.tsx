@@ -57,11 +57,11 @@ export function ConnectGmail({
 
   return (
     <div className="space-y-4 w-full overflow-hidden">
-      <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200 min-w-0">
-        <Mail className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+      <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200 min-w-0">
+        <Mail className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-blue-900">Gmail Integration</p>
-          <p className="text-sm text-blue-800 mt-1 break-words">
+          <p className="font-semibold text-green-900">Gmail Integration</p>
+          <p className="text-sm text-green-800 mt-1 break-words">
             Connect your Gmail account to automatically send grievance emails
             to insurance companies.
           </p>

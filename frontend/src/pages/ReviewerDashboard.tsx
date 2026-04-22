@@ -49,7 +49,7 @@ export default function ReviewerDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+          <Loader2 className="h-8 w-8 text-green-500 animate-spin mx-auto" />
           <p className="text-slate-500 mt-3">Loading your dashboard...</p>
         </div>
       </div>
@@ -68,8 +68,8 @@ export default function ReviewerDashboard() {
       label: "In Progress",
       value: dashboard?.in_progress_count || 0,
       icon: FileText,
-      color: "bg-blue-500",
-      bgLight: "bg-blue-50",
+      color: "bg-green-500",
+      bgLight: "bg-green-50",
     },
     {
       label: "Completed",
@@ -222,14 +222,14 @@ export default function ReviewerDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5"
+            className="mt-8 bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-5"
           >
             <h3 className="font-semibold text-slate-900 mb-4">
               Your Performance
             </h3>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-green-600">
                   {stats.total_documents_reviewed}
                 </p>
                 <p className="text-xs text-slate-500">Documents Reviewed</p>
@@ -247,7 +247,7 @@ export default function ReviewerDashboard() {
                 <p className="text-xs text-slate-500">Approval Rate</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-indigo-600">
+                <p className="text-2xl font-bold text-green-700">
                   {stats.avg_review_time_hours.toFixed(1)}h
                 </p>
                 <p className="text-xs text-slate-500">Avg Review Time</p>
@@ -283,7 +283,7 @@ function CaseCard({
 
   const statusColors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-700",
-    in_progress: "bg-blue-100 text-blue-700",
+    in_progress: "bg-green-100 text-green-700",
     completed: "bg-emerald-100 text-emerald-700",
     needs_more_info: "bg-orange-100 text-orange-700",
   };
@@ -343,7 +343,7 @@ function CaseCard({
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+            className="h-full bg-gradient-to-r from-green-500 to-green-700 rounded-full"
           />
         </div>
 

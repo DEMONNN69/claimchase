@@ -133,10 +133,19 @@ export default function Onboarding() {
             {t('left_panel.subtitle')}
           </p>
         </div>
-        <div className="flex gap-2">
-          <div className={cn("h-1.5 flex-1 rounded-full transition-colors", step >= 1 ? "bg-white" : "bg-white/30")} />
-          <div className={cn("h-1.5 flex-1 rounded-full transition-colors", step >= 2 ? "bg-white" : "bg-white/30")} />
-          <div className={cn("h-1.5 flex-1 rounded-full transition-colors", step >= 3 ? "bg-white" : "bg-white/30")} />
+        <div className="space-y-3">
+          {[
+            { n: 1, label: "Your Details" },
+            { n: 2, label: "Your Insurer" },
+            { n: 3, label: "Your Issue" },
+          ].map(({ n, label }) => (
+            <div key={n} className="flex items-center gap-3">
+              <div className={cn("h-1.5 w-8 rounded-full transition-colors flex-shrink-0", step >= n ? "bg-white" : "bg-white/30")} />
+              <span className={cn("text-sm transition-colors", step >= n ? "text-white font-medium" : "text-white/40")}>
+                {label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -146,7 +155,9 @@ export default function Onboarding() {
         <div className="lg:hidden p-4 border-b">
           <div className="flex items-center justify-between mb-3">
             <BrandLogo size="sm" />
-            <span className="text-sm text-muted-foreground">{step}/3</span>
+            <span className="text-sm text-muted-foreground">
+              Step {step}/3 · {step === 1 ? "Your Details" : step === 2 ? "Your Insurer" : "Your Issue"}
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">

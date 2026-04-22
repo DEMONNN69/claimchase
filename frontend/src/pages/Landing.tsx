@@ -16,7 +16,7 @@ export default function Landing() {
       icon: FileText,
       title: t('services.draft_grievance.title'),
       description: t('services.draft_grievance.description'),
-      color: "bg-blue-500/10 text-blue-600",
+      color: "bg-green-500/10 text-green-600",
     },
     {
       icon: Mail,
@@ -34,7 +34,7 @@ export default function Landing() {
       icon: Users,
       title: t('services.expert_help.title'),
       description: t('services.expert_help.description'),
-      color: "bg-purple-500/10 text-purple-600",
+      color: "bg-green-100/10 text-green-700",
     },
   ];
 
@@ -89,7 +89,7 @@ export default function Landing() {
                   {t('hero.start_claim')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="h-12 px-8">
+                <Button size="lg" variant="outline" className="h-12 px-8" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>
                   {t('hero.how_works')}
                 </Button>
               </div>
@@ -173,7 +173,7 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="w-full px-6 py-12 lg:py-16 bg-muted/30">
+      <section id="how-it-works" className="w-full px-6 py-12 lg:py-16 bg-muted/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t('how_it_works.title')}</h2>
@@ -256,9 +256,6 @@ export default function Landing() {
       <footer className="w-full px-6 py-8 border-t bg-muted/30">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
-              <Shield className="h-4 w-4 text-white" />
-            </div>
             <BrandLogo size="sm" />
             <span className="text-muted-foreground text-sm">{t('footer.tagline')}</span>
           </div>

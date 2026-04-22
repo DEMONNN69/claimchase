@@ -230,8 +230,8 @@ export default function Dashboard() {
                         <div className={cn(
                           "w-2 h-2 rounded-full",
                           activeCase.status === 'draft' ? 'bg-orange-500' :
-                          activeCase.status === 'submitted' ? 'bg-blue-500' :
-                          activeCase.status === 'in_review' ? 'bg-purple-500' :
+                          activeCase.status === 'submitted' ? 'bg-green-500' :
+                          activeCase.status === 'in_review' ? 'bg-green-100' :
                           activeCase.status === 'resolved' ? 'bg-green-500' : 'bg-gray-500'
                         )} />
                         <span className="capitalize">{activeCase.status.replace('_', ' ')}</span>
@@ -336,7 +336,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Active Cases</span>
-                <span className="font-medium text-blue-600">{caseStats.active}</span>
+                <span className="font-medium text-green-600">{caseStats.active}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Resolved Cases</span>

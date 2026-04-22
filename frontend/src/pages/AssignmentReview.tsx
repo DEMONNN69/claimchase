@@ -64,7 +64,7 @@ export default function AssignmentReview() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+        <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function AssignmentReview() {
                 </p>
                 <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden mt-1">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
+                    className="h-full bg-green-500 rounded-full transition-all"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -226,7 +226,7 @@ export default function AssignmentReview() {
                 <div className="flex items-center gap-2">
                   <a
                     href={selectedDoc.document_details.file_url}
-                    className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                    className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
                   >
                     Open <ExternalLink className="h-3.5 w-3.5" />
                   </a>
@@ -268,7 +268,7 @@ export default function AssignmentReview() {
                       </p>
                       <a
                         href={selectedDoc.document_details.file_url}
-                        className="text-blue-600 hover:underline mt-2 inline-block"
+                        className="text-green-600 hover:underline mt-2 inline-block"
                       >
                         Download to view
                       </a>
@@ -488,7 +488,7 @@ function DocumentTab({
       className={cn(
         "flex items-center gap-3 p-3 rounded-xl transition-all text-left min-w-[200px] lg:min-w-0 lg:w-full",
         isSelected
-          ? "bg-blue-50 border-2 border-blue-200"
+          ? "bg-green-50 border-2 border-green-200"
           : "bg-slate-50 border-2 border-transparent hover:bg-slate-100"
       )}
     >
@@ -520,7 +520,7 @@ function DocumentTab({
         <p
           className={cn(
             "text-sm font-medium truncate",
-            isSelected ? "text-blue-900" : "text-slate-900"
+            isSelected ? "text-green-900" : "text-slate-900"
           )}
         >
           {doc.document_details.file_name}

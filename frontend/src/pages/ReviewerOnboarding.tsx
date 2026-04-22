@@ -70,7 +70,7 @@ export default function ReviewerOnboarding() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -78,7 +78,7 @@ export default function ReviewerOnboarding() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 mb-4">
             <Stethoscope className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">
@@ -96,7 +96,7 @@ export default function ReviewerOnboarding() {
               key={s}
               className={cn(
                 "w-3 h-3 rounded-full transition-all",
-                step >= s ? "bg-blue-500 scale-110" : "bg-slate-200"
+                step >= s ? "bg-green-500 scale-110" : "bg-slate-200"
               )}
             />
           ))}
@@ -111,8 +111,8 @@ export default function ReviewerOnboarding() {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <User className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                  <User className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
                   <h2 className="font-semibold text-slate-900">Your Name</h2>
@@ -134,14 +134,14 @@ export default function ReviewerOnboarding() {
                       setFormData({ ...formData, full_name: e.target.value })
                     }
                     placeholder="Dr. John Smith"
-                    className="mt-1.5 rounded-xl border-slate-200 focus:border-blue-500"
+                    className="mt-1.5 rounded-xl border-slate-200 focus:border-green-500"
                   />
                 </div>
 
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!canProceedStep1}
-                  className="w-full rounded-xl py-6 bg-gradient-to-r from-blue-500 to-indigo-600"
+                  className="w-full rounded-xl py-6 bg-gradient-to-r from-green-500 to-green-700"
                 >
                   Continue
                   <ChevronRight className="h-5 w-5 ml-2" />
@@ -157,8 +157,8 @@ export default function ReviewerOnboarding() {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-                  <Stethoscope className="h-5 w-5 text-indigo-600" />
+                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                  <Stethoscope className="h-5 w-5 text-green-700" />
                 </div>
                 <div>
                   <h2 className="font-semibold text-slate-900">
@@ -184,26 +184,26 @@ export default function ReviewerOnboarding() {
                       className={cn(
                         "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
                         isSelected
-                          ? "border-indigo-500 bg-indigo-50"
+                          ? "border-green-500 bg-green-100"
                           : "border-slate-200 hover:border-slate-300"
                       )}
                     >
                       <Icon
                         className={cn(
                           "h-5 w-5",
-                          isSelected ? "text-indigo-600" : "text-slate-400"
+                          isSelected ? "text-green-700" : "text-slate-400"
                         )}
                       />
                       <span
                         className={cn(
                           "text-sm font-medium",
-                          isSelected ? "text-indigo-700" : "text-slate-700"
+                          isSelected ? "text-green-700" : "text-slate-700"
                         )}
                       >
                         {spec.label}
                       </span>
                       {isSelected && (
-                        <Check className="h-4 w-4 text-indigo-600 ml-auto" />
+                        <Check className="h-4 w-4 text-green-700 ml-auto" />
                       )}
                     </motion.button>
                   );
@@ -244,7 +244,7 @@ export default function ReviewerOnboarding() {
                 <Button
                   onClick={() => setStep(3)}
                   disabled={!canProceedStep2 || !canProceedStep3}
-                  className="flex-1 rounded-xl py-6 bg-gradient-to-r from-blue-500 to-indigo-600"
+                  className="flex-1 rounded-xl py-6 bg-gradient-to-r from-green-500 to-green-700"
                 >
                   Continue
                   <ChevronRight className="h-5 w-5 ml-2" />
@@ -286,7 +286,7 @@ export default function ReviewerOnboarding() {
                           years_of_experience: parseInt(e.target.value),
                         })
                       }
-                      className="flex-1 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-500"
+                      className="flex-1 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-green-500"
                     />
                     <div className="w-16 text-center">
                       <span className="text-2xl font-bold text-slate-900">
@@ -341,7 +341,7 @@ export default function ReviewerOnboarding() {
                   <Button
                     onClick={handleSubmit}
                     disabled={onboard.isPending}
-                    className="flex-1 rounded-xl py-6 bg-gradient-to-r from-blue-500 to-indigo-600"
+                    className="flex-1 rounded-xl py-6 bg-gradient-to-r from-green-500 to-green-700"
                   >
                     {onboard.isPending ? (
                       <>

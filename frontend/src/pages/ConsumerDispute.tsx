@@ -108,7 +108,7 @@ export default function ConsumerDispute() {
     setSelectedSubcategoryName("");
     setSelectedEntity(null);
     setSelectedEntityName("");
-    setTimeout(goNext, 200);
+    setTimeout(goNext, 600);
   };
 
   // Subcategory selection
@@ -117,14 +117,14 @@ export default function ConsumerDispute() {
     setSelectedSubcategoryName(name);
     setSelectedEntity(null);
     setSelectedEntityName("");
-    setTimeout(goNext, 200);
+    setTimeout(goNext, 600);
   };
 
   // Entity selection
   const selectEntity = (id: number | null, name: string) => {
     setSelectedEntity(id);
     setSelectedEntityName(name);
-    setTimeout(goNext, 200);
+    setTimeout(goNext, 600);
   };
 
   // File handling
@@ -200,7 +200,7 @@ export default function ConsumerDispute() {
         
         {/* Progress indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Step {step}/5</span>
+          <span className="text-xs text-slate-500">Step {step}/5 · {stepMessages[step as keyof typeof stepMessages]?.question}</span>
           <div className="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-primary rounded-full"
@@ -521,11 +521,11 @@ export default function ConsumerDispute() {
               <span>100% Secure</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-blue-500" />
+              <Clock className="h-4 w-4 text-green-500" />
               <span>Quick Response</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <MessageCircle className="h-4 w-4 text-purple-500" />
+              <MessageCircle className="h-4 w-4 text-green-700" />
               <span>24/7 Support</span>
             </div>
           </div>

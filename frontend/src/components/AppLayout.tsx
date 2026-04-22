@@ -19,13 +19,13 @@ function LegalFooter() {
     >
       <a
         href="/privacy-policy.html"
-        style={{ color: "#2563eb", textDecoration: "none", marginRight: "16px" }}
+        style={{ color: "#16a34a", textDecoration: "none", marginRight: "16px" }}
       >
         Privacy Policy
       </a>
       <a
         href="/terms.html"
-        style={{ color: "#2563eb", textDecoration: "none" }}
+        style={{ color: "#16a34a", textDecoration: "none" }}
       >
         Terms &amp; Conditions
       </a>

@@ -111,7 +111,7 @@ export default function ReplyNotificationModal({
             onClick={() => setActiveTab('paste')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'paste'
-                ? 'border-b-2 border-blue-600 text-blue-600'
+                ? 'border-b-2 border-green-600 text-green-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -143,7 +143,7 @@ export default function ReplyNotificationModal({
                   value={replyBody}
                   onChange={(e) => setReplyBody(e.target.value)}
                   placeholder="Paste the email body here..."
-                  className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                 />
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-gray-500">
@@ -166,7 +166,7 @@ export default function ReplyNotificationModal({
                 <button
                   onClick={handleSubmitReply}
                   disabled={isSubmitting || !replyBody.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Submit Reply

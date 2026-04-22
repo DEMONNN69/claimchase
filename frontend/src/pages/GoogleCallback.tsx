@@ -46,7 +46,7 @@ const GoogleCallback = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-3 text-center">
         {status === "sending" && (
-          <Loader2 className="mx-auto h-10 w-10 text-blue-600 animate-spin" />
+          <Loader2 className="mx-auto h-10 w-10 text-green-600 animate-spin" />
         )}
         {status === "done" && (
           <CheckCircle2 className="mx-auto h-10 w-10 text-green-600" />

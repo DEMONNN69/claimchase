@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { User, Trash2, Bell, Mail, LogOut, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -208,13 +209,28 @@ export default function Settings() {
                 <LogOut className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{t('settings:sign_out')}</span>
               </Button>
-              <Button 
-                variant="destructive" 
-                className="w-full h-11 justify-start gap-3 min-w-0"
-              >
-                <Trash2 className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{t('settings:delete_account')}</span>
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full h-11 justify-start gap-3 min-w-0">
+                    <Trash2 className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('settings:delete_account')}</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your account and all associated data. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Yes, delete my account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <p className="text-xs text-muted-foreground text-center pt-2 break-words">
                 {t('settings:delete_account_warning')}
               </p>

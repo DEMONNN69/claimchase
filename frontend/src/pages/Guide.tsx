@@ -56,15 +56,15 @@ export default function Guide() {
         </div>
 
         {/* Info Card */}
-        <Card className="mb-6 border-2 border-primary/20 bg-primary/5">
-          <CardContent className="p-4 flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">{t('pro_tip')}</p>
-              <p className="text-xs text-muted-foreground">{t('pro_tip_text')}</p>
+        <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 border-l-4 border-l-primary p-4 flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded">Pro Tip</span>
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-sm text-foreground">{t('pro_tip_text')}</p>
+          </div>
+        </div>
 
         {/* Checklist */}
         <Card>
@@ -72,7 +72,7 @@ export default function Guide() {
             <CardTitle className="text-lg">{t('required_documents')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <Accordion type="single" collapsible className="space-y-2">
+            <Accordion type="single" collapsible defaultValue="rejection" className="space-y-2">
               {checklistItems.map((item) => (
                 <AccordionItem
                   key={item.id}

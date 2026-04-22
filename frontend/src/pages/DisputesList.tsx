@@ -33,9 +33,9 @@ import {
 } from "@/components/ui/select";
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  new: { label: "New", color: "bg-blue-500", icon: Clock },
+  new: { label: "New", color: "bg-green-500", icon: Clock },
   contacted: { label: "Contacted", color: "bg-yellow-500", icon: Phone },
-  in_progress: { label: "In Progress", color: "bg-purple-500", icon: Loader2 },
+  in_progress: { label: "In Progress", color: "bg-green-100", icon: Loader2 },
   resolved: { label: "Resolved", color: "bg-green-500", icon: CheckCircle2 },
   closed: { label: "Closed", color: "bg-gray-500", icon: XCircle },
   rejected: { label: "Rejected", color: "bg-red-500", icon: XCircle },
@@ -109,10 +109,10 @@ export default function DisputesList() {
       {/* Stats Cards - Compact */}
       {stats && (
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-          <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+          <Card className="bg-green-50 dark:bg-green-900/20 border-green-200">
             <CardContent className="p-3 text-center">
-              <p className="text-lg font-bold text-blue-700 dark:text-blue-300">{stats.total}</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400">Total</p>
+              <p className="text-lg font-bold text-green-700 dark:text-green-300">{stats.total}</p>
+              <p className="text-xs text-green-600 dark:text-green-400">Total</p>
             </CardContent>
           </Card>
           <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200">
@@ -121,10 +121,10 @@ export default function DisputesList() {
               <p className="text-xs text-yellow-600 dark:text-yellow-400">New</p>
             </CardContent>
           </Card>
-          <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200">
+          <Card className="bg-green-100 dark:bg-green-100/20 border-purple-200">
             <CardContent className="p-3 text-center">
-              <p className="text-lg font-bold text-purple-700 dark:text-purple-300">{stats.in_progress}</p>
-              <p className="text-xs text-purple-600 dark:text-purple-400">In Progress</p>
+              <p className="text-lg font-bold text-green-700 dark:text-green-700">{stats.in_progress}</p>
+              <p className="text-xs text-green-700 dark:text-green-700">In Progress</p>
             </CardContent>
           </Card>
           <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200">
@@ -219,7 +219,7 @@ export default function DisputesList() {
             <p className="text-gray-500 text-sm mb-4">
               {searchQuery || statusFilter ? "Try adjusting your filters" : "You haven't submitted any disputes yet"}
             </p>
-            <Button onClick={() => navigate("/disputes/new")} className="bg-orange-500 hover:bg-orange-600" size="sm">
+            <Button onClick={() => navigate("/disputes/new")} size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Submit Dispute
             </Button>

@@ -45,7 +45,7 @@ export function DesktopSidebar() {
                   )
                 }
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-5 w-5" aria-hidden="true" />
                 <span>{item.label}</span>
               </NavLink>
             </li>

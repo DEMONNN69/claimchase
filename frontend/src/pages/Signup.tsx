@@ -120,14 +120,19 @@ export default function Signup() {
 
               <div>
                 <Label htmlFor="confirmPassword">{t('auth:signup.confirm_password_label')}</Label>
-                <PasswordInput 
-                  id="confirmPassword" 
+                <PasswordInput
+                  id="confirmPassword"
                   placeholder="••••••••"
                   className="mt-2 h-11"
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
                   disabled={isLoading}
                 />
+                {formData.confirmPassword && (
+                  <p className={`text-xs mt-1 ${formData.password === formData.confirmPassword ? "text-green-600" : "text-destructive"}`}>
+                    {formData.password === formData.confirmPassword ? "✓ Passwords match" : "Passwords do not match"}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-start gap-3">

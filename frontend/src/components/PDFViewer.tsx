@@ -63,7 +63,7 @@ export default function PDFViewer({ url, fileName, className }: PDFViewerProps) 
         <p className="text-slate-600 text-center mb-4">{error}</p>
         <a
           href={url}
-          className="text-blue-600 hover:underline flex items-center gap-2"
+          className="text-green-600 hover:underline flex items-center gap-2"
         >
           <Download className="h-4 w-4" />
           Download PDF instead
@@ -165,7 +165,7 @@ export default function PDFViewer({ url, fileName, className }: PDFViewerProps) 
       <div className="flex-1 overflow-auto flex items-start justify-center p-4">
         {loading && (
           <div className="flex flex-col items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 text-blue-400 animate-spin mb-2" />
+            <Loader2 className="h-8 w-8 text-green-400 animate-spin mb-2" />
             <span className="text-slate-400">Loading PDF...</span>
           </div>
         )}
@@ -199,7 +199,7 @@ export default function PDFViewer({ url, fileName, className }: PDFViewerProps) 
                 className={cn(
                   "w-8 h-8 rounded text-xs font-medium transition-colors",
                   pageNumber === page
-                    ? "bg-blue-600 text-white"
+                    ? "bg-green-600 text-white"
                     : "bg-slate-700 text-slate-300 hover:bg-slate-600"
                 )}
               >
