@@ -19,7 +19,6 @@ import {
   AlertCircle,
   FileEdit,
   Eye,
-  Settings
 } from "lucide-react";
 import { useCases } from "@/hooks/useApi";
 import { useAuth } from "@/contexts/AuthContext";
@@ -84,19 +83,10 @@ export default function Cases() {
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       {/* Mobile Navbar - Only visible on mobile */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-40">
         <div className="flex items-center justify-between">
           <BrandLogo size="sm" />
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <button
-              onClick={() => navigate("/settings")}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
+          <NotificationBell />
         </div>
       </div>
 

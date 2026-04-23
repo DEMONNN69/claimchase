@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Scale, Users, CheckCircle, Plus, FileText, Edit2 , FileEdit, Settings } from "lucide-react";
+import { CheckCircle, Plus, FileText, Edit2, FileEdit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInsuranceCompanies, useInsuranceTypes, useCases } from "@/hooks/useApi";
@@ -104,22 +104,10 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Mobile Navbar - Only visible on mobile */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-6">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-0 z-40">
         <div className="flex items-center justify-between">
           <BrandLogo size="sm" />
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <button
-              onClick={() => navigate("/settings")}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="h-5 w-5 text-muted-foreground" />
-            </button>
-            <div className="text-sm text-muted-foreground">
-              {user?.first_name}
-            </div>
-          </div>
+          <NotificationBell />
         </div>
       </div>
 
@@ -280,113 +268,24 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { icon: Plus, label: t('dashboard:actions.new_case'), path: "/start-grievance", primary: true },
-          { icon: FileText, label: t('dashboard:actions.view_cases'), path: "/cases" },
-          { icon: Scale, label: t('dashboard:actions.guide'), path: "/guide" },
-          { icon: Users, label: t('dashboard:actions.get_help'), path: "/handoff" },
-        ].map((action) => (
-          <Card 
-            key={action.label}
-            className={cn(
-              "cursor-pointer hover:shadow-md transition-all",
-              action.primary ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:border-primary/30"
-            )}
-            onClick={() => navigate(action.path)}
-          >
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center mb-2",
-                action.primary ? "bg-primary-foreground/20" : "bg-muted"
-              )}>
-                <action.icon className={cn(
-                  "h-5 w-5",
-                  action.primary ? "text-primary-foreground" : "text-muted-foreground"
-                )} />
-              </div>
-              <span className={cn(
-                "text-sm font-medium",
-                action.primary ? "text-primary-foreground" : "text-foreground"
-              )}>
-                {action.label}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 gap-6 mt-6">
-        {/* Case Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t('dashboard:case_statistics')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Cases</span>
-                <span className="font-medium">{caseStats.total}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Draft Cases</span>
-                <span className="font-medium text-orange-600">{caseStats.draft}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Active Cases</span>
-                <span className="font-medium text-green-600">{caseStats.active}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Resolved Cases</span>
-                <span className="font-medium text-green-600">{caseStats.resolved}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t('dashboard:recent_activity')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {activeCase ? (
-              <div className="space-y-3">
-                <div className="text-sm">
-                  <span className="font-medium">Latest case:</span> {activeCase.case_number}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Status: {activeCase.status.replace('_', ' ')}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Created: {formatDate(activeCase.created_at)}
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => navigate("/cases")}
-                  className="w-full mt-3"
-                >
-                  View All Activity
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground mb-4">{t('dashboard:no_recent_activity')}</p>
-                <Button 
-                  size="sm" 
-                  onClick={() => navigate("/start-grievance")}
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create Your First Case
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Case Stats — inline pills */}
+      <div className="flex gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5 text-sm">
+          <span className="font-semibold">{caseStats.total}</span>
+          <span className="text-muted-foreground">Total</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-orange-50 rounded-full px-3 py-1.5 text-sm">
+          <span className="font-semibold text-orange-600">{caseStats.draft}</span>
+          <span className="text-orange-500">Draft</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-green-50 rounded-full px-3 py-1.5 text-sm">
+          <span className="font-semibold text-green-600">{caseStats.active}</span>
+          <span className="text-green-500">Active</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-green-50 rounded-full px-3 py-1.5 text-sm">
+          <span className="font-semibold text-green-700">{caseStats.resolved}</span>
+          <span className="text-green-600">Resolved</span>
+        </div>
       </div>
      
 

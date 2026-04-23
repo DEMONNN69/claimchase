@@ -45,21 +45,22 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full pb-20 sm:pb-0">
       {/* Header */}
-      <header className="w-full px-6 py-4 flex items-center justify-between border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <BrandLogo size="md" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
+          {/* Desktop only */}
           <a
             href="/privacy-policy.html"
-            className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+            className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground hover:underline"
           >
             Privacy Policy
           </a>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
             <Link to="/login">{t('header.login')}</Link>
           </Button>
           <Button size="sm" onClick={() => navigate("/login")}>
@@ -69,7 +70,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full px-6 py-12 lg:py-20">
+      <section className="w-full px-5 sm:px-6 py-10 lg:py-20">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
             {/* Left - Text */}
@@ -81,22 +82,33 @@ export default function Landing() {
               <h1 className="text-3xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
                 {t('hero.title')}
               </h1>
-              <p className="text-muted-foreground text-base lg:text-lg mb-8 max-w-md mx-auto lg:mx-0">
+              <p className="text-muted-foreground text-base lg:text-lg mb-6 max-w-md mx-auto lg:mx-0">
                 {t('hero.subtitle')}
               </p>
+
+              {/* Mobile social proof — shown only on mobile */}
+              <div className="flex justify-center gap-5 mb-6 sm:hidden">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="text-center">
+                    <p className="text-xl font-bold text-primary">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground leading-tight">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Button size="lg" className="h-12 px-8" onClick={() => navigate("/login")}>
                   {t('hero.start_claim')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="h-12 px-8" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>
+                <Button size="lg" variant="outline" className="h-12 px-8 hidden sm:inline-flex" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>
                   {t('hero.how_works')}
                 </Button>
               </div>
             </div>
 
-            {/* Right - Visual */}
-            <div className="flex-1 w-full max-w-md lg:max-w-none">
+            {/* Right - Visual (desktop only) */}
+            <div className="hidden lg:block flex-1 w-full max-w-md lg:max-w-none">
               <div className="relative">
                 <div className="bg-gradient-to-br from-primary to-primary/60 rounded-3xl p-8 lg:p-12">
                   <div className="bg-white/10 backdrop-blur rounded-2xl p-6 text-white">
@@ -117,7 +129,7 @@ export default function Landing() {
                   </div>
                 </div>
                 {/* Floating stats */}
-                <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4 hidden lg:block">
+                <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-green-500" />
                     <div>
@@ -132,8 +144,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="w-full px-6 py-8 bg-muted/50">
+      {/* Stats Bar — desktop only (mobile gets inline version in hero) */}
+      <section className="hidden sm:block w-full px-6 py-8 bg-muted/50">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-wrap justify-center gap-8 lg:gap-16">
             {stats.map((stat) => (
@@ -252,8 +264,19 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Mobile sticky bottom CTA */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3 flex gap-3">
+        <Button variant="outline" className="flex-1 h-11" asChild>
+          <Link to="/login">{t('header.login')}</Link>
+        </Button>
+        <Button className="flex-1 h-11" onClick={() => navigate("/login")}>
+          {t('hero.start_claim')}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+
       {/* Footer */}
-      <footer className="w-full px-6 py-8 border-t bg-muted/30">
+      <footer className="w-full px-6 py-8 border-t bg-muted/30 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BrandLogo size="sm" />
