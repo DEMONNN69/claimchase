@@ -4,6 +4,7 @@ Extends base.py with security, performance, and production configurations.
 """
 
 from .base import *
+from .base import UNFOLD
 
 DEBUG = False
 
