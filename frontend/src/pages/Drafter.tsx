@@ -192,8 +192,14 @@ export default function Drafter() {
   return (
     <div className="min-h-screen">
       {/* Mobile Navbar - Only visible on mobile */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/cases")}
+            className="p-1.5 hover:bg-muted rounded-lg transition-colors flex-shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <BrandLogo size="sm" />
         </div>
       </div>
@@ -252,7 +258,7 @@ export default function Drafter() {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0" align="start">
+                  <PopoverContent className="w-[min(300px,90vw)] p-0" align="start">
                     <Command>
                       <CommandInput placeholder="Search..." />
                       <CommandList>
@@ -360,18 +366,32 @@ export default function Drafter() {
                     Copy
                   </Button>
                 </div>
-                <Textarea 
+                <Textarea
                   value={formData.description}
                   onChange={(e) => handleInputChange("description", e.target.value)}
-                  className="min-h-[350px] lg:min-h-[400px] font-mono text-sm"
+                  className="min-h-[200px] lg:min-h-[400px] font-mono text-sm"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Submit Button */}
-          <div className="mt-6">
-            <Button 
+          {/* Submit Button — sticky on mobile */}
+          <div className="sticky bottom-0 bg-background pt-3 pb-4 mt-4 border-t lg:static lg:border-t-0 lg:mt-6 lg:pb-0">
+            {/* Gmail status */}
+            <div className="flex items-center gap-2 mb-3 text-sm">
+              {user?.gmail_connected ? (
+                <>
+                  <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+                  <span className="text-green-600 truncate">Gmail: {user.gmail_email}</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0" />
+                  <span className="text-orange-600">{t('gmail.connect_prompt')}</span>
+                </>
+              )}
+            </div>
+            <Button
               size="lg"
               className="w-full lg:w-auto h-12 px-8 gap-2"
               onClick={handleSubmitCase}
@@ -383,24 +403,11 @@ export default function Drafter() {
                caseId ? "Send Email" : "Create Case & Send Email"}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
-              {!user?.gmail_connected ? 
+              {!user?.gmail_connected ?
                 "Please connect Gmail in Settings first" :
-                caseId ? "This will send the email via your connected Gmail" :
-                "This will create a case and send the email via your connected Gmail"}
+                caseId ? "Sends via your connected Gmail" :
+                "Creates case & sends via your connected Gmail"}
             </p>
-            
-            {/* Gmail Connection Status */}
-            {user?.gmail_connected ? (
-              <div className="flex items-center gap-2 mt-3 text-sm text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Gmail: {user.gmail_email}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 mt-3 text-sm text-orange-600">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                {t('gmail.connect_prompt')}
-              </div>
-            )}
           </div>
         </div>
         </>

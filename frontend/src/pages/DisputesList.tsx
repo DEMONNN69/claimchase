@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Settings } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   Plus,
@@ -20,6 +19,7 @@ import {
   Phone,
   Mail,
   MessageCircle,
+  Scale,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConsumerDisputes, useDisputeStats } from "@/hooks/useApi";
@@ -68,17 +68,17 @@ export default function DisputesList() {
   return (
     <div className="min-h-screen">
       {/* Mobile Navbar - Only visible on mobile */}
-      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-40">
         <div className="flex items-center justify-between">
           <BrandLogo size="sm" />
           <div className="flex items-center gap-2">
             <NotificationBell />
             <button
               onClick={() => navigate("/settings")}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm hover:bg-primary/20 transition-colors"
               aria-label="Settings"
             >
-              <Settings className="h-5 w-5 text-muted-foreground" />
+              <span>S</span>
             </button>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function DisputesList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            <Scale className="h-5 w-5 text-orange-500" />
             Consumer Disputes
           </h1>
           <p className="text-gray-500 text-sm">

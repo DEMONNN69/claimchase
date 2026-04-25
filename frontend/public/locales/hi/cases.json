@@ -2,6 +2,9 @@
   "title": "मेरे मामले",
   "subtitle": "अपने बीमा दावों को ट्रैक और प्रबंधित करें",
   "search_placeholder": "मामले खोजें...",
+  "actions": {
+    "new_case": "नया मामला"
+  },
   "filters": {
     "all": "सभी मामले",
     "draft": "ड्राफ्ट",
@@ -23,6 +26,7 @@
     "resolved": "हल हो गया"
   },
   "actions": {
+    "new_case": "नया मामला",
     "edit_draft": "ड्राफ्ट संपादित करें",
     "view_details": "विवरण देखें"
   },

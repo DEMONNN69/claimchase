@@ -2,6 +2,9 @@
   "title": "મારા કેસો",
   "subtitle": "તમારા વિમા ક્લેમનો માગોવાળો કરો અને વ્યવસ્થા કરો",
   "search_placeholder": "કેસો શોધો...",
+  "actions": {
+    "new_case": "નવો કેસ"
+  },
   "filters": {
     "all": "બધા કેસો",
     "draft": "ડ્રાફ્ટ",
@@ -23,6 +26,7 @@
     "resolved": "ઉકેલાયા"
   },
   "actions": {
+    "new_case": "નવો કેસ",
     "edit_draft": "ડ્રાફ્ટ સંપાદિત કરો",
     "view_details": "વિગતો જુઓ"
   },

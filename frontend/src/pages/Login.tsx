@@ -24,10 +24,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
   const handleGoogleLogin = async () => {
     let handleMessage: ((event: MessageEvent) => Promise<void>) | null = null;
     try {
       setGoogleLoading(true);
+      const { data } = await authAPI.googleConnect();
+
+      if (isMobile) {
+        // Redirect flow: no popup on mobile (blocked by browsers)
+        sessionStorage.setItem('google_auth_redirect', 'login');
+        window.location.href = data.authorization_url;
+        return;
+      }
+
+      // Desktop: popup flow
       handleMessage = async (event: MessageEvent) => {
         if (!allowedGoogleMessageOrigins.has(event.origin)) return;
         if (event.data?.type !== 'google-auth-success') return;
@@ -50,7 +62,6 @@ export default function Login() {
       };
       window.addEventListener('message', handleMessage as EventListener);
 
-      const { data } = await authAPI.googleConnect();
       const popup = window.open(
         data.authorization_url,
         'google-login',

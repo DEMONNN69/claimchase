@@ -40,6 +40,9 @@ services:
       - .env.production
     environment:
       - VITE_API_BASE_URL=http://backend:8000
+      - BACKEND_URL=http://backend:8000
+      - PROXY_PUBLIC_ORIGIN=https://amicusclaims.ai
+      - ALLOWED_ORIGINS=https://amicusclaims.ai,https://www.amicusclaims.ai
     expose:
       - "3001"
     depends_on:

@@ -1,4 +1,4 @@
-import { Home, BookOpen, AlertTriangle, FileText } from "lucide-react";
+import { Home, BookOpen, Scale, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ export function BottomNavigation() {
   const navItems = [
     { to: "/dashboard", icon: Home, label: t('navigation.home') },
     { to: "/cases", icon: FileText, label: t('navigation.cases') },
-    { to: "/disputes", icon: AlertTriangle, label: "Disputes" },
+    { to: "/disputes", icon: Scale, label: "Disputes" },
     { to: "/guide", icon: BookOpen, label: t('navigation.guide') },
   ];
 

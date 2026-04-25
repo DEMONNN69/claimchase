@@ -107,7 +107,16 @@ export default function Dashboard() {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-0 z-40">
         <div className="flex items-center justify-between">
           <BrandLogo size="sm" />
-          <NotificationBell />
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => navigate("/settings")}
+              className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm hover:bg-primary/20 transition-colors"
+              aria-label="Settings"
+            >
+              {user?.first_name?.[0]?.toUpperCase() ?? "?"}
+            </button>
+          </div>
         </div>
       </div>
 

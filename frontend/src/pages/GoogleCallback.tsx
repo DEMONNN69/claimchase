@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, CheckCircle2, TriangleAlert } from "lucide-react";
+import { authAPI } from "@/services/auth";
 
 const GoogleCallback = () => {
   const [status, setStatus] = useState<"sending" | "done" | "error">("sending");
@@ -22,19 +23,43 @@ const GoogleCallback = () => {
       return;
     }
 
+    const isRedirectFlow = !window.opener || window.opener.closed;
+
+    if (isRedirectFlow) {
+      // Mobile redirect flow: call API directly, store token, redirect
+      authAPI.googleCallback(code)
+        .then((response) => {
+          const { token, user: userData } = response.data;
+          localStorage.setItem('authToken', token);
+          localStorage.setItem('user', JSON.stringify(userData));
+          sessionStorage.removeItem('google_auth_redirect');
+          setStatus("done");
+          setMessage("Signed in! Redirecting...");
+
+          if (userData?.role === 'medical_reviewer') {
+            window.location.href = '/reviewer';
+          } else if (userData?.is_expert) {
+            window.location.href = '/expert';
+          } else {
+            window.location.href = '/dashboard';
+          }
+        })
+        .catch(() => {
+          setStatus("error");
+          setMessage("Google sign-in failed. Please try again.");
+        });
+      return;
+    }
+
+    // Desktop popup flow: postMessage back to opener
     try {
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage(
-          { type: "google-auth-success", code },
-          "*"
-        );
-        setStatus("done");
-        setMessage("Signed in! You can close this tab.");
-        setTimeout(() => window.close(), 800);
-      } else {
-        setStatus("error");
-        setMessage("No parent window found. Please retry from the app.");
-      }
+      window.opener.postMessage(
+        { type: "google-auth-success", code },
+        "*"
+      );
+      setStatus("done");
+      setMessage("Signed in! You can close this tab.");
+      setTimeout(() => window.close(), 800);
     } catch (err) {
       setStatus("error");
       setMessage("Unable to send authorization code to the app.");

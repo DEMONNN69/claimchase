@@ -1,8 +1,12 @@
 {
   "title": "My Cases",
   "subtitle": "Manage and track your insurance grievances",
-  "new_case": "New Case",
   "search_placeholder": "Search cases...",
+  "actions": {
+    "new_case": "New Case",
+    "edit_draft": "Edit Draft",
+    "view_details": "View Details"
+  },
   "stats": {
     "total_cases": "Total Cases",
     "draft": "Draft",
@@ -32,10 +36,7 @@
   },
   "progress_text": "Step {{current}} of {{total}}",
   "case_number": "Case {{number}}",
-  "actions": {
-    "edit_draft": "Edit Draft",
-    "view_details": "View Details"
-  },
+
   "empty_state": {
     "no_cases": "No cases yet",
     "no_matches": "No matching cases",

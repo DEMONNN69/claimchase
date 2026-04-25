@@ -248,22 +248,32 @@ export default function StartGreivance() {
       {/* Right Panel - Form */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 border-b">
-          <div className="flex items-center justify-between mb-3">
-            <BrandLogo size="sm" />
-            <span className="text-sm text-muted-foreground">
-              Step {step}/3 · {step === 1 ? "Incident Details" : step === 2 ? "Upload Documents" : "Review & Submit"}
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <button onClick={handleBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
+        <div className="lg:hidden px-4 pt-4 pb-3 border-b bg-background sticky top-0 z-30">
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={handleBack} className="p-1.5 hover:bg-muted rounded-lg transition-colors flex-shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <div className="flex-1 flex gap-2">
-              <div className={cn("h-1.5 flex-1 rounded-full", step >= 1 ? "bg-primary" : "bg-muted")} />
-              <div className={cn("h-1.5 flex-1 rounded-full", step >= 2 ? "bg-primary" : "bg-muted")} />
-              <div className={cn("h-1.5 flex-1 rounded-full", step >= 3 ? "bg-primary" : "bg-muted")} />
-            </div>
+            <BrandLogo size="sm" />
+          </div>
+          <div className="flex gap-2">
+            {[
+              { n: 1, label: "Details" },
+              { n: 2, label: "Documents" },
+              { n: 3, label: "Review" },
+            ].map(({ n, label }) => (
+              <div key={n} className="flex-1 flex flex-col gap-1">
+                <div className={cn(
+                  "h-1 rounded-full transition-colors",
+                  step > n ? "bg-primary" : step === n ? "bg-primary" : "bg-muted"
+                )} />
+                <span className={cn(
+                  "text-xs text-center font-medium transition-colors",
+                  step === n ? "text-primary" : step > n ? "text-primary/60" : "text-muted-foreground"
+                )}>
+                  {step > n ? "✓ " : ""}{label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -320,9 +330,11 @@ export default function StartGreivance() {
 
                   <div>
                     <Label htmlFor="policy_number">{t('step1.policy_number')}</Label>
-                    <Input 
+                    <Input
                       id="policy_number"
                       placeholder="e.g., POL123456789"
+                      inputMode="text"
+                      autoCapitalize="characters"
                       value={incidentData.policy_number}
                       onChange={(e) => setIncidentData(prev => ({ ...prev, policy_number: e.target.value }))}
                       className="mt-2 h-11"
@@ -333,9 +345,10 @@ export default function StartGreivance() {
                     <Label htmlFor="claim_amount" className="text-base font-semibold">{t('step1.claim_amount')}</Label>
                     <div className="relative mt-3">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground font-bold text-xl">₹</span>
-                      <Input 
+                      <Input
                         id="claim_amount"
                         type="text"
+                        inputMode="numeric"
                         placeholder="0"
                         value={claimAmountDisplay}
                         onChange={handleClaimAmountChange}
@@ -466,10 +479,10 @@ export default function StartGreivance() {
           </div>
         </div>
 
-        {/* Footer CTA */}
-        <div className="p-6 lg:p-12 lg:pt-0 border-t lg:border-t-0">
+        {/* Footer CTA — sticky on mobile */}
+        <div className="sticky bottom-0 bg-background border-t p-4 lg:relative lg:p-12 lg:pt-0 lg:border-t-0">
           <div className="max-w-xl mx-auto">
-            <Button 
+            <Button
               size="lg"
               className="w-full h-12"
               onClick={handleNext}

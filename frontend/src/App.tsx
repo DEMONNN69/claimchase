@@ -59,7 +59,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
-        <Sonner />
+        <Sonner position="top-center" />
         <BrowserRouter>
           <Routes>
             {/* Public Gmail OAuth callback endpoint used by popup redirect */}
