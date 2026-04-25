@@ -300,8 +300,8 @@ class CaseViewSet(viewsets.ModelViewSet):
             'documents': serializer.data,
         })
     
-    @action(detail=True, methods=['get'], url_path='document-download/(?P<doc_id>[^/.]+)', permission_classes=[])
-    def download_document(self, request, pk=None, doc_id=None):
+    @action(detail=True, methods=['get'], url_path='document-download', permission_classes=[])
+    def download_document(self, request, pk=None):
         """
         Proxy endpoint - ONLY accessible from frontend proxy server.
         Validates origin to prevent direct access.
@@ -330,25 +330,27 @@ class CaseViewSet(viewsets.ModelViewSet):
         if not token_data:
             raise Http404("Invalid or expired access token")
         
-        # Verify token is for this document
-        if token_data['document_id'] != int(doc_id) or token_data['document_type'] != 'case':
+        doc_id = token_data['document_id']
+
+        # Verify token is for this document type
+        if token_data['document_type'] != 'case':
             raise Http404("Token mismatch")
-        
+
         try:
             case = Case.objects.get(id=pk)
         except Case.DoesNotExist:
             raise Http404("Case not found")
-        
+
         # Verify user from token has access
         from claimchase.apps.users.models import CustomUser
         try:
             user = CustomUser.objects.get(id=token_data['user_id'])
         except CustomUser.DoesNotExist:
             raise Http404("User not found")
-        
+
         if case.user != user and not user.is_staff:
             raise Http404("Access denied")
-        
+
         try:
             document = Document.objects.get(id=doc_id, case=case)
         except Document.DoesNotExist:

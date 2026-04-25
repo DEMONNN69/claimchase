@@ -47,7 +47,7 @@ app.get('/api/proxy-documents', async (req, res) => {
   // Construct backend URL
   const endpoint = type === 'case' ? 'cases' : 'disputes';
   const backendUrl = type === 'case'
-    ? `${BACKEND_URL}/api/${endpoint}/${disputeId}/document-download/${docId}/?access=${access}`
+    ? `${BACKEND_URL}/api/${endpoint}/${disputeId}/document-download/?access=${access}`
     : `${BACKEND_URL}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
 
   try {
