@@ -40,6 +40,10 @@ CORS_ALLOWED_ORIGINS = config(
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
 
+FRONTEND_URL = config('FRONTEND_URL', default='https://amicusclaims.ai')
+
+ALLOWED_DOCUMENT_ORIGINS = CORS_ALLOWED_ORIGINS + [FRONTEND_URL]
+
 # CSRF trusted origins (for Railway/Render + frontend)
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
