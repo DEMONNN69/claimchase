@@ -6,11 +6,12 @@ Enables frontend to authenticate and receive JWT/Token for API access.
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core import signing
+from rest_framework_simplejwt.tokens import RefreshToken
 import logging
 
 from .models import CustomUser
@@ -58,35 +59,34 @@ class AuthViewSet(viewsets.ViewSet):
         # Find user by email
         try:
             user = CustomUser.objects.get(email=email)
-        except CustomUser.ShuklasNotExist:
+        except CustomUser.DoesNotExist:
             return Response({
                 'success': False,
                 'message': 'Invalid email or password',
             }, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         # Verify password
         if not user.check_password(password):
             return Response({
                 'success': False,
                 'message': 'Invalid email or password',
             }, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         # Check if user is active
         if not user.is_active:
             return Response({
                 'success': False,
                 'message': 'User account is disabled',
             }, status=status.HTTP_403_FORBIDDEN)
-        
-        # Get or create token
-        token, created = Token.objects.get_or_create(user=user)
-        
+
+        refresh = RefreshToken.for_user(user)
         logger.info(f"User {user.email} logged in successfully")
-        
+
         return Response({
             'success': True,
             'message': 'Login successful',
-            'token': token.key,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
     
@@ -99,19 +99,11 @@ class AuthViewSet(viewsets.ViewSet):
         POST /api/auth/logout/
         Headers: Authorization: Token <token>
         """
-        try:
-            token = Token.objects.get(user=request.user)
-            token.delete()
-            logger.info(f"User {request.user.email} logged out")
-            return Response({
-                'success': True,
-                'message': 'Logout successful',
-            }, status=status.HTTP_200_OK)
-        except Token.ShuklasNotExist:
-            return Response({
-                'success': False,
-                'message': 'Token not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        logger.info(f"User {request.user.email} logged out")
+        return Response({
+            'success': True,
+            'message': 'Logout successful',
+        }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['post'])
     def signup(self, request):
@@ -169,15 +161,14 @@ class AuthViewSet(viewsets.ViewSet):
                 terms_accepted_at=timezone.now(),
             )
             
-            # Get or create token
-            token, _ = Token.objects.get_or_create(user=user)
-            
+            refresh = RefreshToken.for_user(user)
             logger.info(f"New user registered: {user.email}")
-            
+
             return Response({
                 'success': True,
                 'message': 'Account created successfully',
-                'token': token.key,
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
                 'user': UserSerializer(user).data,
             }, status=status.HTTP_201_CREATED)
         
@@ -252,10 +243,8 @@ class AuthViewSet(viewsets.ViewSet):
         }
         """
         try:
-            # Get user's auth token to include in state
-            token = request.auth.key if hasattr(request.auth, 'key') else None
-            
-            auth_url = GmailOAuthService.get_authorization_url(user_token=token)
+            state = signing.dumps(request.user.id, salt='gmail-connect')
+            auth_url = GmailOAuthService.get_authorization_url(user_token=state)
             
             return Response({
                 'success': True,
@@ -294,7 +283,7 @@ class AuthViewSet(viewsets.ViewSet):
             user_token = request.GET.get('state')  # Token passed in state
         else:
             auth_code = request.data.get('code')
-            user_token = request.auth.key if hasattr(request.auth, 'key') else None
+            user_token = request.data.get('state')
         
         if not auth_code:
             # Redirect to frontend with error
@@ -307,9 +296,8 @@ class AuthViewSet(viewsets.ViewSet):
             return redirect(f"{frontend_url}/settings?gmail_error=no_token")
         
         try:
-            # Find user by token
-            token_obj = Token.objects.get(key=user_token)
-            user = token_obj.user
+            user_id = signing.loads(user_token, salt='gmail-connect', max_age=600)
+            user = CustomUser.objects.get(id=user_id)
             
             # Exchange code for tokens
             tokens = GmailOAuthService.exchange_code_for_tokens(auth_code)
@@ -354,8 +342,8 @@ class AuthViewSet(viewsets.ViewSet):
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
             return redirect(f"{frontend_url}/settings?gmail_connected=true&gmail_email={gmail_email}")
         
-        except Token.DoesNotExist:
-            logger.error(f"Invalid token in Gmail callback")
+        except (signing.BadSignature, signing.SignatureExpired, CustomUser.DoesNotExist):
+            logger.error(f"Invalid state in Gmail callback")
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
             return redirect(f"{frontend_url}/settings?gmail_error=invalid_token")
         
@@ -524,15 +512,14 @@ class AuthViewSet(viewsets.ViewSet):
             except Exception as watch_err:
                 logger.warning(f"Gmail watch setup failed for {user.email}: {watch_err}")
 
-        # --- Issue DRF Token ---
-        token, _ = Token.objects.get_or_create(user=user)
-
+        refresh = RefreshToken.for_user(user)
         logger.info(f"Google login successful for {user.email}")
 
         return Response({
             'success': True,
             'message': 'Login successful',
-            'token': token.key,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
         

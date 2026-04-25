@@ -42,6 +42,12 @@ export const authAPI = {
     apiClient.put('/auth/profile/', data),
 
   /**
+   * Refresh access token using refresh token
+   */
+  refreshToken: (refresh: string) =>
+    apiClient.post('/auth/token/refresh/', { refresh }),
+
+  /**
    * Get Google OAuth consent URL
    */
   googleConnect: () => apiClient.get<{ authorization_url: string }>('/auth/google/connect/'),
