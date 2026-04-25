@@ -46,7 +46,9 @@ app.get('/api/proxy-documents', async (req, res) => {
 
   // Construct backend URL
   const endpoint = type === 'case' ? 'cases' : 'disputes';
-  const backendUrl = `${BACKEND_URL}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
+  const backendUrl = type === 'case'
+    ? `${BACKEND_URL}/api/${endpoint}/${disputeId}/document-download/${docId}/?access=${access}`
+    : `${BACKEND_URL}/api/${endpoint}/${disputeId}/documents/${docId}/download/?access=${access}`;
 
   try {
     // Fetch from backend (server-to-server, backend URL hidden from client)

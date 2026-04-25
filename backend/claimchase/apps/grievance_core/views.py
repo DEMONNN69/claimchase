@@ -226,7 +226,7 @@ class CaseViewSet(viewsets.ModelViewSet):
             'emails': serializer.data,
         })
     
-    @action(detail=True, methods=['get', 'post'])
+    @action(detail=True, methods=['get', 'post'], url_path='documents')
     def documents(self, request, pk=None):
         """
         Get or upload documents for a case.
@@ -300,7 +300,7 @@ class CaseViewSet(viewsets.ModelViewSet):
             'documents': serializer.data,
         })
     
-    @action(detail=True, methods=['get'], url_path='documents/(?P<doc_id>[^/.]+)/download', permission_classes=[])
+    @action(detail=True, methods=['get'], url_path='document-download/(?P<doc_id>[^/.]+)', permission_classes=[])
     def download_document(self, request, pk=None, doc_id=None):
         """
         Proxy endpoint - ONLY accessible from frontend proxy server.
