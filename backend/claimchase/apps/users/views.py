@@ -16,6 +16,7 @@ import logging
 
 from .models import CustomUser
 from .serializers import UserSerializer
+from .cookie_auth import set_jwt_cookies, clear_jwt_cookies
 from claimchase.apps.grievance_core.gmail_service import GmailOAuthService, GmailSendService, GmailEncryption
 
 logger = logging.getLogger(__name__)
@@ -82,13 +83,12 @@ class AuthViewSet(viewsets.ViewSet):
         refresh = RefreshToken.for_user(user)
         logger.info(f"User {user.email} logged in successfully")
 
-        return Response({
+        response = Response({
             'success': True,
             'message': 'Login successful',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
+        return set_jwt_cookies(response, refresh)
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def logout(self, request):
@@ -100,10 +100,11 @@ class AuthViewSet(viewsets.ViewSet):
         Headers: Authorization: Token <token>
         """
         logger.info(f"User {request.user.email} logged out")
-        return Response({
+        response = Response({
             'success': True,
             'message': 'Logout successful',
         }, status=status.HTTP_200_OK)
+        return clear_jwt_cookies(response)
     
     @action(detail=False, methods=['post'])
     def signup(self, request):
@@ -164,13 +165,12 @@ class AuthViewSet(viewsets.ViewSet):
             refresh = RefreshToken.for_user(user)
             logger.info(f"New user registered: {user.email}")
 
-            return Response({
+            response = Response({
                 'success': True,
                 'message': 'Account created successfully',
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
                 'user': UserSerializer(user).data,
             }, status=status.HTTP_201_CREATED)
+            return set_jwt_cookies(response, refresh)
         
         except Exception as e:
             logger.error(f"Error creating user: {e}")
@@ -515,13 +515,12 @@ class AuthViewSet(viewsets.ViewSet):
         refresh = RefreshToken.for_user(user)
         logger.info(f"Google login successful for {user.email}")
 
-        return Response({
+        response = Response({
             'success': True,
             'message': 'Login successful',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_200_OK)
+        return set_jwt_cookies(response, refresh)
         
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def google_disconnect(self, request):   

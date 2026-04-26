@@ -7,7 +7,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework_simplejwt.views import TokenRefreshView
+from claimchase.apps.users.token_refresh_view import CookieTokenRefreshView
 
 # Import webhook handler
 from claimchase.apps.grievance_core.webhooks import gmail_webhook
@@ -30,7 +30,7 @@ urlpatterns = [
     path('webhooks/gmail/', gmail_webhook, name='gmail-webhook'),
     
     # JWT token refresh
-    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('api/auth/token/refresh/', CookieTokenRefreshView.as_view(), name='token-refresh'),
 
     # App URLs
     path('api/', include('claimchase.apps.users.urls')),

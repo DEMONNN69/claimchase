@@ -1047,37 +1047,18 @@ def get_insurance_types(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])  # We'll handle auth manually with token parameter
+@permission_classes([IsAuthenticated])
 def document_proxy(request, document_id):
     """
     Proxy endpoint to serve document files.
     This allows secure access to Cloudinary private resources.
-    
-    GET /api/documents/<id>/file/?token=<auth_token>
+
+    GET /api/documents/<id>/file/
     """
     from django.http import HttpResponse, HttpResponseRedirect
-    from rest_framework.authtoken.models import Token
     import requests
-    
-    # Get token from query parameter or Authorization header
-    token_key = request.GET.get('token') or request.META.get('HTTP_AUTHORIZATION', '').replace('Token ', '').replace('Bearer ', '')
-    
-    if not token_key:
-        return Response(
-            {'error': 'Authentication token required'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
-    # Authenticate user
-    try:
-        token = Token.objects.get(key=token_key)
-        user = token.user
-    except Token.DoesNotExist:
-        return Response(
-            {'error': 'Invalid authentication token'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
+
+    user = request.user
     document = get_object_or_404(Document, id=document_id)
     
     # Check if user has permission to access this document

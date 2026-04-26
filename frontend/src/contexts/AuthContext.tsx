@@ -1,6 +1,7 @@
 /**
  * Authentication Context and Hook
- * Manages user authentication state and JWT tokens
+ * Auth state managed server-side via httpOnly JWT cookies.
+ * No tokens stored in localStorage.
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -22,17 +23,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const storeTokens = (access: string, refresh: string) => {
-  localStorage.setItem('accessToken', access);
-  localStorage.setItem('refreshToken', refresh);
-};
-
-const clearTokens = () => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
-};
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,23 +41,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // On mount — try to restore session via cookie (server validates)
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('accessToken');
-
-      if (storedUser && token) {
-        try {
-          setUser(JSON.parse(storedUser));
-          await getProfile();
-        } catch (e) {
-          clearTokens();
-        }
+      if (!storedUser) {
+        setIsLoading(false);
+        return;
       }
-
-      setIsLoading(false);
+      setUser(JSON.parse(storedUser));
+      try {
+        await getProfile();
+      } catch {
+        localStorage.removeItem('user');
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
-
     loadUser();
   }, []);
 
@@ -75,11 +66,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await authAPI.login(email, password);
-      const { access, refresh, user: userData } = response.data;
-
-      storeTokens(access, refresh);
+      const { user: userData } = response.data;
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (err: any) {
@@ -95,11 +83,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await authAPI.signup(data);
-      const { access, refresh, user: userData } = response.data;
-
-      storeTokens(access, refresh);
+      const { user: userData } = response.data;
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (err: any) {
@@ -116,8 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       setError(null);
       const response = await authAPI.googleCallback(code);
-      const { access, refresh, user: userData } = response.data;
-      storeTokens(access, refresh);
+      const { user: userData } = response.data;
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (err: any) {
@@ -135,7 +119,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      clearTokens();
+      localStorage.removeItem('user');
       setUser(null);
     }
   };
