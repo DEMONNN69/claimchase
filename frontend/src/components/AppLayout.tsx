@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
 import { DesktopSidebar } from "./DesktopSidebar";
+import MobileSidebar from "./MobileSidebar";
 
 const pagesWithNav = ["/dashboard", "/cases", "/guide", "/settings", "/disputes"];
 
@@ -42,6 +43,8 @@ export function AppLayout() {
       <div className="flex flex-1">
         {/* Desktop Sidebar - only on pages with nav */}
         {showNav && <DesktopSidebar />}
+        {/* Mobile Sidebar toggle/overlay for small screens */}
+        {showNav && <MobileSidebar />}
 
         {/* Main Content */}
         <div className={showNav ? "flex-1 md:max-w-none" : "w-full"}>

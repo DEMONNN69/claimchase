@@ -70,6 +70,8 @@ export default function StartGreivance() {
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
 
+  const MIN_CLAIM_AMOUNT = 10000; // minimum allowed claim amount in rupees
+
   // Form data
   const [incidentData, setIncidentData] = useState({
     incident_date: "",
@@ -82,11 +84,15 @@ export default function StartGreivance() {
   // For formatted display and words
   const [claimAmountDisplay, setClaimAmountDisplay] = useState("");
   const [claimAmountWords, setClaimAmountWords] = useState("");
+  const [minToastShown, setMinToastShown] = useState(false);
 
   const [uploadedDocuments, setUploadedDocuments] = useState<any[]>([]);
   const [areDocumentsValid, setAreDocumentsValid] = useState(false);
 
-  const canProceedStep1 = incidentData.incident_date && incidentData.policy_number && incidentData.description && incidentData.insurance_type;
+  const claimAmountNumeric = incidentData.claim_amount ? parseInt(incidentData.claim_amount as any, 10) : 0;
+  const isClaimAmountValid = claimAmountNumeric >= MIN_CLAIM_AMOUNT;
+
+  const canProceedStep1 = incidentData.incident_date && incidentData.policy_number && incidentData.description && incidentData.insurance_type && isClaimAmountValid;
   const canProceedStep2 = areDocumentsValid;
 
   const handleDocumentsChange = (documents: any[], isValid: boolean) => {
@@ -101,6 +107,7 @@ export default function StartGreivance() {
       setIncidentData(prev => ({ ...prev, claim_amount: '' }));
       setClaimAmountDisplay('');
       setClaimAmountWords('');
+      setMinToastShown(false);
       return;
     }
     
@@ -114,6 +121,17 @@ export default function StartGreivance() {
     
     // Convert to words
     setClaimAmountWords(numberToIndianWords(numericValue));
+
+    // Show a one-time toast if below minimum
+    if (numericValue > 0 && numericValue < MIN_CLAIM_AMOUNT) {
+      if (!minToastShown) {
+        toast.error(`Minimum claim amount is ₹${MIN_CLAIM_AMOUNT.toLocaleString()}`);
+        setMinToastShown(true);
+      }
+    } else {
+      // reset flag when valid or cleared
+      if (minToastShown) setMinToastShown(false);
+    }
   };
 
   const handleNext = async () => {
@@ -366,9 +384,15 @@ export default function StartGreivance() {
                         </p>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      💡 Minimum claim amount is ₹20,000
-                    </p>
+                    {incidentData.claim_amount && !isClaimAmountValid ? (
+                      <p className="text-xs text-destructive mt-2">
+                        Minimum claim amount should be ₹10,000
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Minimum claim amount should be ₹10,000
+                      </p>
+                    )}
                   </div>
 
                   <div>

@@ -1,13 +1,16 @@
-import { Home, BookOpen, Settings, Shield, AlertTriangle, FileText } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Home, BookOpen, Settings, Shield, AlertTriangle, FileText, LogOut } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { NotificationBell } from './NotificationBell';
 import { BrandLogo } from './BrandLogo';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function DesktopSidebar() {
   const { t } = useTranslation('common');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   
   const navItems = [
     { to: "/dashboard", icon: Home, label: t('navigation.home') },
@@ -50,6 +53,27 @@ export function DesktopSidebar() {
               </NavLink>
             </li>
           ))}
+
+          {/* Sign out button placed directly under Settings */}
+          <li>
+            <button
+              onClick={async () => {
+                try {
+                  await logout();
+                  navigate('/login');
+                } catch (err) {
+                  console.error('Logout failed', err);
+                  navigate('/login');
+                }
+              }}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-red-600 hover:bg-red-50 w-full text-left"
+              )}
+            >
+              <LogOut className="h-5 w-5" aria-hidden="true" />
+              <span>{t('navigation.logout', { defaultValue: 'Sign out' })}</span>
+            </button>
+          </li>
         </ul>
       </nav>
 
